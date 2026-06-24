@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ServicosRouteImport } from './routes/servicos'
 import { Route as QuemSomosRouteImport } from './routes/quem-somos'
 import { Route as ModeloRouteImport } from './routes/modelo'
@@ -24,6 +25,11 @@ import { Route as AdminLeadsRouteImport } from './routes/admin.leads'
 import { Route as AdminDefinicoesRouteImport } from './routes/admin.definicoes'
 import { Route as AdminConteudosRouteImport } from './routes/admin.conteudos'
 
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ServicosRoute = ServicosRouteImport.update({
   id: '/servicos',
   path: '/servicos',
@@ -105,6 +111,7 @@ export interface FileRoutesByFullPath {
   '/modelo': typeof ModeloRoute
   '/quem-somos': typeof QuemSomosRoute
   '/servicos': typeof ServicosRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin/conteudos': typeof AdminConteudosRoute
   '/admin/definicoes': typeof AdminDefinicoesRoute
   '/admin/leads': typeof AdminLeadsRoute
@@ -120,6 +127,7 @@ export interface FileRoutesByTo {
   '/modelo': typeof ModeloRoute
   '/quem-somos': typeof QuemSomosRoute
   '/servicos': typeof ServicosRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin/conteudos': typeof AdminConteudosRoute
   '/admin/definicoes': typeof AdminDefinicoesRoute
   '/admin/leads': typeof AdminLeadsRoute
@@ -137,6 +145,7 @@ export interface FileRoutesById {
   '/modelo': typeof ModeloRoute
   '/quem-somos': typeof QuemSomosRoute
   '/servicos': typeof ServicosRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin/conteudos': typeof AdminConteudosRoute
   '/admin/definicoes': typeof AdminDefinicoesRoute
   '/admin/leads': typeof AdminLeadsRoute
@@ -155,6 +164,7 @@ export interface FileRouteTypes {
     | '/modelo'
     | '/quem-somos'
     | '/servicos'
+    | '/sitemap.xml'
     | '/admin/conteudos'
     | '/admin/definicoes'
     | '/admin/leads'
@@ -170,6 +180,7 @@ export interface FileRouteTypes {
     | '/modelo'
     | '/quem-somos'
     | '/servicos'
+    | '/sitemap.xml'
     | '/admin/conteudos'
     | '/admin/definicoes'
     | '/admin/leads'
@@ -186,6 +197,7 @@ export interface FileRouteTypes {
     | '/modelo'
     | '/quem-somos'
     | '/servicos'
+    | '/sitemap.xml'
     | '/admin/conteudos'
     | '/admin/definicoes'
     | '/admin/leads'
@@ -203,10 +215,18 @@ export interface RootRouteChildren {
   ModeloRoute: typeof ModeloRoute
   QuemSomosRoute: typeof QuemSomosRoute
   ServicosRoute: typeof ServicosRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/servicos': {
       id: '/servicos'
       path: '/servicos'
@@ -336,6 +356,7 @@ const rootRouteChildren: RootRouteChildren = {
   ModeloRoute: ModeloRoute,
   QuemSomosRoute: QuemSomosRoute,
   ServicosRoute: ServicosRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
