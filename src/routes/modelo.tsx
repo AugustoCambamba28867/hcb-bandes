@@ -15,7 +15,9 @@ export const Route = createFileRoute("/modelo")({
         property: "og:description",
         content: "Um processo estruturado em 7 etapas, transparente do início ao fim.",
       },
+      { property: "og:url", content: "/modelo" },
     ],
+    links: [{ rel: "canonical", href: "/modelo" }],
   }),
   component: ModeloPage,
 });

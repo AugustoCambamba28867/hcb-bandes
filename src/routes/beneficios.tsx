@@ -17,7 +17,9 @@ export const Route = createFileRoute("/beneficios")({
         content:
           "Vantagens concretas para cada actor do ecossistema HCB-BANDES.",
       },
+      { property: "og:url", content: "/beneficios" },
     ],
+    links: [{ rel: "canonical", href: "/beneficios" }],
   }),
   component: BeneficiosPage,
 });

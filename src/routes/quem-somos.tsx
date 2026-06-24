@@ -17,7 +17,9 @@ export const Route = createFileRoute("/quem-somos")({
         property: "og:description",
         content: "História, missão, visão e valores da HCB-BANDES.",
       },
+      { property: "og:url", content: "/quem-somos" },
     ],
+    links: [{ rel: "canonical", href: "/quem-somos" }],
   }),
   component: QuemSomos,
 });
