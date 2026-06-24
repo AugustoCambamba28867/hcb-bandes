@@ -26,13 +26,20 @@ export const Route = createFileRoute("/admin")({
   component: AdminLayout,
 });
 
-const NAV = [
+type NavItem = {
+  to: "/admin" | "/admin/leads" | "/admin/conteudos" | "/admin/parceiros" | "/admin/definicoes";
+  label: string;
+  icon: typeof LayoutDashboard;
+  exact?: boolean;
+};
+
+const NAV: NavItem[] = [
   { to: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { to: "/admin/leads", label: "Leads", icon: Inbox },
   { to: "/admin/conteudos", label: "Conteúdos", icon: FileText },
   { to: "/admin/parceiros", label: "Parceiros", icon: Users2 },
   { to: "/admin/definicoes", label: "Definições", icon: Settings },
-] as const;
+];
 
 function AdminLayout() {
   const [auth, setAuth] = useState<boolean | null>(null);

@@ -16,7 +16,13 @@ import { Route as MissaoVisaoRouteImport } from './routes/missao-visao'
 import { Route as DiferenciaisRouteImport } from './routes/diferenciais'
 import { Route as ContactosRouteImport } from './routes/contactos'
 import { Route as BeneficiosRouteImport } from './routes/beneficios'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as AdminParceirosRouteImport } from './routes/admin.parceiros'
+import { Route as AdminLeadsRouteImport } from './routes/admin.leads'
+import { Route as AdminDefinicoesRouteImport } from './routes/admin.definicoes'
+import { Route as AdminConteudosRouteImport } from './routes/admin.conteudos'
 
 const ServicosRoute = ServicosRouteImport.update({
   id: '/servicos',
@@ -53,14 +59,45 @@ const BeneficiosRoute = BeneficiosRouteImport.update({
   path: '/beneficios',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminParceirosRoute = AdminParceirosRouteImport.update({
+  id: '/parceiros',
+  path: '/parceiros',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminLeadsRoute = AdminLeadsRouteImport.update({
+  id: '/leads',
+  path: '/leads',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminDefinicoesRoute = AdminDefinicoesRouteImport.update({
+  id: '/definicoes',
+  path: '/definicoes',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminConteudosRoute = AdminConteudosRouteImport.update({
+  id: '/conteudos',
+  path: '/conteudos',
+  getParentRoute: () => AdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/beneficios': typeof BeneficiosRoute
   '/contactos': typeof ContactosRoute
   '/diferenciais': typeof DiferenciaisRoute
@@ -68,6 +105,11 @@ export interface FileRoutesByFullPath {
   '/modelo': typeof ModeloRoute
   '/quem-somos': typeof QuemSomosRoute
   '/servicos': typeof ServicosRoute
+  '/admin/conteudos': typeof AdminConteudosRoute
+  '/admin/definicoes': typeof AdminDefinicoesRoute
+  '/admin/leads': typeof AdminLeadsRoute
+  '/admin/parceiros': typeof AdminParceirosRoute
+  '/admin/': typeof AdminIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -78,10 +120,16 @@ export interface FileRoutesByTo {
   '/modelo': typeof ModeloRoute
   '/quem-somos': typeof QuemSomosRoute
   '/servicos': typeof ServicosRoute
+  '/admin/conteudos': typeof AdminConteudosRoute
+  '/admin/definicoes': typeof AdminDefinicoesRoute
+  '/admin/leads': typeof AdminLeadsRoute
+  '/admin/parceiros': typeof AdminParceirosRoute
+  '/admin': typeof AdminIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/beneficios': typeof BeneficiosRoute
   '/contactos': typeof ContactosRoute
   '/diferenciais': typeof DiferenciaisRoute
@@ -89,11 +137,17 @@ export interface FileRoutesById {
   '/modelo': typeof ModeloRoute
   '/quem-somos': typeof QuemSomosRoute
   '/servicos': typeof ServicosRoute
+  '/admin/conteudos': typeof AdminConteudosRoute
+  '/admin/definicoes': typeof AdminDefinicoesRoute
+  '/admin/leads': typeof AdminLeadsRoute
+  '/admin/parceiros': typeof AdminParceirosRoute
+  '/admin/': typeof AdminIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/beneficios'
     | '/contactos'
     | '/diferenciais'
@@ -101,6 +155,11 @@ export interface FileRouteTypes {
     | '/modelo'
     | '/quem-somos'
     | '/servicos'
+    | '/admin/conteudos'
+    | '/admin/definicoes'
+    | '/admin/leads'
+    | '/admin/parceiros'
+    | '/admin/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -111,9 +170,15 @@ export interface FileRouteTypes {
     | '/modelo'
     | '/quem-somos'
     | '/servicos'
+    | '/admin/conteudos'
+    | '/admin/definicoes'
+    | '/admin/leads'
+    | '/admin/parceiros'
+    | '/admin'
   id:
     | '__root__'
     | '/'
+    | '/admin'
     | '/beneficios'
     | '/contactos'
     | '/diferenciais'
@@ -121,10 +186,16 @@ export interface FileRouteTypes {
     | '/modelo'
     | '/quem-somos'
     | '/servicos'
+    | '/admin/conteudos'
+    | '/admin/definicoes'
+    | '/admin/leads'
+    | '/admin/parceiros'
+    | '/admin/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRouteWithChildren
   BeneficiosRoute: typeof BeneficiosRoute
   ContactosRoute: typeof ContactosRoute
   DiferenciaisRoute: typeof DiferenciaisRoute
@@ -185,6 +256,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BeneficiosRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -192,11 +270,65 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/parceiros': {
+      id: '/admin/parceiros'
+      path: '/parceiros'
+      fullPath: '/admin/parceiros'
+      preLoaderRoute: typeof AdminParceirosRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/leads': {
+      id: '/admin/leads'
+      path: '/leads'
+      fullPath: '/admin/leads'
+      preLoaderRoute: typeof AdminLeadsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/definicoes': {
+      id: '/admin/definicoes'
+      path: '/definicoes'
+      fullPath: '/admin/definicoes'
+      preLoaderRoute: typeof AdminDefinicoesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/conteudos': {
+      id: '/admin/conteudos'
+      path: '/conteudos'
+      fullPath: '/admin/conteudos'
+      preLoaderRoute: typeof AdminConteudosRouteImport
+      parentRoute: typeof AdminRoute
+    }
   }
 }
 
+interface AdminRouteChildren {
+  AdminConteudosRoute: typeof AdminConteudosRoute
+  AdminDefinicoesRoute: typeof AdminDefinicoesRoute
+  AdminLeadsRoute: typeof AdminLeadsRoute
+  AdminParceirosRoute: typeof AdminParceirosRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminConteudosRoute: AdminConteudosRoute,
+  AdminDefinicoesRoute: AdminDefinicoesRoute,
+  AdminLeadsRoute: AdminLeadsRoute,
+  AdminParceirosRoute: AdminParceirosRoute,
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRouteWithChildren,
   BeneficiosRoute: BeneficiosRoute,
   ContactosRoute: ContactosRoute,
   DiferenciaisRoute: DiferenciaisRoute,
