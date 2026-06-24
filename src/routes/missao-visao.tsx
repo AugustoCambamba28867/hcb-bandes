@@ -15,7 +15,9 @@ export const Route = createFileRoute("/missao-visao")({
         property: "og:description",
         content: "Os princípios que orientam a actuação da HCB-BANDES em Angola.",
       },
+      { property: "og:url", content: "/missao-visao" },
     ],
+    links: [{ rel: "canonical", href: "/missao-visao" }],
   }),
   component: MissaoVisaoPage,
 });

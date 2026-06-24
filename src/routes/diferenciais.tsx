@@ -17,7 +17,9 @@ export const Route = createFileRoute("/diferenciais")({
         content:
           "Os diferenciais competitivos que tornam a HCB-BANDES uma escolha de confiança.",
       },
+      { property: "og:url", content: "/diferenciais" },
     ],
+    links: [{ rel: "canonical", href: "/diferenciais" }],
   }),
   component: DiferenciaisPage,
 });

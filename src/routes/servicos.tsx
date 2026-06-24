@@ -16,7 +16,9 @@ export const Route = createFileRoute("/servicos")({
         property: "og:description",
         content: "Quatro pilares de serviço para uma solução habitacional completa.",
       },
+      { property: "og:url", content: "/servicos" },
     ],
+    links: [{ rel: "canonical", href: "/servicos" }],
   }),
   component: ServicosPage,
 });
