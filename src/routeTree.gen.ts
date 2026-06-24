@@ -9,8 +9,50 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ServicosRouteImport } from './routes/servicos'
+import { Route as QuemSomosRouteImport } from './routes/quem-somos'
+import { Route as ModeloRouteImport } from './routes/modelo'
+import { Route as MissaoVisaoRouteImport } from './routes/missao-visao'
+import { Route as DiferenciaisRouteImport } from './routes/diferenciais'
+import { Route as ContactosRouteImport } from './routes/contactos'
+import { Route as BeneficiosRouteImport } from './routes/beneficios'
 import { Route as IndexRouteImport } from './routes/index'
 
+const ServicosRoute = ServicosRouteImport.update({
+  id: '/servicos',
+  path: '/servicos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const QuemSomosRoute = QuemSomosRouteImport.update({
+  id: '/quem-somos',
+  path: '/quem-somos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ModeloRoute = ModeloRouteImport.update({
+  id: '/modelo',
+  path: '/modelo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MissaoVisaoRoute = MissaoVisaoRouteImport.update({
+  id: '/missao-visao',
+  path: '/missao-visao',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DiferenciaisRoute = DiferenciaisRouteImport.update({
+  id: '/diferenciais',
+  path: '/diferenciais',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactosRoute = ContactosRouteImport.update({
+  id: '/contactos',
+  path: '/contactos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BeneficiosRoute = BeneficiosRouteImport.update({
+  id: '/beneficios',
+  path: '/beneficios',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -19,28 +61,130 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/beneficios': typeof BeneficiosRoute
+  '/contactos': typeof ContactosRoute
+  '/diferenciais': typeof DiferenciaisRoute
+  '/missao-visao': typeof MissaoVisaoRoute
+  '/modelo': typeof ModeloRoute
+  '/quem-somos': typeof QuemSomosRoute
+  '/servicos': typeof ServicosRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/beneficios': typeof BeneficiosRoute
+  '/contactos': typeof ContactosRoute
+  '/diferenciais': typeof DiferenciaisRoute
+  '/missao-visao': typeof MissaoVisaoRoute
+  '/modelo': typeof ModeloRoute
+  '/quem-somos': typeof QuemSomosRoute
+  '/servicos': typeof ServicosRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/beneficios': typeof BeneficiosRoute
+  '/contactos': typeof ContactosRoute
+  '/diferenciais': typeof DiferenciaisRoute
+  '/missao-visao': typeof MissaoVisaoRoute
+  '/modelo': typeof ModeloRoute
+  '/quem-somos': typeof QuemSomosRoute
+  '/servicos': typeof ServicosRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/beneficios'
+    | '/contactos'
+    | '/diferenciais'
+    | '/missao-visao'
+    | '/modelo'
+    | '/quem-somos'
+    | '/servicos'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/beneficios'
+    | '/contactos'
+    | '/diferenciais'
+    | '/missao-visao'
+    | '/modelo'
+    | '/quem-somos'
+    | '/servicos'
+  id:
+    | '__root__'
+    | '/'
+    | '/beneficios'
+    | '/contactos'
+    | '/diferenciais'
+    | '/missao-visao'
+    | '/modelo'
+    | '/quem-somos'
+    | '/servicos'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  BeneficiosRoute: typeof BeneficiosRoute
+  ContactosRoute: typeof ContactosRoute
+  DiferenciaisRoute: typeof DiferenciaisRoute
+  MissaoVisaoRoute: typeof MissaoVisaoRoute
+  ModeloRoute: typeof ModeloRoute
+  QuemSomosRoute: typeof QuemSomosRoute
+  ServicosRoute: typeof ServicosRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/servicos': {
+      id: '/servicos'
+      path: '/servicos'
+      fullPath: '/servicos'
+      preLoaderRoute: typeof ServicosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/quem-somos': {
+      id: '/quem-somos'
+      path: '/quem-somos'
+      fullPath: '/quem-somos'
+      preLoaderRoute: typeof QuemSomosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/modelo': {
+      id: '/modelo'
+      path: '/modelo'
+      fullPath: '/modelo'
+      preLoaderRoute: typeof ModeloRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/missao-visao': {
+      id: '/missao-visao'
+      path: '/missao-visao'
+      fullPath: '/missao-visao'
+      preLoaderRoute: typeof MissaoVisaoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/diferenciais': {
+      id: '/diferenciais'
+      path: '/diferenciais'
+      fullPath: '/diferenciais'
+      preLoaderRoute: typeof DiferenciaisRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contactos': {
+      id: '/contactos'
+      path: '/contactos'
+      fullPath: '/contactos'
+      preLoaderRoute: typeof ContactosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/beneficios': {
+      id: '/beneficios'
+      path: '/beneficios'
+      fullPath: '/beneficios'
+      preLoaderRoute: typeof BeneficiosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -53,6 +197,13 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  BeneficiosRoute: BeneficiosRoute,
+  ContactosRoute: ContactosRoute,
+  DiferenciaisRoute: DiferenciaisRoute,
+  MissaoVisaoRoute: MissaoVisaoRoute,
+  ModeloRoute: ModeloRoute,
+  QuemSomosRoute: QuemSomosRoute,
+  ServicosRoute: ServicosRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
