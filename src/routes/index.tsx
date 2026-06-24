@@ -31,7 +31,9 @@ export const Route = createFileRoute("/")({
           "Soluções habitacionais para trabalhadores angolanos. Transparência, tecnologia e proximidade.",
       },
       { property: "og:image", content: heroImg },
+      { property: "og:url", content: "/" },
     ],
+    links: [{ rel: "canonical", href: "/" }],
   }),
   component: HomePage,
 });
