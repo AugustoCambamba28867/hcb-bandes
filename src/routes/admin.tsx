@@ -11,6 +11,9 @@ import {
   Menu,
   X,
   ExternalLink,
+  UserCog,
+  ShieldCheck,
+  Database,
 } from "lucide-react";
 import { toast } from "sonner";
 import { adminLogin, adminLogout, isAdminAuthenticated, getAdminSession } from "@/lib/leads-store";
