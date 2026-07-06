@@ -62,6 +62,39 @@ function AdminDashboard() {
         ))}
       </div>
 
+      {/* Widgets institucionais (mock) */}
+      <section>
+        <h2 className="font-display text-lg font-semibold text-primary">Visão geral (dados simulados)</h2>
+        <div className="mt-3 grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
+          <StatCard label="Utilizadores" value={DASHBOARD_STATS.totalUsers} icon={Users} tone="primary" />
+          <StatCard label="Administradores" value={DASHBOARD_STATS.administrators} icon={UserCog} tone="gold" />
+          <StatCard label="Clientes" value={DASHBOARD_STATS.clients.toLocaleString("pt-PT")} icon={Users} tone="primary" />
+          <StatCard label="Pedidos" value={DASHBOARD_STATS.orders} icon={ShoppingCart} tone="success" />
+          <StatCard label="Produtos" value={DASHBOARD_STATS.products} icon={Package} tone="primary" />
+          <StatCard label="Receita (AOA)" value={(DASHBOARD_STATS.revenue / 1_000_000).toFixed(1) + "M"} icon={DollarSign} tone="success" />
+          <StatCard label="Relatórios" value={DASHBOARD_STATS.reports} icon={FileBarChart} tone="primary" />
+          <StatCard label="Actividades" value={DASHBOARD_STATS.activities} icon={Activity} tone="gold" />
+        </div>
+      </section>
+
+      {/* Actividade recente */}
+      <section className="rounded-xl border border-border bg-card">
+        <header className="border-b border-border px-5 py-4">
+          <h2 className="font-display text-lg font-semibold text-primary">Actividade recente</h2>
+        </header>
+        <ul className="divide-y divide-border">
+          {MOCK_ACTIVITIES.map((a) => (
+            <li key={a.id} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-5 py-3 text-sm">
+              <div className="min-w-0">
+                <div className="truncate text-foreground"><span className="font-semibold">{a.actor}</span> {a.action} <span className="text-muted-foreground">{a.target}</span></div>
+                <div className="text-xs text-muted-foreground">{new Date(a.at).toLocaleString("pt-PT")}</div>
+              </div>
+              <Badge tone={a.type === "success" ? "success" : a.type === "error" ? "danger" : a.type === "warn" ? "gold" : "primary"}>{a.type}</Badge>
+            </li>
+          ))}
+        </ul>
+      </section>
+
       <section className="rounded-xl border border-border bg-card">
         <header className="flex items-center justify-between gap-3 border-b border-border px-5 py-4">
           <h2 className="font-display text-lg font-semibold text-primary">Leads recentes</h2>
