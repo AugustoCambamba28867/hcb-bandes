@@ -47,7 +47,16 @@ function AdminLayout() {
   const path = useRouterState({ select: (s) => s.location.pathname });
 
   useEffect(() => {
-    setAuth(isAdminAuthenticated());
+    const check = () => setAuth(isAdminAuthenticated());
+    check();
+    // Re-verificar sessão ao voltar à aba e periodicamente (expiração).
+    const onVis = () => check();
+    document.addEventListener("visibilitychange", onVis);
+    const interval = window.setInterval(check, 60_000);
+    return () => {
+      document.removeEventListener("visibilitychange", onVis);
+      window.clearInterval(interval);
+    };
   }, []);
 
   useEffect(() => {
