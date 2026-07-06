@@ -77,20 +77,59 @@ export function clearLeads() {
   write([]);
 }
 
+const STATUS_LABELS_CSV: Record<LeadStatus, string> = {
+  novo: "Novo",
+  em_contacto: "Em contacto",
+  qualificado: "Qualificado",
+  fechado: "Fechado",
+  descartado: "Descartado",
+};
+
+function normalizePhone(phone?: string): string {
+  if (!phone) return "";
+  const cleaned = phone.replace(/[^\d+]/g, "");
+  if (!cleaned) return "";
+  // Angola: garantir prefixo +244 se aplicável (9 dígitos iniciando por 9).
+  if (/^9\d{8}$/.test(cleaned)) return `+244${cleaned}`;
+  if (/^244\d{9}$/.test(cleaned)) return `+${cleaned}`;
+  return cleaned;
+}
+
+function formatDatePT(iso: string): string {
+  const d = new Date(iso);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
 export function exportLeadsCSV(leads: Lead[]): string {
-  const headers = ["Data", "Nome", "Email", "Telefone", "Empresa", "Perfil", "Estado", "Mensagem"];
+  const headers = [
+    "ID",
+    "Data (ISO)",
+    "Data (PT)",
+    "Nome",
+    "Email",
+    "Telefone",
+    "Empresa",
+    "Perfil",
+    "Estado",
+    "Mensagem",
+  ];
   const rows = leads.map((l) => [
-    new Date(l.createdAt).toLocaleString("pt-PT"),
-    l.nome,
-    l.email,
-    l.telefone ?? "",
-    l.empresa ?? "",
+    l.id,
+    l.createdAt,
+    formatDatePT(l.createdAt),
+    l.nome.trim(),
+    l.email.trim().toLowerCase(),
+    normalizePhone(l.telefone),
+    (l.empresa ?? "").trim(),
     l.perfil,
-    l.status,
-    l.mensagem.replace(/\s+/g, " "),
+    STATUS_LABELS_CSV[l.status],
+    l.mensagem.replace(/\s+/g, " ").trim(),
   ]);
   const escape = (v: string) => `"${v.replace(/"/g, '""')}"`;
-  return [headers, ...rows].map((r) => r.map((c) => escape(String(c))).join(",")).join("\n");
+  return [headers, ...rows]
+    .map((r) => r.map((c) => escape(String(c ?? ""))).join(","))
+    .join("\r\n");
 }
 
 export function downloadCSV(filename: string, content: string) {
@@ -106,24 +145,54 @@ export function downloadCSV(filename: string, content: string) {
 
 // ---------------- Admin auth (DEMO sem backend) ----------------
 // Quando a base de dados estiver ligada, substituir por autenticação real.
-const AUTH_KEY = "hcb_admin_auth_v1";
+const AUTH_KEY = "hcb_admin_auth_v2";
 const DEMO_PASSWORD = "hcb2026"; // Credencial de demonstração — alterar ao integrar backend.
 
-export function adminLogin(password: string): boolean {
+const SESSION_SHORT_MS = 24 * 60 * 60 * 1000; // 24 horas
+const SESSION_LONG_MS = 30 * 24 * 60 * 60 * 1000; // 30 dias (lembrar-me)
+
+interface AdminSession {
+  expiresAt: number;
+  rememberMe: boolean;
+  loggedInAt: number;
+}
+
+export function adminLogin(password: string, rememberMe = false): boolean {
   if (!isBrowser()) return false;
-  if (password === DEMO_PASSWORD) {
-    window.localStorage.setItem(AUTH_KEY, "1");
-    return true;
-  }
-  return false;
+  if (password !== DEMO_PASSWORD) return false;
+  const now = Date.now();
+  const session: AdminSession = {
+    loggedInAt: now,
+    expiresAt: now + (rememberMe ? SESSION_LONG_MS : SESSION_SHORT_MS),
+    rememberMe,
+  };
+  window.localStorage.setItem(AUTH_KEY, JSON.stringify(session));
+  return true;
 }
 
 export function adminLogout() {
   if (!isBrowser()) return;
   window.localStorage.removeItem(AUTH_KEY);
+  // Limpar chave antiga também.
+  window.localStorage.removeItem("hcb_admin_auth_v1");
+}
+
+export function getAdminSession(): AdminSession | null {
+  if (!isBrowser()) return null;
+  try {
+    const raw = window.localStorage.getItem(AUTH_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as AdminSession;
+    if (!parsed?.expiresAt || Date.now() > parsed.expiresAt) {
+      window.localStorage.removeItem(AUTH_KEY);
+      return null;
+    }
+    return parsed;
+  } catch {
+    return null;
+  }
 }
 
 export function isAdminAuthenticated(): boolean {
-  if (!isBrowser()) return false;
-  return window.localStorage.getItem(AUTH_KEY) === "1";
+  return getAdminSession() !== null;
 }
