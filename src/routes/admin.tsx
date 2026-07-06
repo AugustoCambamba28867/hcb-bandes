@@ -13,7 +13,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { toast } from "sonner";
-import { adminLogin, adminLogout, isAdminAuthenticated } from "@/lib/leads-store";
+import { adminLogin, adminLogout, isAdminAuthenticated, getAdminSession } from "@/lib/leads-store";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -47,7 +47,16 @@ function AdminLayout() {
   const path = useRouterState({ select: (s) => s.location.pathname });
 
   useEffect(() => {
-    setAuth(isAdminAuthenticated());
+    const check = () => setAuth(isAdminAuthenticated());
+    check();
+    // Re-verificar sessão ao voltar à aba e periodicamente (expiração).
+    const onVis = () => check();
+    document.addEventListener("visibilitychange", onVis);
+    const interval = window.setInterval(check, 60_000);
+    return () => {
+      document.removeEventListener("visibilitychange", onVis);
+      window.clearInterval(interval);
+    };
   }, []);
 
   useEffect(() => {
@@ -111,6 +120,7 @@ function AdminLayout() {
             </nav>
 
             <div className="border-t border-border p-3 space-y-2">
+              <SessionInfo />
               <Link
                 to="/"
                 className="flex items-center gap-2 rounded-md px-3 py-2 text-xs font-medium text-muted-foreground hover:bg-secondary hover:text-foreground"
@@ -123,6 +133,7 @@ function AdminLayout() {
                   toast.success("Sessão terminada");
                   setAuth(false);
                 }}
+                aria-label="Terminar sessão"
                 className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-xs font-medium text-destructive hover:bg-destructive/10"
               >
                 <LogOut size={14} /> Terminar sessão
@@ -149,6 +160,26 @@ function AdminLayout() {
   );
 }
 
+function SessionInfo() {
+  const [session, setSession] = useState(() => getAdminSession());
+  useEffect(() => {
+    const t = window.setInterval(() => setSession(getAdminSession()), 30_000);
+    return () => window.clearInterval(t);
+  }, []);
+  if (!session) return null;
+  const remaining = session.expiresAt - Date.now();
+  const hours = Math.floor(remaining / (60 * 60 * 1000));
+  const days = Math.floor(hours / 24);
+  const label =
+    days >= 1 ? `${days} dia${days > 1 ? "s" : ""}` : hours >= 1 ? `${hours}h` : `<1h`;
+  return (
+    <div className="rounded-md border border-border bg-secondary/50 px-3 py-2 text-[10px] text-muted-foreground">
+      <div className="font-semibold text-foreground">Sessão activa</div>
+      <div>Expira em {label}{session.rememberMe ? " · lembrar-me" : ""}</div>
+    </div>
+  );
+}
+
 function LoginScreen({ onSuccess }: { onSuccess: () => void }) {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -157,13 +188,14 @@ function LoginScreen({ onSuccess }: { onSuccess: () => void }) {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
     const password = String(fd.get("password") ?? "");
+    const remember = fd.get("remember") === "on";
     if (password.length < 4) {
       setError("Indique a palavra-passe.");
       return;
     }
     setLoading(true);
     setTimeout(() => {
-      const ok = adminLogin(password);
+      const ok = adminLogin(password, remember);
       setLoading(false);
       if (ok) {
         toast.success("Bem-vindo ao painel");
@@ -200,6 +232,14 @@ function LoginScreen({ onSuccess }: { onSuccess: () => void }) {
             />
             {error && <p className="mt-1.5 text-xs text-destructive">{error}</p>}
           </div>
+          <label className="flex items-center gap-2 text-xs text-muted-foreground select-none">
+            <input
+              type="checkbox"
+              name="remember"
+              className="h-4 w-4 rounded border-input text-primary focus:ring-2 focus:ring-ring"
+            />
+            Manter sessão iniciada por 30 dias
+          </label>
           <button
             type="submit"
             disabled={loading}
