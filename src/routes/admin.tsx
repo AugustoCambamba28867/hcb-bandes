@@ -232,6 +232,14 @@ function LoginScreen({ onSuccess }: { onSuccess: () => void }) {
             />
             {error && <p className="mt-1.5 text-xs text-destructive">{error}</p>}
           </div>
+          <label className="flex items-center gap-2 text-xs text-muted-foreground select-none">
+            <input
+              type="checkbox"
+              name="remember"
+              className="h-4 w-4 rounded border-input text-primary focus:ring-2 focus:ring-ring"
+            />
+            Manter sessão iniciada por 30 dias
+          </label>
           <button
             type="submit"
             disabled={loading}
