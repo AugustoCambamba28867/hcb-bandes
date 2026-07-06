@@ -120,6 +120,7 @@ function AdminLayout() {
             </nav>
 
             <div className="border-t border-border p-3 space-y-2">
+              <SessionInfo />
               <Link
                 to="/"
                 className="flex items-center gap-2 rounded-md px-3 py-2 text-xs font-medium text-muted-foreground hover:bg-secondary hover:text-foreground"
@@ -132,6 +133,7 @@ function AdminLayout() {
                   toast.success("Sessão terminada");
                   setAuth(false);
                 }}
+                aria-label="Terminar sessão"
                 className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-xs font-medium text-destructive hover:bg-destructive/10"
               >
                 <LogOut size={14} /> Terminar sessão
