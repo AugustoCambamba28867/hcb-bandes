@@ -30,7 +30,15 @@ export const Route = createFileRoute("/admin")({
 });
 
 type NavItem = {
-  to: "/admin" | "/admin/leads" | "/admin/conteudos" | "/admin/parceiros" | "/admin/definicoes";
+  to:
+    | "/admin"
+    | "/admin/leads"
+    | "/admin/utilizadores"
+    | "/admin/permissoes"
+    | "/admin/database"
+    | "/admin/conteudos"
+    | "/admin/parceiros"
+    | "/admin/definicoes";
   label: string;
   icon: typeof LayoutDashboard;
   exact?: boolean;
@@ -39,6 +47,9 @@ type NavItem = {
 const NAV: NavItem[] = [
   { to: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { to: "/admin/leads", label: "Leads", icon: Inbox },
+  { to: "/admin/utilizadores", label: "Utilizadores", icon: UserCog },
+  { to: "/admin/permissoes", label: "Permissões", icon: ShieldCheck },
+  { to: "/admin/database", label: "Base de Dados", icon: Database },
   { to: "/admin/conteudos", label: "Conteúdos", icon: FileText },
   { to: "/admin/parceiros", label: "Parceiros", icon: Users2 },
   { to: "/admin/definicoes", label: "Definições", icon: Settings },
