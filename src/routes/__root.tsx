@@ -89,7 +89,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "HCB-BANDES conecta empresas, bancos, promotores e trabalhadores em soluções habitacionais transparentes em Angola.",
       },
       { name: "author", content: "HCB-BANDES" },
-      { property: "og:title", content: "HCB-BANDES — Habitação Corporativa" },
+      { property: "og:title", content: "HCB-BANDES — Habitação Corporativa em Angola" },
       {
         property: "og:description",
         content:
@@ -97,6 +97,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "HCB-BANDES — Habitação Corporativa em Angola" },
+      { name: "description", content: "Soluções habitacionais para trabalhadores angolanos. Conectamos empresas, bancos, promotores e clientes finais." },
+      { property: "og:description", content: "Soluções habitacionais para trabalhadores angolanos. Conectamos empresas, bancos, promotores e clientes finais." },
+      { name: "twitter:description", content: "Soluções habitacionais para trabalhadores angolanos. Conectamos empresas, bancos, promotores e clientes finais." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/1c84f725-9e11-4821-88fa-a5c83bdb7d0c/id-preview-8fda0d03--ba79df78-b778-495d-a9d4-166e092d801e.lovable.app-1783360610388.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/1c84f725-9e11-4821-88fa-a5c83bdb7d0c/id-preview-8fda0d03--ba79df78-b778-495d-a9d4-166e092d801e.lovable.app-1783360610388.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
