@@ -1,7 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Inbox, TrendingUp, Users, CheckCircle2, ArrowRight, Clock } from "lucide-react";
+import { Inbox, TrendingUp, Users, CheckCircle2, ArrowRight, Clock, ShoppingCart, Package, DollarSign, FileBarChart, Activity, UserCog } from "lucide-react";
 import { listLeads, type Lead } from "@/lib/leads-store";
+import { DASHBOARD_STATS, MOCK_ACTIVITIES } from "@/lib/mock-data";
+import { StatCard, Badge } from "@/components/ui-kit";
 
 export const Route = createFileRoute("/admin/")({
   component: AdminDashboard,
