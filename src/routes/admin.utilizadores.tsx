@@ -272,7 +272,7 @@ function UsersPage() {
         description={confirmDel ? `${confirmDel.firstName} ${confirmDel.lastName} será removido permanentemente.` : ""}
         tone="danger"
         confirmLabel="Eliminar"
-        onConfirm={() => confirmDel && remove(confirmDel.id)}
+        onConfirm={() => { if (confirmDel) remove(confirmDel.id); }}
       />
     </div>
   );
