@@ -160,6 +160,26 @@ function AdminLayout() {
   );
 }
 
+function SessionInfo() {
+  const [session, setSession] = useState(() => getAdminSession());
+  useEffect(() => {
+    const t = window.setInterval(() => setSession(getAdminSession()), 30_000);
+    return () => window.clearInterval(t);
+  }, []);
+  if (!session) return null;
+  const remaining = session.expiresAt - Date.now();
+  const hours = Math.floor(remaining / (60 * 60 * 1000));
+  const days = Math.floor(hours / 24);
+  const label =
+    days >= 1 ? `${days} dia${days > 1 ? "s" : ""}` : hours >= 1 ? `${hours}h` : `<1h`;
+  return (
+    <div className="rounded-md border border-border bg-secondary/50 px-3 py-2 text-[10px] text-muted-foreground">
+      <div className="font-semibold text-foreground">Sessão activa</div>
+      <div>Expira em {label}{session.rememberMe ? " · lembrar-me" : ""}</div>
+    </div>
+  );
+}
+
 function LoginScreen({ onSuccess }: { onSuccess: () => void }) {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -168,13 +188,14 @@ function LoginScreen({ onSuccess }: { onSuccess: () => void }) {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
     const password = String(fd.get("password") ?? "");
+    const remember = fd.get("remember") === "on";
     if (password.length < 4) {
       setError("Indique a palavra-passe.");
       return;
     }
     setLoading(true);
     setTimeout(() => {
-      const ok = adminLogin(password);
+      const ok = adminLogin(password, remember);
       setLoading(false);
       if (ok) {
         toast.success("Bem-vindo ao painel");
