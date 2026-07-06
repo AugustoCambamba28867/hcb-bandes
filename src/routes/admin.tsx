@@ -13,7 +13,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { toast } from "sonner";
-import { adminLogin, adminLogout, isAdminAuthenticated } from "@/lib/leads-store";
+import { adminLogin, adminLogout, isAdminAuthenticated, getAdminSession } from "@/lib/leads-store";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
