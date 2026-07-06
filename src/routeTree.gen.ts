@@ -20,9 +20,12 @@ import { Route as BeneficiosRouteImport } from './routes/beneficios'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as AdminUtilizadoresRouteImport } from './routes/admin.utilizadores'
+import { Route as AdminPermissoesRouteImport } from './routes/admin.permissoes'
 import { Route as AdminParceirosRouteImport } from './routes/admin.parceiros'
 import { Route as AdminLeadsRouteImport } from './routes/admin.leads'
 import { Route as AdminDefinicoesRouteImport } from './routes/admin.definicoes'
+import { Route as AdminDatabaseRouteImport } from './routes/admin.database'
 import { Route as AdminConteudosRouteImport } from './routes/admin.conteudos'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -80,6 +83,16 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminUtilizadoresRoute = AdminUtilizadoresRouteImport.update({
+  id: '/utilizadores',
+  path: '/utilizadores',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminPermissoesRoute = AdminPermissoesRouteImport.update({
+  id: '/permissoes',
+  path: '/permissoes',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminParceirosRoute = AdminParceirosRouteImport.update({
   id: '/parceiros',
   path: '/parceiros',
@@ -93,6 +106,11 @@ const AdminLeadsRoute = AdminLeadsRouteImport.update({
 const AdminDefinicoesRoute = AdminDefinicoesRouteImport.update({
   id: '/definicoes',
   path: '/definicoes',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminDatabaseRoute = AdminDatabaseRouteImport.update({
+  id: '/database',
+  path: '/database',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminConteudosRoute = AdminConteudosRouteImport.update({
@@ -113,9 +131,12 @@ export interface FileRoutesByFullPath {
   '/servicos': typeof ServicosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin/conteudos': typeof AdminConteudosRoute
+  '/admin/database': typeof AdminDatabaseRoute
   '/admin/definicoes': typeof AdminDefinicoesRoute
   '/admin/leads': typeof AdminLeadsRoute
   '/admin/parceiros': typeof AdminParceirosRoute
+  '/admin/permissoes': typeof AdminPermissoesRoute
+  '/admin/utilizadores': typeof AdminUtilizadoresRoute
   '/admin/': typeof AdminIndexRoute
 }
 export interface FileRoutesByTo {
@@ -129,9 +150,12 @@ export interface FileRoutesByTo {
   '/servicos': typeof ServicosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin/conteudos': typeof AdminConteudosRoute
+  '/admin/database': typeof AdminDatabaseRoute
   '/admin/definicoes': typeof AdminDefinicoesRoute
   '/admin/leads': typeof AdminLeadsRoute
   '/admin/parceiros': typeof AdminParceirosRoute
+  '/admin/permissoes': typeof AdminPermissoesRoute
+  '/admin/utilizadores': typeof AdminUtilizadoresRoute
   '/admin': typeof AdminIndexRoute
 }
 export interface FileRoutesById {
@@ -147,9 +171,12 @@ export interface FileRoutesById {
   '/servicos': typeof ServicosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin/conteudos': typeof AdminConteudosRoute
+  '/admin/database': typeof AdminDatabaseRoute
   '/admin/definicoes': typeof AdminDefinicoesRoute
   '/admin/leads': typeof AdminLeadsRoute
   '/admin/parceiros': typeof AdminParceirosRoute
+  '/admin/permissoes': typeof AdminPermissoesRoute
+  '/admin/utilizadores': typeof AdminUtilizadoresRoute
   '/admin/': typeof AdminIndexRoute
 }
 export interface FileRouteTypes {
@@ -166,9 +193,12 @@ export interface FileRouteTypes {
     | '/servicos'
     | '/sitemap.xml'
     | '/admin/conteudos'
+    | '/admin/database'
     | '/admin/definicoes'
     | '/admin/leads'
     | '/admin/parceiros'
+    | '/admin/permissoes'
+    | '/admin/utilizadores'
     | '/admin/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -182,9 +212,12 @@ export interface FileRouteTypes {
     | '/servicos'
     | '/sitemap.xml'
     | '/admin/conteudos'
+    | '/admin/database'
     | '/admin/definicoes'
     | '/admin/leads'
     | '/admin/parceiros'
+    | '/admin/permissoes'
+    | '/admin/utilizadores'
     | '/admin'
   id:
     | '__root__'
@@ -199,9 +232,12 @@ export interface FileRouteTypes {
     | '/servicos'
     | '/sitemap.xml'
     | '/admin/conteudos'
+    | '/admin/database'
     | '/admin/definicoes'
     | '/admin/leads'
     | '/admin/parceiros'
+    | '/admin/permissoes'
+    | '/admin/utilizadores'
     | '/admin/'
   fileRoutesById: FileRoutesById
 }
@@ -297,6 +333,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/utilizadores': {
+      id: '/admin/utilizadores'
+      path: '/utilizadores'
+      fullPath: '/admin/utilizadores'
+      preLoaderRoute: typeof AdminUtilizadoresRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/permissoes': {
+      id: '/admin/permissoes'
+      path: '/permissoes'
+      fullPath: '/admin/permissoes'
+      preLoaderRoute: typeof AdminPermissoesRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/parceiros': {
       id: '/admin/parceiros'
       path: '/parceiros'
@@ -318,6 +368,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminDefinicoesRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/database': {
+      id: '/admin/database'
+      path: '/database'
+      fullPath: '/admin/database'
+      preLoaderRoute: typeof AdminDatabaseRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/conteudos': {
       id: '/admin/conteudos'
       path: '/conteudos'
@@ -330,17 +387,23 @@ declare module '@tanstack/react-router' {
 
 interface AdminRouteChildren {
   AdminConteudosRoute: typeof AdminConteudosRoute
+  AdminDatabaseRoute: typeof AdminDatabaseRoute
   AdminDefinicoesRoute: typeof AdminDefinicoesRoute
   AdminLeadsRoute: typeof AdminLeadsRoute
   AdminParceirosRoute: typeof AdminParceirosRoute
+  AdminPermissoesRoute: typeof AdminPermissoesRoute
+  AdminUtilizadoresRoute: typeof AdminUtilizadoresRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminConteudosRoute: AdminConteudosRoute,
+  AdminDatabaseRoute: AdminDatabaseRoute,
   AdminDefinicoesRoute: AdminDefinicoesRoute,
   AdminLeadsRoute: AdminLeadsRoute,
   AdminParceirosRoute: AdminParceirosRoute,
+  AdminPermissoesRoute: AdminPermissoesRoute,
+  AdminUtilizadoresRoute: AdminUtilizadoresRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 
