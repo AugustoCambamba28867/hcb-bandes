@@ -11,13 +11,12 @@ vi.mock("sonner", () => ({
 
 function buildRouter(initial = "/admin") {
   const rootRoute = createRootRoute({ component: () => <Outlet /> });
-  const admin = createRoute({
+  const admin: any = createRoute({
     getParentRoute: () => rootRoute,
     path: "/admin",
     component: AdminRoute.options.component!,
-    head: AdminRoute.options.head,
   });
-  const adminIndex = createRoute({
+  const adminIndex: any = createRoute({
     getParentRoute: () => admin,
     path: "/",
     component: AdminIndexRoute.options.component!,
@@ -26,7 +25,7 @@ function buildRouter(initial = "/admin") {
   return createRouter({
     routeTree,
     history: createMemoryHistory({ initialEntries: [initial] }),
-  });
+  }) as any;
 }
 
 beforeEach(() => {
