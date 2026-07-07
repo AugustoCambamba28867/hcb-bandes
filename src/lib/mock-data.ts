@@ -183,3 +183,177 @@ export const MOCK_BACKUPS = [
   { id: "b2", name: "backup_2026_01_14_manual.sql", size: "24.6 MB", type: "manual", at: new Date(Date.now() - 26 * 3600_000).toISOString() },
   { id: "b3", name: "backup_2026_01_13_auto.sql", size: "24.5 MB", type: "automático", at: new Date(Date.now() - 50 * 3600_000).toISOString() },
 ];
+
+// -------- Pedidos (mock) --------
+export type OrderStatus =
+  | "pendente"
+  | "aprovado"
+  | "em_processamento"
+  | "concluido"
+  | "rejeitado"
+  | "cancelado";
+
+export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
+  pendente: "Pendente",
+  aprovado: "Aprovado",
+  em_processamento: "Em processamento",
+  concluido: "Concluído",
+  rejeitado: "Rejeitado",
+  cancelado: "Cancelado",
+};
+
+export interface Order {
+  id: string;
+  reference: string;
+  client: string;
+  email: string;
+  service: string;
+  amount: number;
+  status: OrderStatus;
+  createdAt: string;
+  updatedAt: string;
+}
+
+const SERVICES = [
+  "Plano Profissional",
+  "Plano Familiar",
+  "Plano Condomínio",
+  "Consultoria Institucional",
+  "Assistência Técnica",
+  "Serviço Personalizado",
+];
+
+const CLIENTS: [string, string][] = [
+  ["Domingos Bernardo", "domingos.bernardo@empresa.ao"],
+  ["Marta Kiala", "marta.kiala@gmail.com"],
+  ["Condomínio Talatona", "geral@cond-talatona.ao"],
+  ["Isaías Pinto", "isaias.p@outlook.com"],
+  ["Sofia Neves", "sofia.neves@empresa.ao"],
+  ["Alberto Mateus", "alberto@mateus.co.ao"],
+  ["Grupo Kianda", "financas@grupokianda.ao"],
+  ["Helena Bandes", "helena.b@empresa.ao"],
+  ["Rui Domingos", "rui.d@yahoo.com"],
+  ["Vânia Chissola", "vania.c@empresa.ao"],
+  ["Marco Silva", "marco.silva@empresa.ao"],
+  ["Ana Cardoso", "ana.cardoso@gmail.com"],
+  ["Condomínio Miramar", "gestao@miramar.ao"],
+  ["João Pereira", "joao.p@empresa.ao"],
+  ["Cláudia Neto", "claudia.n@empresa.ao"],
+  ["Pedro Almeida", "pedro.a@empresa.ao"],
+  ["Sara Bernardo", "sara.b@gmail.com"],
+  ["Hélder Pinto", "helder.p@empresa.ao"],
+  ["Inês Domingos", "ines.d@empresa.ao"],
+  ["Rita Alves", "rita.a@empresa.ao"],
+  ["Bruno Costa", "bruno.c@empresa.ao"],
+  ["Carla Ferreira", "carla.f@empresa.ao"],
+  ["Diogo Martins", "diogo.m@empresa.ao"],
+  ["Eva Ribeiro", "eva.r@empresa.ao"],
+  ["Fábio Sousa", "fabio.s@empresa.ao"],
+];
+
+const ORDER_STATUSES: OrderStatus[] = [
+  "pendente", "pendente", "pendente",
+  "aprovado", "aprovado",
+  "em_processamento", "em_processamento",
+  "concluido", "concluido", "concluido",
+  "rejeitado", "cancelado",
+];
+
+export const MOCK_ORDERS: Order[] = CLIENTS.map(([client, email], i) => {
+  const created = Date.now() - i * 86400000 * 1.7;
+  return {
+    id: `ord-${(i + 1).toString().padStart(4, "0")}`,
+    reference: `HCB-${(2026000 + i + 1).toString()}`,
+    client,
+    email,
+    service: pick(SERVICES, i),
+    amount: 45_000 + (i % 12) * 32_500 + (i % 5) * 12_000,
+    status: ORDER_STATUSES[i % ORDER_STATUSES.length],
+    createdAt: new Date(created).toISOString(),
+    updatedAt: new Date(created + 3600_000 * (i % 24)).toISOString(),
+  };
+});
+
+// -------- Relatórios (mock) --------
+export type ReportCategory =
+  | "financeiro"
+  | "operacional"
+  | "comercial"
+  | "recursos_humanos"
+  | "auditoria";
+
+export const REPORT_CATEGORY_LABELS: Record<ReportCategory, string> = {
+  financeiro: "Financeiro",
+  operacional: "Operacional",
+  comercial: "Comercial",
+  recursos_humanos: "Recursos Humanos",
+  auditoria: "Auditoria",
+};
+
+export interface ReportItem {
+  id: string;
+  title: string;
+  category: ReportCategory;
+  period: string;
+  author: string;
+  records: number;
+  generatedAt: string;
+  status: "publicado" | "rascunho" | "arquivado";
+}
+
+const REPORT_TITLES: [string, ReportCategory][] = [
+  ["Receita mensal consolidada", "financeiro"],
+  ["Fluxo de caixa semanal", "financeiro"],
+  ["Contas a receber — atrasadas", "financeiro"],
+  ["Pedidos por serviço", "comercial"],
+  ["Leads convertidos por origem", "comercial"],
+  ["Taxa de conversão trimestral", "comercial"],
+  ["Actividade dos operadores", "operacional"],
+  ["Tempo médio de atendimento", "operacional"],
+  ["Backups e integridade da BD", "operacional"],
+  ["Colaboradores por departamento", "recursos_humanos"],
+  ["Registo de férias e ausências", "recursos_humanos"],
+  ["Logs de acesso administrativo", "auditoria"],
+  ["Tentativas de login falhadas", "auditoria"],
+  ["Alterações de permissões", "auditoria"],
+  ["Exportações de dados sensíveis", "auditoria"],
+  ["Receita por perfil de cliente", "financeiro"],
+  ["Utilizadores activos vs inactivos", "recursos_humanos"],
+  ["Parceiros por estado contratual", "comercial"],
+];
+
+const REPORT_STATUSES: ReportItem["status"][] = [
+  "publicado", "publicado", "publicado", "rascunho", "arquivado",
+];
+
+export const MOCK_REPORTS: ReportItem[] = REPORT_TITLES.map(([title, category], i) => ({
+  id: `rpt-${(i + 1).toString().padStart(4, "0")}`,
+  title,
+  category,
+  period: `${((i % 12) + 1).toString().padStart(2, "0")}/2026`,
+  author: pick(["Ana Silva", "João Cardoso", "Sistema", "Pedro Almeida", "Sara Bernardo"], i),
+  records: 32 + (i * 41) % 980,
+  generatedAt: new Date(Date.now() - i * 86400000 * 2.3).toISOString(),
+  status: REPORT_STATUSES[i % REPORT_STATUSES.length],
+}));
+
+// Utilitário partilhado de download CSV.
+export function downloadTextFile(filename: string, content: string, mime = "text/csv;charset=utf-8;") {
+  if (typeof window === "undefined") return;
+  const blob = new Blob(["\uFEFF" + content], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+export function toCSV(rows: (string | number)[][]): string {
+  const escape = (v: string | number) => {
+    const s = String(v ?? "");
+    return /[",\n;]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+  };
+  return rows.map((r) => r.map(escape).join(",")).join("\r\n");
+}
+
