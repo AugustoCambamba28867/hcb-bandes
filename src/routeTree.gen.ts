@@ -21,7 +21,9 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminUtilizadoresRouteImport } from './routes/admin.utilizadores'
+import { Route as AdminRelatoriosRouteImport } from './routes/admin.relatorios'
 import { Route as AdminPermissoesRouteImport } from './routes/admin.permissoes'
+import { Route as AdminPedidosRouteImport } from './routes/admin.pedidos'
 import { Route as AdminParceirosRouteImport } from './routes/admin.parceiros'
 import { Route as AdminLeadsRouteImport } from './routes/admin.leads'
 import { Route as AdminDefinicoesRouteImport } from './routes/admin.definicoes'
@@ -88,9 +90,19 @@ const AdminUtilizadoresRoute = AdminUtilizadoresRouteImport.update({
   path: '/utilizadores',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminRelatoriosRoute = AdminRelatoriosRouteImport.update({
+  id: '/relatorios',
+  path: '/relatorios',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminPermissoesRoute = AdminPermissoesRouteImport.update({
   id: '/permissoes',
   path: '/permissoes',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminPedidosRoute = AdminPedidosRouteImport.update({
+  id: '/pedidos',
+  path: '/pedidos',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminParceirosRoute = AdminParceirosRouteImport.update({
@@ -135,7 +147,9 @@ export interface FileRoutesByFullPath {
   '/admin/definicoes': typeof AdminDefinicoesRoute
   '/admin/leads': typeof AdminLeadsRoute
   '/admin/parceiros': typeof AdminParceirosRoute
+  '/admin/pedidos': typeof AdminPedidosRoute
   '/admin/permissoes': typeof AdminPermissoesRoute
+  '/admin/relatorios': typeof AdminRelatoriosRoute
   '/admin/utilizadores': typeof AdminUtilizadoresRoute
   '/admin/': typeof AdminIndexRoute
 }
@@ -154,7 +168,9 @@ export interface FileRoutesByTo {
   '/admin/definicoes': typeof AdminDefinicoesRoute
   '/admin/leads': typeof AdminLeadsRoute
   '/admin/parceiros': typeof AdminParceirosRoute
+  '/admin/pedidos': typeof AdminPedidosRoute
   '/admin/permissoes': typeof AdminPermissoesRoute
+  '/admin/relatorios': typeof AdminRelatoriosRoute
   '/admin/utilizadores': typeof AdminUtilizadoresRoute
   '/admin': typeof AdminIndexRoute
 }
@@ -175,7 +191,9 @@ export interface FileRoutesById {
   '/admin/definicoes': typeof AdminDefinicoesRoute
   '/admin/leads': typeof AdminLeadsRoute
   '/admin/parceiros': typeof AdminParceirosRoute
+  '/admin/pedidos': typeof AdminPedidosRoute
   '/admin/permissoes': typeof AdminPermissoesRoute
+  '/admin/relatorios': typeof AdminRelatoriosRoute
   '/admin/utilizadores': typeof AdminUtilizadoresRoute
   '/admin/': typeof AdminIndexRoute
 }
@@ -197,7 +215,9 @@ export interface FileRouteTypes {
     | '/admin/definicoes'
     | '/admin/leads'
     | '/admin/parceiros'
+    | '/admin/pedidos'
     | '/admin/permissoes'
+    | '/admin/relatorios'
     | '/admin/utilizadores'
     | '/admin/'
   fileRoutesByTo: FileRoutesByTo
@@ -216,7 +236,9 @@ export interface FileRouteTypes {
     | '/admin/definicoes'
     | '/admin/leads'
     | '/admin/parceiros'
+    | '/admin/pedidos'
     | '/admin/permissoes'
+    | '/admin/relatorios'
     | '/admin/utilizadores'
     | '/admin'
   id:
@@ -236,7 +258,9 @@ export interface FileRouteTypes {
     | '/admin/definicoes'
     | '/admin/leads'
     | '/admin/parceiros'
+    | '/admin/pedidos'
     | '/admin/permissoes'
+    | '/admin/relatorios'
     | '/admin/utilizadores'
     | '/admin/'
   fileRoutesById: FileRoutesById
@@ -340,11 +364,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminUtilizadoresRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/relatorios': {
+      id: '/admin/relatorios'
+      path: '/relatorios'
+      fullPath: '/admin/relatorios'
+      preLoaderRoute: typeof AdminRelatoriosRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/permissoes': {
       id: '/admin/permissoes'
       path: '/permissoes'
       fullPath: '/admin/permissoes'
       preLoaderRoute: typeof AdminPermissoesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/pedidos': {
+      id: '/admin/pedidos'
+      path: '/pedidos'
+      fullPath: '/admin/pedidos'
+      preLoaderRoute: typeof AdminPedidosRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/parceiros': {
@@ -391,7 +429,9 @@ interface AdminRouteChildren {
   AdminDefinicoesRoute: typeof AdminDefinicoesRoute
   AdminLeadsRoute: typeof AdminLeadsRoute
   AdminParceirosRoute: typeof AdminParceirosRoute
+  AdminPedidosRoute: typeof AdminPedidosRoute
   AdminPermissoesRoute: typeof AdminPermissoesRoute
+  AdminRelatoriosRoute: typeof AdminRelatoriosRoute
   AdminUtilizadoresRoute: typeof AdminUtilizadoresRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
@@ -402,7 +442,9 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminDefinicoesRoute: AdminDefinicoesRoute,
   AdminLeadsRoute: AdminLeadsRoute,
   AdminParceirosRoute: AdminParceirosRoute,
+  AdminPedidosRoute: AdminPedidosRoute,
   AdminPermissoesRoute: AdminPermissoesRoute,
+  AdminRelatoriosRoute: AdminRelatoriosRoute,
   AdminUtilizadoresRoute: AdminUtilizadoresRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
