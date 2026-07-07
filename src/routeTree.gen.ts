@@ -22,6 +22,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminUtilizadoresRouteImport } from './routes/admin.utilizadores'
 import { Route as AdminPermissoesRouteImport } from './routes/admin.permissoes'
+import { Route as AdminPedidosRouteImport } from './routes/admin.pedidos'
 import { Route as AdminParceirosRouteImport } from './routes/admin.parceiros'
 import { Route as AdminLeadsRouteImport } from './routes/admin.leads'
 import { Route as AdminDefinicoesRouteImport } from './routes/admin.definicoes'
@@ -93,6 +94,11 @@ const AdminPermissoesRoute = AdminPermissoesRouteImport.update({
   path: '/permissoes',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminPedidosRoute = AdminPedidosRouteImport.update({
+  id: '/pedidos',
+  path: '/pedidos',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminParceirosRoute = AdminParceirosRouteImport.update({
   id: '/parceiros',
   path: '/parceiros',
@@ -135,6 +141,7 @@ export interface FileRoutesByFullPath {
   '/admin/definicoes': typeof AdminDefinicoesRoute
   '/admin/leads': typeof AdminLeadsRoute
   '/admin/parceiros': typeof AdminParceirosRoute
+  '/admin/pedidos': typeof AdminPedidosRoute
   '/admin/permissoes': typeof AdminPermissoesRoute
   '/admin/utilizadores': typeof AdminUtilizadoresRoute
   '/admin/': typeof AdminIndexRoute
@@ -154,6 +161,7 @@ export interface FileRoutesByTo {
   '/admin/definicoes': typeof AdminDefinicoesRoute
   '/admin/leads': typeof AdminLeadsRoute
   '/admin/parceiros': typeof AdminParceirosRoute
+  '/admin/pedidos': typeof AdminPedidosRoute
   '/admin/permissoes': typeof AdminPermissoesRoute
   '/admin/utilizadores': typeof AdminUtilizadoresRoute
   '/admin': typeof AdminIndexRoute
@@ -175,6 +183,7 @@ export interface FileRoutesById {
   '/admin/definicoes': typeof AdminDefinicoesRoute
   '/admin/leads': typeof AdminLeadsRoute
   '/admin/parceiros': typeof AdminParceirosRoute
+  '/admin/pedidos': typeof AdminPedidosRoute
   '/admin/permissoes': typeof AdminPermissoesRoute
   '/admin/utilizadores': typeof AdminUtilizadoresRoute
   '/admin/': typeof AdminIndexRoute
@@ -197,6 +206,7 @@ export interface FileRouteTypes {
     | '/admin/definicoes'
     | '/admin/leads'
     | '/admin/parceiros'
+    | '/admin/pedidos'
     | '/admin/permissoes'
     | '/admin/utilizadores'
     | '/admin/'
@@ -216,6 +226,7 @@ export interface FileRouteTypes {
     | '/admin/definicoes'
     | '/admin/leads'
     | '/admin/parceiros'
+    | '/admin/pedidos'
     | '/admin/permissoes'
     | '/admin/utilizadores'
     | '/admin'
@@ -236,6 +247,7 @@ export interface FileRouteTypes {
     | '/admin/definicoes'
     | '/admin/leads'
     | '/admin/parceiros'
+    | '/admin/pedidos'
     | '/admin/permissoes'
     | '/admin/utilizadores'
     | '/admin/'
@@ -347,6 +359,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPermissoesRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/pedidos': {
+      id: '/admin/pedidos'
+      path: '/pedidos'
+      fullPath: '/admin/pedidos'
+      preLoaderRoute: typeof AdminPedidosRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/parceiros': {
       id: '/admin/parceiros'
       path: '/parceiros'
@@ -391,6 +410,7 @@ interface AdminRouteChildren {
   AdminDefinicoesRoute: typeof AdminDefinicoesRoute
   AdminLeadsRoute: typeof AdminLeadsRoute
   AdminParceirosRoute: typeof AdminParceirosRoute
+  AdminPedidosRoute: typeof AdminPedidosRoute
   AdminPermissoesRoute: typeof AdminPermissoesRoute
   AdminUtilizadoresRoute: typeof AdminUtilizadoresRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -402,6 +422,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminDefinicoesRoute: AdminDefinicoesRoute,
   AdminLeadsRoute: AdminLeadsRoute,
   AdminParceirosRoute: AdminParceirosRoute,
+  AdminPedidosRoute: AdminPedidosRoute,
   AdminPermissoesRoute: AdminPermissoesRoute,
   AdminUtilizadoresRoute: AdminUtilizadoresRoute,
   AdminIndexRoute: AdminIndexRoute,
