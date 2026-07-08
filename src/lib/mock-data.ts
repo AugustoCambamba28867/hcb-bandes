@@ -337,6 +337,65 @@ export const MOCK_REPORTS: ReportItem[] = REPORT_TITLES.map(([title, category], 
   status: REPORT_STATUSES[i % REPORT_STATUSES.length],
 }));
 
+// -------- Auditoria (mock) --------
+export interface AuditEvent {
+  id: string;
+  actor: string;
+  action: string;
+  target: string;
+  details: string;
+  at: string;
+  type: "info" | "warning" | "success" | "error";
+}
+
+export const MOCK_AUDIT_EVENTS: AuditEvent[] = [
+  {
+    id: "aud-0001",
+    actor: "Ana Silva",
+    action: "aprovou pedido",
+    target: "HCB-2026004",
+    details: "Pedido do Plano Profissional validado para seguimento financeiro.",
+    at: new Date(Date.now() - 35 * 60_000).toISOString(),
+    type: "success",
+  },
+  {
+    id: "aud-0002",
+    actor: "João Cardoso",
+    action: "exportou relatórios",
+    target: "Relatórios",
+    details: "Exportação CSV de relatórios financeiros e operacionais.",
+    at: new Date(Date.now() - 2 * 3600_000).toISOString(),
+    type: "info",
+  },
+  {
+    id: "aud-0003",
+    actor: "Pedro Almeida",
+    action: "rejeitou pedido",
+    target: "HCB-2026011",
+    details: "Pedido rejeitado por documentação insuficiente.",
+    at: new Date(Date.now() - 5 * 3600_000).toISOString(),
+    type: "warning",
+  },
+  {
+    id: "aud-0004",
+    actor: "Sara Bernardo",
+    action: "concluiu pedido",
+    target: "HCB-2026008",
+    details: "Processo marcado como concluído depois da validação administrativa.",
+    at: new Date(Date.now() - 9 * 3600_000).toISOString(),
+    type: "success",
+  },
+  {
+    id: "aud-0005",
+    actor: "Sistema",
+    action: "bloqueou acesso",
+    target: "/admin/relatorios",
+    details: "Acesso negado por falta de permissão de visualização.",
+    at: new Date(Date.now() - 18 * 3600_000).toISOString(),
+    type: "error",
+  },
+];
+
 // Utilitário partilhado de download CSV.
 export function downloadTextFile(filename: string, content: string, mime = "text/csv;charset=utf-8;") {
   if (typeof window === "undefined") return;

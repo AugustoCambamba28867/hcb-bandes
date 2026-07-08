@@ -5,12 +5,13 @@ import { toast } from "sonner";
 import {
   MOCK_REPORTS,
   REPORT_CATEGORY_LABELS,
-  toCSV,
-  downloadTextFile,
   type ReportCategory,
   type ReportItem,
 } from "@/lib/mock-data";
 import { Badge, EmptyState, StatCard } from "@/components/ui-kit";
+import { canAccessAdminModule, getAdminAccessMessage } from "@/lib/admin-permissions";
+import { addAuditEvent } from "@/lib/audit-store";
+import { downloadCsv } from "@/lib/export-utils";
 
 export const Route = createFileRoute("/admin/relatorios")({
   head: () => ({ meta: [{ title: "Relatórios — Admin HCB-BANDES" }] }),
@@ -34,6 +35,7 @@ function RelatoriosPage() {
   const [cat, setCat] = useState<ReportCategory | "todas">("todas");
   const [status, setStatus] = useState<ReportItem["status"] | "todos">("todos");
   const [period, setPeriod] = useState("");
+  const canView = canAccessAdminModule(undefined, "Relatórios", "View");
 
   const filtered = useMemo(() => {
     const term = q.trim().toLowerCase();
@@ -73,7 +75,14 @@ function RelatoriosPage() {
         new Date(r.generatedAt).toLocaleString("pt-PT"),
       ],
     ];
-    downloadTextFile(`${r.id}-${r.title.slice(0, 24).replace(/\s+/g, "-")}.csv`, toCSV(rows));
+    downloadCsv(`${r.id}-${r.title.slice(0, 24).replace(/\s+/g, "-")}.csv`, rows);
+    addAuditEvent({
+      actor: "Administrador",
+      action: "exportou relatório",
+      target: r.id,
+      details: `Exportação CSV de "${r.title}".`,
+      type: "info",
+    });
     toast.success(`Relatório ${r.id} exportado`);
   }
 
@@ -95,8 +104,25 @@ function RelatoriosPage() {
         new Date(r.generatedAt).toLocaleString("pt-PT"),
       ]),
     ];
-    downloadTextFile(`hcb-relatorios-${new Date().toISOString().slice(0, 10)}.csv`, toCSV(rows));
+    downloadCsv(`hcb-relatorios-${new Date().toISOString().slice(0, 10)}.csv`, rows);
+    addAuditEvent({
+      actor: "Administrador",
+      action: "exportou relatórios",
+      target: "Relatórios",
+      details: `${filtered.length} registos exportados em CSV.`,
+      type: "info",
+    });
     toast.success(`${filtered.length} relatórios exportados`);
+  }
+
+  if (!canView) {
+    return (
+      <EmptyState
+        title="Acesso negado"
+        description={getAdminAccessMessage(undefined, "Relatórios", "View")}
+        icon={FileBarChart}
+      />
+    );
   }
 
   return (

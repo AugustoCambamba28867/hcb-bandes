@@ -14,12 +14,13 @@ import { toast } from "sonner";
 import {
   MOCK_ORDERS,
   ORDER_STATUS_LABELS,
-  toCSV,
-  downloadTextFile,
   type Order,
   type OrderStatus,
 } from "@/lib/mock-data";
 import { Badge, EmptyState, ConfirmDialog, StatCard } from "@/components/ui-kit";
+import { canAccessAdminModule, getAdminAccessMessage } from "@/lib/admin-permissions";
+import { addAuditEvent } from "@/lib/audit-store";
+import { downloadCsv } from "@/lib/export-utils";
 
 export const Route = createFileRoute("/admin/pedidos")({
   head: () => ({ meta: [{ title: "Pedidos — Admin HCB-BANDES" }] }),
@@ -48,6 +49,8 @@ function PedidosPage() {
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<Order | null>(null);
   const [confirm, setConfirm] = useState<{ order: Order; next: OrderStatus } | null>(null);
+  const canView = canAccessAdminModule(undefined, "Pedidos", "View");
+  const canApprove = canAccessAdminModule(undefined, "Pedidos", "Approve");
 
   const filtered = useMemo(() => {
     const term = q.trim().toLowerCase();
@@ -79,10 +82,29 @@ function PedidosPage() {
   }, [orders]);
 
   function setStatus(id: string, status: OrderStatus) {
+    if (!canApprove) {
+      toast.error(getAdminAccessMessage(undefined, "Pedidos", "Approve"));
+      return;
+    }
     setOrders((prev) =>
       prev.map((o) => (o.id === id ? { ...o, status, updatedAt: new Date().toISOString() } : o)),
     );
     if (selected?.id === id) setSelected((s) => (s ? { ...s, status } : s));
+    const order = orders.find((o) => o.id === id);
+    addAuditEvent({
+      actor: "Administrador",
+      action:
+        status === "aprovado"
+          ? "aprovou pedido"
+          : status === "rejeitado"
+            ? "rejeitou pedido"
+            : status === "concluido"
+              ? "concluiu pedido"
+              : "actualizou pedido",
+      target: order?.reference ?? id,
+      details: `Estado alterado para ${ORDER_STATUS_LABELS[status]}.`,
+      type: status === "rejeitado" || status === "cancelado" ? "warning" : "success",
+    });
     toast.success(`Pedido ${ORDER_STATUS_LABELS[status].toLowerCase()}`);
   }
 
@@ -104,8 +126,25 @@ function PedidosPage() {
         new Date(o.updatedAt).toLocaleString("pt-PT"),
       ]),
     ];
-    downloadTextFile(`hcb-pedidos-${new Date().toISOString().slice(0, 10)}.csv`, toCSV(rows));
+    downloadCsv(`hcb-pedidos-${new Date().toISOString().slice(0, 10)}.csv`, rows);
+    addAuditEvent({
+      actor: "Administrador",
+      action: "exportou pedidos",
+      target: "Pedidos",
+      details: `${filtered.length} pedidos exportados em CSV.`,
+      type: "info",
+    });
     toast.success(`${filtered.length} pedidos exportados`);
+  }
+
+  if (!canView) {
+    return (
+      <EmptyState
+        title="Acesso negado"
+        description={getAdminAccessMessage(undefined, "Pedidos", "View")}
+        icon={ShoppingCart}
+      />
+    );
   }
 
   return (

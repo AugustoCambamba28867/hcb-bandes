@@ -29,6 +29,7 @@ import { Route as AdminLeadsRouteImport } from './routes/admin.leads'
 import { Route as AdminDefinicoesRouteImport } from './routes/admin.definicoes'
 import { Route as AdminDatabaseRouteImport } from './routes/admin.database'
 import { Route as AdminConteudosRouteImport } from './routes/admin.conteudos'
+import { Route as AdminAuditoriaRouteImport } from './routes/admin.auditoria'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -130,6 +131,11 @@ const AdminConteudosRoute = AdminConteudosRouteImport.update({
   path: '/conteudos',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminAuditoriaRoute = AdminAuditoriaRouteImport.update({
+  id: '/auditoria',
+  path: '/auditoria',
+  getParentRoute: () => AdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -142,6 +148,7 @@ export interface FileRoutesByFullPath {
   '/quem-somos': typeof QuemSomosRoute
   '/servicos': typeof ServicosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/admin/auditoria': typeof AdminAuditoriaRoute
   '/admin/conteudos': typeof AdminConteudosRoute
   '/admin/database': typeof AdminDatabaseRoute
   '/admin/definicoes': typeof AdminDefinicoesRoute
@@ -163,6 +170,7 @@ export interface FileRoutesByTo {
   '/quem-somos': typeof QuemSomosRoute
   '/servicos': typeof ServicosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/admin/auditoria': typeof AdminAuditoriaRoute
   '/admin/conteudos': typeof AdminConteudosRoute
   '/admin/database': typeof AdminDatabaseRoute
   '/admin/definicoes': typeof AdminDefinicoesRoute
@@ -186,6 +194,7 @@ export interface FileRoutesById {
   '/quem-somos': typeof QuemSomosRoute
   '/servicos': typeof ServicosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/admin/auditoria': typeof AdminAuditoriaRoute
   '/admin/conteudos': typeof AdminConteudosRoute
   '/admin/database': typeof AdminDatabaseRoute
   '/admin/definicoes': typeof AdminDefinicoesRoute
@@ -210,6 +219,7 @@ export interface FileRouteTypes {
     | '/quem-somos'
     | '/servicos'
     | '/sitemap.xml'
+    | '/admin/auditoria'
     | '/admin/conteudos'
     | '/admin/database'
     | '/admin/definicoes'
@@ -231,6 +241,7 @@ export interface FileRouteTypes {
     | '/quem-somos'
     | '/servicos'
     | '/sitemap.xml'
+    | '/admin/auditoria'
     | '/admin/conteudos'
     | '/admin/database'
     | '/admin/definicoes'
@@ -253,6 +264,7 @@ export interface FileRouteTypes {
     | '/quem-somos'
     | '/servicos'
     | '/sitemap.xml'
+    | '/admin/auditoria'
     | '/admin/conteudos'
     | '/admin/database'
     | '/admin/definicoes'
@@ -420,10 +432,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminConteudosRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/auditoria': {
+      id: '/admin/auditoria'
+      path: '/auditoria'
+      fullPath: '/admin/auditoria'
+      preLoaderRoute: typeof AdminAuditoriaRouteImport
+      parentRoute: typeof AdminRoute
+    }
   }
 }
 
 interface AdminRouteChildren {
+  AdminAuditoriaRoute: typeof AdminAuditoriaRoute
   AdminConteudosRoute: typeof AdminConteudosRoute
   AdminDatabaseRoute: typeof AdminDatabaseRoute
   AdminDefinicoesRoute: typeof AdminDefinicoesRoute
@@ -437,6 +457,7 @@ interface AdminRouteChildren {
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminAuditoriaRoute: AdminAuditoriaRoute,
   AdminConteudosRoute: AdminConteudosRoute,
   AdminDatabaseRoute: AdminDatabaseRoute,
   AdminDefinicoesRoute: AdminDefinicoesRoute,
@@ -466,3 +487,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

@@ -37,6 +37,7 @@ type NavItem = {
     | "/admin/leads"
     | "/admin/pedidos"
     | "/admin/relatorios"
+    | "/admin/auditoria"
     | "/admin/utilizadores"
     | "/admin/permissoes"
     | "/admin/database"
@@ -53,6 +54,7 @@ const NAV: NavItem[] = [
   { to: "/admin/leads", label: "Leads", icon: Inbox },
   { to: "/admin/pedidos", label: "Pedidos", icon: ShoppingCart },
   { to: "/admin/relatorios", label: "Relatórios", icon: FileBarChart },
+  { to: "/admin/auditoria", label: "Auditoria", icon: ShieldCheck },
   { to: "/admin/utilizadores", label: "Utilizadores", icon: UserCog },
   { to: "/admin/permissoes", label: "Permissões", icon: ShieldCheck },
   { to: "/admin/database", label: "Base de Dados", icon: Database },

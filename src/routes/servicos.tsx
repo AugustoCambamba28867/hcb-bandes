@@ -1,20 +1,19 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Building2, Landmark, Home, ShieldCheck, CheckCircle2 } from "lucide-react";
+import { Banknote, CheckCircle2, ClipboardList, Settings2 } from "lucide-react";
 import { PageHero, Section } from "@/components/section";
 
 export const Route = createFileRoute("/servicos")({
   head: () => ({
     meta: [
-      { title: "Serviços — HCB-BANDES" },
+      { title: "Servicos - HCB-BANDES" },
       {
         name: "description",
-        content:
-          "Habitação Corporativa, Crédito Imobiliário, Imobiliário e Gestão Condominial.",
+        content: "Gestao financeira, administrativa e operacional para condominios.",
       },
-      { property: "og:title", content: "Serviços — HCB-BANDES" },
+      { property: "og:title", content: "Servicos - HCB-BANDES" },
       {
         property: "og:description",
-        content: "Quatro pilares de serviço para uma solução habitacional completa.",
+        content: "Servicos profissionais de gestao condominial HCB-BANDES.",
       },
       { property: "og:url", content: "/servicos" },
     ],
@@ -25,43 +24,36 @@ export const Route = createFileRoute("/servicos")({
 
 const SERVICOS = [
   {
-    icon: Building2,
-    title: "Habitação Corporativa",
-    desc: "Desenhamos programas habitacionais à medida das empresas parceiras, integrando o benefício no pacote oferecido aos seus colaboradores.",
+    icon: Banknote,
+    image: "/legacy/gestao-financeira.jpg",
+    title: "Gestao Financeira",
+    desc: "Organizamos a saude financeira do condominio com cobranca, controlo de caixa, prestacao de contas e relatorios claros.",
     pontos: [
-      "Protocolos com condições preferenciais",
-      "Comunicação interna e atendimento dedicado",
-      "Reporting periódico para a Direcção e RH",
+      "Orcamentos, quotas e controlo de inadimplencia",
+      "Relatorios financeiros periodicos",
+      "Transparencia nas receitas e despesas",
     ],
   },
   {
-    icon: Landmark,
-    title: "Crédito Imobiliário",
-    desc: "Articulamos o cliente final com os bancos comerciais parceiros, garantindo processos pré-validados e ágeis.",
+    icon: ClipboardList,
+    image: "/legacy/gestao-administrativa.jpg",
+    title: "Gestao Administrativa",
+    desc: "Tratamos dos processos administrativos do condominio, documentacao, comunicacao com moradores e suporte a tomada de decisao.",
     pontos: [
-      "Simulação prévia das condições",
-      "Documentação preparada e organizada",
-      "Acompanhamento até à aprovação",
+      "Actas, contratos e organizacao documental",
+      "Atendimento e comunicacao com moradores",
+      "Apoio a direccao e assembleias",
     ],
   },
   {
-    icon: Home,
-    title: "Imobiliário",
-    desc: "Carteira de imóveis e condomínios cuidadosamente seleccionados com promotores parceiros em todo o país.",
+    icon: Settings2,
+    image: "/legacy/gestao-operacional.jpg",
+    title: "Gestao Operacional",
+    desc: "Coordenamos manutencao, limpeza, seguranca e fornecedores para garantir tranquilidade, conservacao e valorizacao do patrimonio.",
     pontos: [
-      "Tipologias diversas e localizações estratégicas",
-      "Visitas e acompanhamento personalizado",
-      "Garantia de qualidade construtiva",
-    ],
-  },
-  {
-    icon: ShieldCheck,
-    title: "Gestão Condominial",
-    desc: "Administração profissional de condomínios, com foco em transparência financeira e qualidade de vida dos moradores.",
-    pontos: [
-      "Gestão financeira e administrativa",
-      "Manutenção e segurança permanentes",
-      "Plataforma de comunicação com moradores",
+      "Supervisao de manutencao e limpeza",
+      "Coordenacao de seguranca e fornecedores",
+      "Rotinas operacionais acompanhadas de perto",
     ],
   },
 ];
@@ -70,31 +62,42 @@ function ServicosPage() {
   return (
     <>
       <PageHero
-        eyebrow="Os Nossos Serviços"
-        title="Quatro pilares que cobrem toda a cadeia da habitação."
-        subtitle="Da empresa parceira ao trabalhador beneficiário, integramos os serviços essenciais para que cada projecto habitacional aconteça com eficiência."
+        eyebrow="Os Nossos Servicos"
+        title="Gestao condominial profissional para valorizar patrimonios."
+        subtitle="A HCB-BANDES actua na administracao de condominios com foco em organizacao financeira, rigor administrativo e operacao diaria eficiente."
       />
 
       <Section>
-        <div className="grid gap-8 lg:grid-cols-2">
+        <div className="mb-10 overflow-hidden rounded-lg border border-border bg-card">
+          <img
+            src="/legacy/capa.png"
+            alt="HCB-BANDES gestao de condominios"
+            className="h-64 w-full object-cover sm:h-80"
+          />
+        </div>
+
+        <div className="grid gap-6 lg:grid-cols-3">
           {SERVICOS.map((s) => (
             <article
               key={s.title}
-              className="group rounded-2xl border border-border bg-card p-8 transition hover:border-gold/60 hover:shadow-elegant"
+              className="group overflow-hidden rounded-lg border border-border bg-card transition hover:border-gold/60 hover:shadow-elegant"
             >
-              <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-primary text-primary-foreground group-hover:bg-gold group-hover:text-gold-foreground transition">
-                <s.icon size={24} />
+              <img src={s.image} alt={s.title} className="h-44 w-full object-cover" />
+              <div className="p-6">
+                <div className="flex h-11 w-11 items-center justify-center rounded-md bg-primary text-primary-foreground transition group-hover:bg-gold group-hover:text-gold-foreground">
+                  <s.icon size={21} />
+                </div>
+                <h2 className="mt-5 font-display text-xl font-bold text-primary">{s.title}</h2>
+                <p className="mt-3 text-sm leading-relaxed text-foreground/75">{s.desc}</p>
+                <ul className="mt-5 space-y-2">
+                  {s.pontos.map((p) => (
+                    <li key={p} className="flex items-start gap-2 text-sm text-foreground/80">
+                      <CheckCircle2 size={16} className="mt-0.5 shrink-0 text-gold" />
+                      {p}
+                    </li>
+                  ))}
+                </ul>
               </div>
-              <h2 className="mt-6 font-display text-2xl font-bold text-primary">{s.title}</h2>
-              <p className="mt-3 text-foreground/75 leading-relaxed">{s.desc}</p>
-              <ul className="mt-6 space-y-2">
-                {s.pontos.map((p) => (
-                  <li key={p} className="flex items-start gap-2 text-sm text-foreground/80">
-                    <CheckCircle2 size={16} className="mt-0.5 text-gold shrink-0" />
-                    {p}
-                  </li>
-                ))}
-              </ul>
             </article>
           ))}
         </div>
