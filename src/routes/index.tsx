@@ -14,6 +14,7 @@ import { useEffect, useState } from "react";
 import heroImg from "@/assets/hero-building.jpg";
 import familyImg from "@/assets/family-keys.jpg";
 import partnershipImg from "@/assets/partnership.jpg";
+import { cn } from "@/lib/utils";
 import { Section, SectionHeader } from "@/components/section";
 import {
   Carousel,
@@ -269,7 +270,14 @@ function HomePage() {
           />
           <div className="mt-12 overflow-hidden rounded-[2rem] border border-border bg-card/90 p-4 shadow-elegant">
             <Carousel
-              opts={{ loop: true, align: "center", skipSnaps: false }}
+              opts={{
+                loop: true,
+                align: "start",
+                skipSnaps: false,
+                slidesToScroll: 1,
+                containScroll: "trimSnaps",
+                speed: 12,
+              }}
               className="relative"
               setApi={setEmblaApi}
             >
@@ -277,7 +285,12 @@ function HomePage() {
                 {PROCESSO.map((item, index) => (
                   <CarouselItem
                     key={item.title}
-                    className="rounded-[2rem] border border-border bg-background p-6 shadow-elegant transition-transform duration-500 hover:-translate-y-1 md:min-w-[32rem]"
+                    className={cn(
+                      "rounded-[2rem] border bg-background p-6 transition-all duration-500 min-w-[18rem] sm:min-w-[20rem] md:min-w-[22rem] lg:min-w-[24rem]",
+                      index === activeIndex
+                        ? "scale-[1.03] border-gold/50 shadow-2xl ring-1 ring-gold/20"
+                        : "border-border border-opacity-60 opacity-80 hover:-translate-y-2 hover:shadow-2xl hover:opacity-100",
+                    )}
                   >
                     <div className="flex items-center justify-between gap-3">
                       <div className="flex h-14 w-14 items-center justify-center rounded-3xl bg-gradient-to-br from-gold/30 to-accent/30 text-primary font-display text-2xl font-bold ring-1 ring-gold/40">
@@ -288,7 +301,9 @@ function HomePage() {
                       </div>
                     </div>
                     <h3 className="mt-6 font-display text-2xl font-semibold text-primary">{item.title}</h3>
-                    <p className="mt-4 text-base leading-relaxed text-muted-foreground">{item.description}</p>
+                    <p className="mt-4 text-base leading-relaxed text-muted-foreground">
+                      {item.description}
+                    </p>
                   </CarouselItem>
                 ))}
               </CarouselContent>
@@ -302,8 +317,10 @@ function HomePage() {
                   key={index}
                   type="button"
                   onClick={() => emblaApi?.scrollTo(index)}
-                  className={`h-2.5 w-2.5 rounded-full transition-all duration-300 ${
-                    index === activeIndex ? "bg-gold w-3.5" : "bg-muted-foreground/40 hover:bg-primary"
+                  className={`h-2.5 rounded-full transition-all duration-300 ${
+                    index === activeIndex
+                      ? "bg-gold w-3.5 shadow-glow"
+                      : "bg-muted-foreground/40 hover:bg-primary"
                   }`}
                   aria-label={`Ir para etapa ${index + 1}`}
                 />
