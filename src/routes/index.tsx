@@ -378,14 +378,15 @@ function HomePage() {
           loading="lazy"
           width={1280}
           height={960}
-          className="absolute inset-0 -z-10 h-full w-full object-cover"
+          className="absolute inset-0 -z-10 h-full w-full object-cover scale-105"
         />
-        <div className="absolute inset-0 -z-10 bg-gradient-to-r from-primary/95 to-primary/70" />
+        <div className="absolute inset-0 -z-10 bg-gradient-to-br from-primary/95 via-primary/85 to-accent/70 animate-gradient" />
+        <div className="absolute inset-0 -z-10 bg-grid-primary opacity-25" />
         <div className="container-page py-24 text-primary-foreground">
-          <div className="max-w-2xl">
-            <TrendingUp className="text-gold" />
-            <h2 className="mt-4 font-display text-3xl md:text-4xl font-bold leading-tight">
-              Pronto para transformar habitação num benefício real?
+          <div className="max-w-2xl animate-slide-up">
+            <TrendingUp className="text-gold animate-float-slow" />
+            <h2 className="mt-4 font-display text-3xl md:text-5xl font-bold leading-tight">
+              Pronto para transformar habitação num <span className="text-gradient-gold">benefício real</span>?
             </h2>
             <p className="mt-4 text-primary-foreground/85">
               Marque uma reunião com a nossa equipa e descubra como integrar a HCB-BANDES no pacote
@@ -393,12 +394,13 @@ function HomePage() {
             </p>
             <Link
               to="/contactos"
-              className="mt-8 inline-flex items-center gap-2 rounded-md bg-gold px-6 py-3 text-sm font-semibold text-gold-foreground shadow-gold hover:brightness-95 transition"
+              className="group mt-8 inline-flex items-center gap-2 rounded-md bg-gold px-7 py-3.5 text-sm font-semibold text-gold-foreground shadow-gold hover:brightness-95 hover:-translate-y-0.5 hover:shadow-elegant transition-all duration-300 animate-glow-pulse"
             >
-              Falar com a equipa <ArrowRight size={16} />
+              Falar com a equipa
+              <ArrowRight size={16} className="transition-transform duration-300 group-hover:translate-x-1" />
             </Link>
           </div>
-        </div>
+
       </section>
     </>
   );
