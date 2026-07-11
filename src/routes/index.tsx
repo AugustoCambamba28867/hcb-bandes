@@ -93,43 +93,48 @@ function HomePage() {
             alt="Edifício residencial moderno em Luanda"
             width={1920}
             height={1280}
-            className="h-full w-full object-cover"
+            className="h-full w-full object-cover scale-105"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-primary/95 via-primary/80 to-primary/40" />
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/95 via-primary/85 to-accent/60 animate-gradient" />
+          <div className="absolute inset-0 bg-grid-primary opacity-40" />
+          {/* animated blobs */}
+          <div className="absolute -top-24 -left-24 h-96 w-96 rounded-full bg-gold/25 blur-3xl animate-blob" />
+          <div className="absolute bottom-0 right-0 h-[28rem] w-[28rem] rounded-full bg-accent/30 blur-3xl animate-blob" style={{ animationDelay: "-6s" }} />
         </div>
 
         <div className="container-page relative py-24 md:py-32">
           <div className="grid gap-12 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
-            <div className="max-w-2xl text-primary-foreground animate-appear">
-              <div className="inline-flex items-center gap-2 rounded-full border border-gold/40 bg-primary/40 px-4 py-1 text-xs font-medium uppercase tracking-[0.2em] text-gold backdrop-blur">
+            <div className="max-w-2xl text-primary-foreground animate-slide-in-left">
+              <div className="inline-flex items-center gap-2 rounded-full border border-gold/50 bg-primary/40 px-4 py-1.5 text-xs font-medium uppercase tracking-[0.2em] text-gold backdrop-blur animate-glow-pulse">
                 <Sparkles size={12} /> {settings.empresa}
               </div>
-              <h1 className="mt-6 font-display text-4xl md:text-6xl font-bold leading-[1.05]">
-                Conectamos <span className="text-gold">empresas, bancos</span> e trabalhadores a
+              <h1 className="mt-6 font-display text-4xl md:text-6xl font-bold leading-[1.05] animate-slide-up delay-100">
+                Conectamos <span className="text-gradient-gold">empresas, bancos</span> e trabalhadores a
                 imóveis de valor.
               </h1>
-              <p className="mt-6 max-w-xl text-lg text-primary-foreground/85 leading-relaxed">
+              <p className="mt-6 max-w-xl text-lg text-primary-foreground/85 leading-relaxed animate-slide-up delay-200">
                 {settings.tagline}. Criamos jornadas habitacionais com clareza, parceria e execução.
               </p>
-              <div className="mt-8 flex flex-wrap gap-3">
+              <div className="mt-8 flex flex-wrap gap-3 animate-slide-up delay-300">
                 <Link
                   to="/contactos"
-                  className="inline-flex items-center gap-2 rounded-md bg-gold px-6 py-3 text-sm font-semibold text-gold-foreground shadow-gold hover:brightness-95 transition"
+                  className="group inline-flex items-center gap-2 rounded-md bg-gold px-6 py-3 text-sm font-semibold text-gold-foreground shadow-gold hover:brightness-95 hover:-translate-y-0.5 hover:shadow-elegant transition-all duration-300"
                 >
-                  Solicitar orçamento <ArrowRight size={16} />
+                  Solicitar orçamento
+                  <ArrowRight size={16} className="transition-transform duration-300 group-hover:translate-x-1" />
                 </Link>
                 <Link
                   to="/servicos"
-                  className="inline-flex items-center gap-2 rounded-md border border-primary-foreground/30 bg-primary-foreground/10 px-6 py-3 text-sm font-semibold text-primary-foreground hover:bg-primary-foreground/15 transition"
+                  className="inline-flex items-center gap-2 rounded-md border border-primary-foreground/30 bg-primary-foreground/10 px-6 py-3 text-sm font-semibold text-primary-foreground hover:bg-primary-foreground/20 hover:border-gold/60 transition-all duration-300"
                 >
                   Ver serviços
                 </Link>
               </div>
             </div>
 
-            <div className="relative animate-appear">
-              <div className="absolute -right-12 top-0 hidden h-40 w-40 rounded-full bg-gold/20 blur-3xl lg:block" />
-              <div className="relative overflow-hidden rounded-[2rem] border border-gold/20 bg-primary/10 p-6 shadow-elegant backdrop-blur">
+            <div className="relative animate-slide-in-right delay-200">
+              <div className="absolute -right-12 top-0 hidden h-40 w-40 rounded-full bg-gold/25 blur-3xl lg:block animate-float-slow" />
+              <div className="relative overflow-hidden rounded-[2rem] border border-gold/25 bg-primary/20 p-6 shadow-elegant backdrop-blur-md">
                 <div className="text-xs font-semibold uppercase tracking-[0.24em] text-gold">
                   Como funciona
                 </div>
@@ -137,11 +142,12 @@ function HomePage() {
                   {PROCESSO.map((item, index) => (
                     <div
                       key={item.title}
-                      className="rounded-3xl border border-border bg-background/90 p-4 transition hover:-translate-y-1 hover:border-gold/50"
+                      className="rounded-3xl border border-border bg-background/95 p-4 hover-lift hover:border-gold/60 animate-slide-up"
+                      style={{ animationDelay: `${0.35 + index * 0.12}s` }}
                     >
                       <div className="flex items-center justify-between gap-4">
                         <span className="text-sm font-semibold text-primary">{item.title}</span>
-                        <div className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-gold/15 text-gold text-sm font-bold">
+                        <div className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-gold/20 text-gold text-sm font-bold ring-1 ring-gold/40">
                           {index + 1}
                         </div>
                       </div>
@@ -154,6 +160,7 @@ function HomePage() {
           </div>
         </div>
       </section>
+
 
       {/* STATS */}
       <section className="border-b border-border bg-secondary/40">
