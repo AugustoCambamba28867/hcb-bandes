@@ -208,10 +208,27 @@ interface AdminSession {
   loggedInAt: number;
 }
 
-export function adminLogin(password: string, rememberMe = false): boolean {
+export function adminLogin(arg1: string, arg2: string | boolean = false, arg3 = false): boolean {
+  // Backwards compatible: adminLogin(password, remember?) or adminLogin(username, password, remember?)
   if (!isBrowser()) return false;
-  const normalizedPassword = password.trim();
-  if (!ADMIN_PASSWORDS.includes(normalizedPassword)) return false;
+  let username = ADMIN_USERNAME;
+  let password = "";
+  let rememberMe = false;
+
+  if (typeof arg2 === "boolean") {
+    // signature: (password, remember?)
+    password = String(arg1 ?? "").trim();
+    rememberMe = Boolean(arg2);
+  } else {
+    // signature: (username, password, remember?)
+    username = String(arg1 ?? "").trim();
+    password = String(arg2 ?? "").trim();
+    rememberMe = Boolean(arg3);
+  }
+
+  if (username !== ADMIN_USERNAME) return false;
+  if (!ADMIN_PASSWORDS.includes(password)) return false;
+
   const now = Date.now();
   const session: AdminSession = {
     loggedInAt: now,

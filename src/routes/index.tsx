@@ -264,68 +264,94 @@ function HomePage() {
         <div className="absolute inset-0 bg-grid-primary opacity-30 pointer-events-none" />
         <div className="relative">
           <SectionHeader
-            eyebrow="Passo a passo"
-            title="Um processo claro para empresas, bancos e trabalhadores"
-            description="Cada etapa é pensada para reduzir riscos, acelerar decisões e garantir a melhor proposta habitacional."
+            eyebrow="Como funciona"
+            title="Como funciona"
           />
           <div className="mt-12 overflow-hidden rounded-[2rem] border border-border bg-card/90 p-4 shadow-elegant">
-            <Carousel
-              opts={{
-                loop: true,
-                align: "start",
-                skipSnaps: false,
-                slidesToScroll: 1,
-                containScroll: "trimSnaps",
-                speed: 12,
-              }}
-              className="relative"
-              setApi={setEmblaApi}
-            >
-              <CarouselContent className="flex gap-4 py-4 md:py-6">
-                {PROCESSO.map((item, index) => (
-                  <CarouselItem
-                    key={item.title}
-                    className={cn(
-                      "rounded-[2rem] bg-background p-6 transition-all duration-500",
-                      "min-w-full sm:min-w-[48%] md:min-w-[45%] lg:min-w-[32%]",
-                      index === activeIndex
-                        ? "border-gold/50 shadow-2xl ring-1 ring-gold/20 scale-[1.03]"
-                        : "border-border border-opacity-60 opacity-80 hover:-translate-y-2 hover:shadow-2xl hover:opacity-100",
-                    )}
-                  >
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="flex h-14 w-14 items-center justify-center rounded-3xl bg-gradient-to-br from-gold/30 to-accent/30 text-primary font-display text-2xl font-bold ring-1 ring-gold/40">
-                        {index + 1}
+            {/* Carousel for small screens */}
+            <div className="md:hidden">
+              <Carousel
+                opts={{
+                  loop: true,
+                  align: "start",
+                  skipSnaps: false,
+                  slidesToScroll: 1,
+                  containScroll: "trimSnaps",
+                  speed: 12,
+                }}
+                className="relative"
+                setApi={setEmblaApi}
+              >
+                <CarouselContent className="flex gap-4 py-4 md:py-6">
+                  {PROCESSO.map((item, index) => (
+                    <CarouselItem
+                      key={item.title}
+                      className={cn(
+                        "rounded-[2rem] bg-background p-6 transition-all duration-500",
+                        "min-w-full",
+                        index === activeIndex
+                          ? "border-gold/50 shadow-2xl ring-1 ring-gold/20 scale-[1.03]"
+                          : "border-border border-opacity-60 opacity-80 hover:-translate-y-2 hover:shadow-2xl hover:opacity-100",
+                      )}
+                    >
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex h-14 w-14 items-center justify-center rounded-3xl bg-gradient-to-br from-gold/30 to-accent/30 text-primary font-display text-2xl font-bold ring-1 ring-gold/40">
+                          {index + 1}
+                        </div>
+                        <div className="text-right text-xs uppercase tracking-[0.25em] text-muted-foreground">
+                          Etapa {index + 1}
+                        </div>
                       </div>
-                      <div className="text-right text-xs uppercase tracking-[0.25em] text-muted-foreground">
-                        Etapa {index + 1}
-                      </div>
-                    </div>
-                    <h3 className="mt-6 font-display text-2xl font-semibold text-primary">{item.title}</h3>
-                    <p className="mt-4 text-base leading-relaxed text-muted-foreground">
-                      {item.description}
-                    </p>
-                  </CarouselItem>
-                ))}
-              </CarouselContent>
+                      <h3 className="mt-6 font-display text-2xl font-semibold text-primary">{item.title}</h3>
+                      <p className="mt-4 text-base leading-relaxed text-muted-foreground">
+                        {item.description}
+                      </p>
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
 
-              <CarouselPrevious className="left-2 md:-left-12 top-1/2 -translate-y-1/2" aria-label="Slide anterior" />
-              <CarouselNext className="right-2 md:-right-12 top-1/2 -translate-y-1/2" aria-label="Próximo slide" />
-            </Carousel>
-            <div className="mt-6 flex items-center justify-center gap-2 md:gap-3">
-              {PROCESSO.map((_, index) => (
-                <button
-                  key={index}
-                  type="button"
-                  onClick={() => emblaApi?.scrollTo(index)}
+                <CarouselPrevious className="left-2 top-1/2 -translate-y-1/2" aria-label="Slide anterior" />
+                <CarouselNext className="right-2 top-1/2 -translate-y-1/2" aria-label="Próximo slide" />
+              </Carousel>
+              <div className="mt-6 flex items-center justify-center gap-2 md:gap-3">
+                {PROCESSO.map((_, index) => (
+                  <button
+                    key={index}
+                    type="button"
+                    onClick={() => emblaApi?.scrollTo(index)}
+                    className={cn(
+                      "h-3 rounded-full transition-all duration-300",
+                      index === activeIndex
+                        ? "bg-gold w-4 shadow-glow scale-110"
+                        : "bg-muted-foreground/40 hover:bg-primary w-3",
+                    )}
+                    aria-label={`Ir para etapa ${index + 1}`}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Grid for md+ screens */}
+            <div className="hidden md:grid md:grid-cols-3 gap-6">
+              {PROCESSO.map((item, index) => (
+                <div
+                  key={item.title}
                   className={cn(
-                    "h-3 rounded-full transition-all duration-300",
+                    "rounded-[1.5rem] bg-background p-6 transition-all duration-500",
                     index === activeIndex
-                      ? "bg-gold w-4 shadow-glow scale-110"
-                      : "bg-muted-foreground/40 hover:bg-primary w-3",
+                      ? "border-gold/50 shadow-2xl ring-1 ring-gold/20 scale-[1.01]"
+                      : "border-border border-opacity-60 hover:-translate-y-1 hover:shadow-md",
                   )}
-                  aria-label={`Ir para etapa ${index + 1}`}
-                />
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-3xl bg-gradient-to-br from-gold/25 to-accent/25 text-primary font-display text-xl font-bold ring-1 ring-gold/30">
+                      {index + 1}
+                    </div>
+                    <div className="text-right text-xs uppercase tracking-[0.25em] text-muted-foreground">Etapa {index + 1}</div>
+                  </div>
+                  <h3 className="mt-4 font-display text-xl font-semibold text-primary">{item.title}</h3>
+                  <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{item.description}</p>
+                </div>
               ))}
             </div>
           </div>

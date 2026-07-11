@@ -209,21 +209,26 @@ function LoginScreen({ onSuccess }: { onSuccess: () => void }) {
   function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
+    const username = String(fd.get("username") ?? "").trim();
     const password = String(fd.get("password") ?? "");
     const remember = fd.get("remember") === "on";
+    if (!username) {
+      setError("Indique o nome de utilizador.");
+      return;
+    }
     if (password.length < 4) {
       setError("Indique a palavra-passe.");
       return;
     }
     setLoading(true);
     setTimeout(() => {
-      const ok = adminLogin(password, remember);
+      const ok = adminLogin(username, password, remember);
       setLoading(false);
       if (ok) {
         toast.success("Bem-vindo ao painel");
         onSuccess();
       } else {
-        setError("Palavra-passe incorrecta.");
+        setError("Nome de utilizador ou palavra-passe incorrectos.");
       }
     }, 400);
   }
@@ -240,6 +245,18 @@ function LoginScreen({ onSuccess }: { onSuccess: () => void }) {
         </p>
 
         <form onSubmit={submit} className="mt-6 space-y-4">
+          <div>
+            <label htmlFor="username" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Utilizador
+            </label>
+            <input
+              id="username"
+              name="username"
+              type="text"
+              autoComplete="username"
+              className="mt-1.5 w-full rounded-md border border-input bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+            />
+          </div>
           <div>
             <label htmlFor="password" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Palavra-passe
