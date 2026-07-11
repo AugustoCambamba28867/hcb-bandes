@@ -345,9 +345,14 @@ function HomePage() {
                 "Acompanhamento em todas as fases",
               ],
             },
-          ].map((b) => (
-            <div key={b.title} className="rounded-xl border border-border bg-card p-7">
-              <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-gold/15 text-gold">
+          ].map((b, i) => (
+            <div
+              key={b.title}
+              className="group relative overflow-hidden rounded-xl border border-border bg-card p-7 hover-lift hover:border-gold/60 animate-slide-up"
+              style={{ animationDelay: `${i * 0.12}s` }}
+            >
+              <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-gold via-accent to-gold scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-500" />
+              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-gold/20 to-accent/20 text-primary transition-all duration-300 group-hover:from-gold group-hover:to-gold group-hover:text-gold-foreground group-hover:rotate-6">
                 <b.icon size={20} />
               </div>
               <h3 className="mt-5 font-display text-xl font-semibold text-primary">{b.title}</h3>
@@ -361,6 +366,7 @@ function HomePage() {
               </ul>
             </div>
           ))}
+
         </div>
       </Section>
 
