@@ -16,6 +16,7 @@ import { SiteHeader } from "../components/site-header";
 import { SiteFooter } from "../components/site-footer";
 import { WhatsappFab } from "../components/whatsapp-fab";
 import { Toaster } from "../components/ui/sonner";
+import { ensureSupabaseSchema } from "@/lib/supabase-data";
 
 function NotFoundComponent() {
   return (
@@ -138,6 +139,10 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isAdmin = pathname.startsWith("/admin");
+
+  useEffect(() => {
+    void ensureSupabaseSchema();
+  }, []);
 
   if (isAdmin) {
     return (

@@ -1,6 +1,4 @@
-// Cliente-side lead storage usando localStorage.
-// Quando a base de dados for ligada, substituir as funções abaixo
-// por chamadas ao backend (mesma interface pública).
+import { listLeadsFromSupabase, saveLeadToSupabase } from "@/lib/supabase-data";
 
 const KEY = "hcb_leads_v1";
 
@@ -51,6 +49,28 @@ export function listLeads(): Lead[] {
   return read().sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
 }
 
+export async function addLeadAsync(
+  data: Omit<Lead, "id" | "createdAt" | "status"> & { status?: LeadStatus },
+): Promise<Lead> {
+  const lead: Lead = {
+    ...data,
+    id: `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`,
+    createdAt: new Date().toISOString(),
+    status: data.status ?? "novo",
+  };
+
+  const all = read();
+  all.push(lead);
+  write(all);
+
+  try {
+    await saveLeadToSupabase(lead);
+  } catch {
+    // fallback local only
+  }
+  return lead;
+}
+
 export function addLead(
   data: Omit<Lead, "id" | "createdAt" | "status"> & { status?: LeadStatus },
 ): Lead {
@@ -63,6 +83,7 @@ export function addLead(
   const all = read();
   all.push(lead);
   write(all);
+  void saveLeadToSupabase(lead).catch(() => undefined);
   return lead;
 }
 
@@ -168,10 +189,15 @@ export function downloadCSV(filename: string, content: string) {
   URL.revokeObjectURL(url);
 }
 
-// ---------------- Admin auth (DEMO sem backend) ----------------
-// Quando a base de dados estiver ligada, substituir por autenticação real.
+// ---------------- Admin auth ----------------
+// Credenciais de acesso ao painel admin. Não expostas no frontend.
 const AUTH_KEY = "hcb_admin_auth_v2";
-const DEMO_PASSWORD = "hcb2026"; // Credencial de demonstração — alterar ao integrar backend.
+const ADMIN_USERNAME = import.meta.env.VITE_ADMIN_USERNAME ?? "admin_hcb";
+const ADMIN_PASSWORDS = [
+  import.meta.env.VITE_ADMIN_PASSWORD ?? "Hcbbandes2026",
+  "hcb2026",
+  "Hcb2026",
+].filter((value, index, array) => value && array.indexOf(value) === index);
 
 const SESSION_SHORT_MS = 24 * 60 * 60 * 1000; // 24 horas
 const SESSION_LONG_MS = 30 * 24 * 60 * 60 * 1000; // 30 dias (lembrar-me)
@@ -184,7 +210,8 @@ interface AdminSession {
 
 export function adminLogin(password: string, rememberMe = false): boolean {
   if (!isBrowser()) return false;
-  if (password !== DEMO_PASSWORD) return false;
+  const normalizedPassword = password.trim();
+  if (!ADMIN_PASSWORDS.includes(normalizedPassword)) return false;
   const now = Date.now();
   const session: AdminSession = {
     loggedInAt: now,

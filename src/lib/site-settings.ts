@@ -1,5 +1,4 @@
-// Definições do site geridas localmente pelo painel admin.
-// Quando o backend estiver ligado, mover para a base de dados.
+import { readSettings, saveSettingsToSupabase } from "@/lib/supabase-data";
 
 const KEY = "hcb_site_settings_v1";
 
@@ -31,6 +30,27 @@ function isBrowser() {
   return typeof window !== "undefined";
 }
 
+export async function getSettingsAsync(): Promise<SiteSettings> {
+  if (!isBrowser()) return DEFAULT_SETTINGS;
+  try {
+    const remote = await readSettings();
+    if (remote) {
+      window.localStorage.setItem(KEY, JSON.stringify(remote));
+      return remote;
+    }
+  } catch {
+    // fallback local
+  }
+
+  try {
+    const raw = window.localStorage.getItem(KEY);
+    if (!raw) return DEFAULT_SETTINGS;
+    return { ...DEFAULT_SETTINGS, ...JSON.parse(raw) };
+  } catch {
+    return DEFAULT_SETTINGS;
+  }
+}
+
 export function getSettings(): SiteSettings {
   if (!isBrowser()) return DEFAULT_SETTINGS;
   try {
@@ -42,9 +62,14 @@ export function getSettings(): SiteSettings {
   }
 }
 
-export function saveSettings(s: SiteSettings) {
+export async function saveSettings(s: SiteSettings) {
   if (!isBrowser()) return;
   window.localStorage.setItem(KEY, JSON.stringify(s));
+  try {
+    await saveSettingsToSupabase(s);
+  } catch {
+    // ignore and keep local fallback
+  }
   window.dispatchEvent(new Event("hcb_settings_changed"));
 }
 
