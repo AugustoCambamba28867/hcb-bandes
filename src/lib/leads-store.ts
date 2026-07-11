@@ -51,7 +51,9 @@ export function listLeads(): Lead[] {
   return read().sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
 }
 
-export function addLead(data: Omit<Lead, "id" | "createdAt" | "status"> & { status?: LeadStatus }): Lead {
+export function addLead(
+  data: Omit<Lead, "id" | "createdAt" | "status"> & { status?: LeadStatus },
+): Lead {
   const lead: Lead = {
     ...data,
     id: `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`,
@@ -62,6 +64,29 @@ export function addLead(data: Omit<Lead, "id" | "createdAt" | "status"> & { stat
   all.push(lead);
   write(all);
   return lead;
+}
+
+export const SUPPORT_WHATSAPP_NUMBER = "+244935105538";
+
+export function buildWhatsAppUrl(message: string, phone: string = SUPPORT_WHATSAPP_NUMBER) {
+  const digits = phone.replace(/\D+/g, "");
+  const encoded = encodeURIComponent(message.trim().replace(/\s+/g, " "));
+  return `https://wa.me/${digits}?text=${encoded}`;
+}
+
+export function formatLeadWhatsAppText(
+  lead: Pick<Lead, "nome" | "empresa" | "perfil" | "mensagem">,
+) {
+  const company = lead.empresa?.trim();
+  const companySegment = company ? ` da ${company}` : "";
+  const perfilSegment = lead.perfil ? `Sou ${lead.perfil}. ` : "";
+  const message = lead.mensagem.trim();
+
+  return `Olá HCB-BANDES, sou ${lead.nome}${companySegment}. ${perfilSegment}Gostaria de solicitar um orçamento e deixo a seguinte mensagem: ${message}`;
+}
+
+export function buildLeadWhatsAppUrl(lead: Pick<Lead, "nome" | "empresa" | "perfil" | "mensagem">) {
+  return buildWhatsAppUrl(formatLeadWhatsAppText(lead));
 }
 
 export function updateLeadStatus(id: string, status: LeadStatus) {

@@ -4,7 +4,8 @@ import { Mail, Phone, MapPin, MessageCircle, Send, AlertCircle } from "lucide-re
 import { toast } from "sonner";
 import { PageHero, Section } from "@/components/section";
 import { contactSchema } from "@/lib/validation";
-import { addLead } from "@/lib/leads-store";
+import { addLead, buildWhatsAppUrl, formatLeadWhatsAppText } from "@/lib/leads-store";
+import { getSettings } from "@/lib/site-settings";
 
 export const Route = createFileRoute("/contactos")({
   head: () => ({
@@ -34,12 +35,19 @@ const PERFIS = [
   "Outro",
 ] as const;
 
-type Errors = Partial<Record<"nome" | "empresa" | "email" | "telefone" | "perfil" | "mensagem", string>>;
+type Errors = Partial<
+  Record<"nome" | "empresa" | "email" | "telefone" | "perfil" | "mensagem", string>
+>;
 
 function ContactosPage() {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Errors>({});
   const [mensagemLen, setMensagemLen] = useState(0);
+  const settings = getSettings();
+  const quickWhatsAppLink = buildWhatsAppUrl(
+    "Olá HCB-BANDES, gostaria de solicitar um orçamento e saber como podemos avançar.",
+    settings.whatsapp,
+  );
 
   function validateField(name: string, value: string, all: Record<string, string>) {
     const result = contactSchema.safeParse({ ...all, [name]: value });
@@ -75,68 +83,102 @@ function ContactosPage() {
     }
 
     setLoading(true);
-    setTimeout(() => {
-      addLead({
-        nome: result.data.nome,
-        email: result.data.email,
-        telefone: result.data.telefone || undefined,
-        empresa: result.data.empresa || undefined,
-        perfil: result.data.perfil,
-        mensagem: result.data.mensagem,
-      });
-      setLoading(false);
-      setErrors({});
-      setMensagemLen(0);
-      form.reset();
-      toast.success("Mensagem enviada com sucesso", {
-        description: "A nossa equipa entrará em contacto em breve.",
-      });
-    }, 500);
+    const lead = addLead({
+      nome: result.data.nome,
+      email: result.data.email,
+      telefone: result.data.telefone || undefined,
+      empresa: result.data.empresa || undefined,
+      perfil: result.data.perfil,
+      mensagem: result.data.mensagem,
+    });
+
+    const whatsappText = formatLeadWhatsAppText(lead);
+    const whatsappUrl = buildWhatsAppUrl(whatsappText, settings.whatsapp);
+    window.open(whatsappUrl, "_blank", "noopener,noreferrer");
+
+    setLoading(false);
+    setErrors({});
+    setMensagemLen(0);
+    form.reset();
+    toast.success("Pedido enviado com sucesso", {
+      description: "A sua mensagem foi guardada e o WhatsApp será aberto com o seu pedido.",
+    });
   }
 
   return (
     <>
       <PageHero
-        eyebrow="Contactos"
-        title="Vamos conversar sobre o seu projecto habitacional."
-        subtitle="Preencha o formulário, envie um e-mail ou fale connosco directamente pelo WhatsApp."
+        eyebrow="Contactos & Orçamento"
+        title="Solicite o seu orçamento e abra um chat direto no WhatsApp."
+        subtitle="A nossa equipa recebe o seu pedido imediatamente e prepara uma proposta com base nas suas necessidades."
       />
 
       <Section>
-        <div className="grid gap-10 lg:grid-cols-[1fr_1.2fr] lg:gap-16">
-          <div>
-            <h2 className="font-display text-2xl font-bold text-primary">Falar connosco</h2>
-            <p className="mt-3 text-muted-foreground">
-              Estamos disponíveis para reuniões presenciais ou videoconferência.
-            </p>
-
-            <div className="mt-8 space-y-5">
-              {[
-                { icon: MapPin, label: "Escritório", value: "Luanda, Angola" },
-                { icon: Phone, label: "Telefone", value: "+244 935 105 538" },
-                { icon: Mail, label: "E-mail", value: "geral@hcb-bandes.com" },
-                { icon: MessageCircle, label: "WhatsApp", value: "+244 935 105 538" },
-              ].map((c) => (
-                <div key={c.label} className="flex items-start gap-4">
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-gold/15 text-gold">
-                    <c.icon size={20} />
-                  </div>
-                  <div className="min-w-0">
-                    <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{c.label}</div>
-                    <div className="text-base font-medium text-foreground break-words">{c.value}</div>
-                  </div>
-                </div>
-              ))}
+        <div className="grid gap-10 lg:grid-cols-[1.05fr_1fr] lg:gap-16">
+          <div className="space-y-8 animate-appear">
+            <div className="rounded-[2rem] border border-gold/20 bg-secondary/70 p-6 shadow-elegant">
+              <div className="text-xs font-semibold uppercase tracking-[0.22em] text-gold">
+                Orçamento imediato
+              </div>
+              <h2 className="mt-3 font-display text-3xl font-bold text-primary">
+                Faça já o seu pedido e fale com a equipa pelo WhatsApp.
+              </h2>
+              <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
+                Guardamos o seu pedido no sistema de leads e abrimos automaticamente o chat com a
+                mensagem preparada.
+              </p>
+              <div className="mt-6 space-y-3 text-sm text-foreground/90">
+                <p>✔ Formulário simples com validação em tempo real.</p>
+                <p>✔ Mensagem automática disponível no painel admin.</p>
+                <p>✔ Conversa direta com o número da empresa.</p>
+              </div>
+              <a
+                href={quickWhatsAppLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-6 inline-flex items-center gap-2 rounded-md bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition"
+              >
+                <MessageCircle size={16} /> Enviar pedido pelo WhatsApp
+              </a>
             </div>
 
-            <a
-              href="https://wa.me/244935105538"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-8 inline-flex items-center gap-2 rounded-md bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition"
-            >
-              <MessageCircle size={16} /> Abrir WhatsApp
-            </a>
+            <div className="rounded-3xl border border-border bg-card p-6 shadow-elegant">
+              <h3 className="font-display text-xl font-semibold text-primary">Dados de contacto</h3>
+              <div className="mt-6 space-y-5">
+                {[
+                  {
+                    icon: MapPin,
+                    label: "Escritório",
+                    value: settings.endereco || "Luanda, Angola",
+                  },
+                  {
+                    icon: Phone,
+                    label: "Telefone",
+                    value: settings.telefone || "+244 935 105 538",
+                  },
+                  { icon: Mail, label: "E-mail", value: settings.email || "geral@hcb-bandes.com" },
+                  {
+                    icon: MessageCircle,
+                    label: "WhatsApp",
+                    value: settings.whatsapp || "+244 935 105 538",
+                  },
+                ].map((c) => (
+                  <div key={c.label} className="flex items-start gap-4">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-gold/15 text-gold">
+                      <c.icon size={20} />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                        {c.label}
+                      </div>
+                      <div className="text-base font-medium text-foreground break-words">
+                        {c.value}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
 
           <form
@@ -186,7 +228,10 @@ function ContactosPage() {
             </div>
 
             <div className="mt-4">
-              <label htmlFor="perfil" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <label
+                htmlFor="perfil"
+                className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+              >
                 Sou <span className="text-gold">*</span>
               </label>
               <select
@@ -197,18 +242,27 @@ function ContactosPage() {
                 aria-describedby={errors.perfil ? "perfil-error" : undefined}
                 className={`mt-1.5 w-full rounded-md border bg-background px-3 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring ${errors.perfil ? "border-destructive" : "border-input"}`}
               >
-                <option value="" disabled>Seleccione uma opção…</option>
-                {PERFIS.map((p) => <option key={p}>{p}</option>)}
+                <option value="" disabled>
+                  Seleccione uma opção…
+                </option>
+                {PERFIS.map((p) => (
+                  <option key={p}>{p}</option>
+                ))}
               </select>
               {errors.perfil && <FieldError id="perfil-error" msg={errors.perfil} />}
             </div>
 
             <div className="mt-4">
               <div className="flex items-baseline justify-between">
-                <label htmlFor="mensagem" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                <label
+                  htmlFor="mensagem"
+                  className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                >
                   Mensagem <span className="text-gold">*</span>
                 </label>
-                <span className={`text-[11px] tabular-nums ${mensagemLen > 1000 ? "text-destructive" : "text-muted-foreground"}`}>
+                <span
+                  className={`text-[11px] tabular-nums ${mensagemLen > 1000 ? "text-destructive" : "text-muted-foreground"}`}
+                >
                   {mensagemLen}/1000
                 </span>
               </div>
@@ -236,7 +290,13 @@ function ContactosPage() {
               disabled={loading}
               className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-md bg-gold px-5 py-3 text-sm font-semibold text-gold-foreground shadow-gold hover:brightness-95 transition disabled:opacity-60"
             >
-              {loading ? "A enviar…" : (<><Send size={16} /> Enviar mensagem</>)}
+              {loading ? (
+                "A enviar…"
+              ) : (
+                <>
+                  <Send size={16} /> Solicitar orçamento
+                </>
+              )}
             </button>
             <p className="mt-3 text-xs text-muted-foreground">
               Ao enviar, concorda em ser contactado pela equipa HCB-BANDES.
@@ -269,7 +329,10 @@ function Field({
 }) {
   return (
     <div>
-      <label htmlFor={name} className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+      <label
+        htmlFor={name}
+        className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+      >
         {label} {required && <span className="text-gold">*</span>}
       </label>
       <input

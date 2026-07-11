@@ -14,6 +14,7 @@ import heroImg from "@/assets/hero-building.jpg";
 import familyImg from "@/assets/family-keys.jpg";
 import partnershipImg from "@/assets/partnership.jpg";
 import { Section, SectionHeader } from "@/components/section";
+import { getSettings } from "@/lib/site-settings";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -61,7 +62,27 @@ const SERVICOS = [
   },
 ];
 
+const PROCESSO = [
+  {
+    title: "Diagnóstico rápido",
+    description: "Mapeamos o seu perfil, a empresa e os requisitos do crédito habitacional.",
+  },
+  {
+    title: "Conexão com parceiros",
+    description: "Articulamos empresas, bancos e promotores para encontrar a solução ideal.",
+  },
+  {
+    title: "Proposta transparente",
+    description: "Apresentamos uma oferta clara, com custos e cronograma definidos.",
+  },
+  {
+    title: "Acompanhamento contínuo",
+    description: "Acompanhamos cada etapa até à entrega das chaves.",
+  },
+];
+
 function HomePage() {
+  const settings = getSettings();
   return (
     <>
       {/* HERO */}
@@ -77,32 +98,58 @@ function HomePage() {
           <div className="absolute inset-0 bg-gradient-to-r from-primary/95 via-primary/80 to-primary/40" />
         </div>
 
-        <div className="container-page relative py-28 md:py-40">
-          <div className="max-w-2xl text-primary-foreground">
-            <div className="inline-flex items-center gap-2 rounded-full border border-gold/40 bg-primary/40 px-3 py-1 text-xs font-medium uppercase tracking-[0.2em] text-gold backdrop-blur">
-              <Sparkles size={12} /> Habitação Corporativa
+        <div className="container-page relative py-24 md:py-32">
+          <div className="grid gap-12 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
+            <div className="max-w-2xl text-primary-foreground animate-appear">
+              <div className="inline-flex items-center gap-2 rounded-full border border-gold/40 bg-primary/40 px-4 py-1 text-xs font-medium uppercase tracking-[0.2em] text-gold backdrop-blur">
+                <Sparkles size={12} /> {settings.empresa}
+              </div>
+              <h1 className="mt-6 font-display text-4xl md:text-6xl font-bold leading-[1.05]">
+                Conectamos <span className="text-gold">empresas, bancos</span> e trabalhadores a
+                imóveis de valor.
+              </h1>
+              <p className="mt-6 max-w-xl text-lg text-primary-foreground/85 leading-relaxed">
+                {settings.tagline}. Criamos jornadas habitacionais com clareza, parceria e execução.
+              </p>
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Link
+                  to="/contactos"
+                  className="inline-flex items-center gap-2 rounded-md bg-gold px-6 py-3 text-sm font-semibold text-gold-foreground shadow-gold hover:brightness-95 transition"
+                >
+                  Solicitar orçamento <ArrowRight size={16} />
+                </Link>
+                <Link
+                  to="/servicos"
+                  className="inline-flex items-center gap-2 rounded-md border border-primary-foreground/30 bg-primary-foreground/10 px-6 py-3 text-sm font-semibold text-primary-foreground hover:bg-primary-foreground/15 transition"
+                >
+                  Ver serviços
+                </Link>
+              </div>
             </div>
-            <h1 className="mt-6 font-display text-4xl md:text-6xl font-bold leading-[1.05]">
-              Conectamos pessoas, empresas, <span className="text-gold">bancos</span> e imóveis.
-            </h1>
-            <p className="mt-6 text-lg text-primary-foreground/85 leading-relaxed">
-              A HCB-BANDES facilita o acesso à habitação para trabalhadores angolanos através
-              de parcerias estratégicas com empresas, instituições financeiras e promotores
-              imobiliários.
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link
-                to="/contactos"
-                className="inline-flex items-center gap-2 rounded-md bg-gold px-6 py-3 text-sm font-semibold text-gold-foreground shadow-gold hover:brightness-95 transition"
-              >
-                Sou Empresa — Quero ser parceiro <ArrowRight size={16} />
-              </Link>
-              <Link
-                to="/servicos"
-                className="inline-flex items-center gap-2 rounded-md border border-primary-foreground/30 bg-primary-foreground/10 px-6 py-3 text-sm font-semibold text-primary-foreground hover:bg-primary-foreground/15 backdrop-blur transition"
-              >
-                Sou Trabalhador
-              </Link>
+
+            <div className="relative animate-appear">
+              <div className="absolute -right-12 top-0 hidden h-40 w-40 rounded-full bg-gold/20 blur-3xl lg:block" />
+              <div className="relative overflow-hidden rounded-[2rem] border border-gold/20 bg-primary/10 p-6 shadow-elegant backdrop-blur">
+                <div className="text-xs font-semibold uppercase tracking-[0.24em] text-gold">
+                  Como funciona
+                </div>
+                <div className="mt-6 space-y-4">
+                  {PROCESSO.map((item, index) => (
+                    <div
+                      key={item.title}
+                      className="rounded-3xl border border-border bg-background/90 p-4 transition hover:-translate-y-1 hover:border-gold/50"
+                    >
+                      <div className="flex items-center justify-between gap-4">
+                        <span className="text-sm font-semibold text-primary">{item.title}</span>
+                        <div className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-gold/15 text-gold text-sm font-bold">
+                          {index + 1}
+                        </div>
+                      </div>
+                      <p className="mt-2 text-sm text-muted-foreground">{item.description}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -156,6 +203,36 @@ function HomePage() {
         </div>
       </Section>
 
+      {/* PROCESSO */}
+      <Section className="bg-[radial-gradient(circle_at_top_left,_rgba(201,162,39,0.12),_transparent_40%),_rgba(255,255,255,0.5)]">
+        <SectionHeader
+          eyebrow="Passo a passo"
+          title="Um processo claro para empresas, bancos e trabalhadores"
+          description="Cada etapa é pensada para reduzir riscos, acelerar decisões e garantir a melhor proposta habitacional."
+        />
+        <div className="mt-12 grid gap-6 md:grid-cols-2">
+          {PROCESSO.map((item, index) => (
+            <div
+              key={item.title}
+              className="group rounded-3xl border border-border bg-card p-6 shadow-elegant transition hover:-translate-y-1 hover:border-gold/60"
+            >
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gold/15 text-gold font-semibold">
+                  {index + 1}
+                </div>
+                <div className="text-right text-xs uppercase tracking-[0.25em] text-muted-foreground">
+                  Etapa {index + 1}
+                </div>
+              </div>
+              <h3 className="mt-5 font-display text-xl font-semibold text-primary">{item.title}</h3>
+              <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+                {item.description}
+              </p>
+            </div>
+          ))}
+        </div>
+      </Section>
+
       {/* ECOSSISTEMA */}
       <section className="bg-primary text-primary-foreground">
         <div className="container-page grid gap-12 py-20 md:py-28 lg:grid-cols-2 lg:items-center">
@@ -167,9 +244,8 @@ function HomePage() {
               Um modelo que une quatro actores num só propósito.
             </h2>
             <p className="mt-4 text-primary-foreground/80 leading-relaxed">
-              Promotores, empresas empregadoras, bancos e trabalhadores: cada peça encaixa para
-              que a habitação deixe de ser um sonho distante e se torne uma realidade
-              sustentável.
+              Promotores, empresas empregadoras, bancos e trabalhadores: cada peça encaixa para que
+              a habitação deixe de ser um sonho distante e se torne uma realidade sustentável.
             </p>
             <ul className="mt-8 space-y-3">
               {[
@@ -274,8 +350,8 @@ function HomePage() {
               Pronto para transformar habitação num benefício real?
             </h2>
             <p className="mt-4 text-primary-foreground/85">
-              Marque uma reunião com a nossa equipa e descubra como integrar a HCB-BANDES no
-              pacote de benefícios da sua empresa.
+              Marque uma reunião com a nossa equipa e descubra como integrar a HCB-BANDES no pacote
+              de benefícios da sua empresa.
             </p>
             <Link
               to="/contactos"

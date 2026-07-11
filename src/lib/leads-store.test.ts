@@ -10,6 +10,8 @@ import {
   deleteLead,
   clearLeads,
   exportLeadsCSV,
+  buildWhatsAppUrl,
+  formatLeadWhatsAppText,
 } from "@/lib/leads-store";
 
 beforeEach(() => {
@@ -112,5 +114,14 @@ describe("leads store", () => {
     addLead({ ...sample, mensagem: 'Ele disse "olá" hoje.' });
     const csv = exportLeadsCSV(listLeads());
     expect(csv).toContain('""olá""');
+  });
+
+  it("builds a WhatsApp URL with encoded lead message", () => {
+    const lead = addLead(sample);
+    const text = formatLeadWhatsAppText(lead);
+    const url = buildWhatsAppUrl(text, "+244935105538");
+    expect(url).toContain("https://wa.me/244935105538?text=");
+    expect(decodeURIComponent(url.split("?text=")[1])).toContain("Olá HCB-BANDES");
+    expect(decodeURIComponent(url.split("?text=")[1])).toContain("Mensagem de teste");
   });
 });

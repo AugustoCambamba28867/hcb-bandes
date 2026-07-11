@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Download, Search, Trash2, Mail, Phone, X } from "lucide-react";
+import { Download, Search, Trash2, Mail, Phone, X, MessageSquare } from "lucide-react";
 import { toast } from "sonner";
 import {
   listLeads,
@@ -8,6 +8,8 @@ import {
   deleteLead,
   exportLeadsCSV,
   downloadCSV,
+  formatLeadWhatsAppText,
+  buildWhatsAppUrl,
   type Lead,
   type LeadStatus,
 } from "@/lib/leads-store";
@@ -27,7 +29,8 @@ const STATUS_LABELS: Record<LeadStatus, string> = {
 const STATUS_STYLES: Record<LeadStatus, string> = {
   novo: "bg-gold/15 text-gold border-gold/30",
   em_contacto: "bg-primary/10 text-primary border-primary/20",
-  qualificado: "bg-[oklch(0.62_0.17_150)]/15 text-[oklch(0.45_0.15_150)] border-[oklch(0.62_0.17_150)]/30",
+  qualificado:
+    "bg-[oklch(0.62_0.17_150)]/15 text-[oklch(0.45_0.15_150)] border-[oklch(0.62_0.17_150)]/30",
   fechado: "bg-primary text-primary-foreground border-primary",
   descartado: "bg-muted text-muted-foreground border-border",
 };
@@ -94,21 +97,26 @@ function LeadsPage() {
         <div className="min-w-0">
           <h1 className="font-display text-2xl sm:text-3xl font-bold text-primary">Leads</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            {filtered.length} {filtered.length === 1 ? "resultado" : "resultados"} de {leads.length}.
+            {filtered.length} {filtered.length === 1 ? "resultado" : "resultados"} de {leads.length}
+            .
           </p>
         </div>
         <button
           onClick={exportarCSV}
           className="inline-flex shrink-0 items-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition"
         >
-          <Download size={14} /> <span className="hidden sm:inline">Exportar CSV</span><span className="sm:hidden">CSV</span>
+          <Download size={14} /> <span className="hidden sm:inline">Exportar CSV</span>
+          <span className="sm:hidden">CSV</span>
         </button>
       </header>
 
       {/* filtros */}
       <div className="grid gap-3 sm:grid-cols-[1fr_auto_auto]">
         <div className="relative">
-          <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <Search
+            size={14}
+            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+          />
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
@@ -123,7 +131,9 @@ function LeadsPage() {
         >
           <option value="todos">Todos os estados</option>
           {Object.entries(STATUS_LABELS).map(([v, l]) => (
-            <option key={v} value={v}>{l}</option>
+            <option key={v} value={v}>
+              {l}
+            </option>
           ))}
         </select>
         <select
@@ -132,7 +142,11 @@ function LeadsPage() {
           className="rounded-md border border-input bg-card px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
         >
           <option value="todos">Todos os perfis</option>
-          {perfis.map((p) => <option key={p} value={p}>{p}</option>)}
+          {perfis.map((p) => (
+            <option key={p} value={p}>
+              {p}
+            </option>
+          ))}
         </select>
       </div>
 
@@ -162,10 +176,7 @@ function LeadsPage() {
                   {filtered.map((l) => (
                     <tr key={l.id} className="hover:bg-secondary/40">
                       <td className="px-4 py-3">
-                        <button
-                          onClick={() => setSelected(l)}
-                          className="text-left"
-                        >
+                        <button onClick={() => setSelected(l)} className="text-left">
                           <div className="font-medium text-foreground">{l.nome}</div>
                           <div className="text-xs text-muted-foreground">{l.email}</div>
                         </button>
@@ -178,7 +189,9 @@ function LeadsPage() {
                           className={`rounded-md border px-2 py-1 text-xs font-medium ${STATUS_STYLES[l.status]}`}
                         >
                           {Object.entries(STATUS_LABELS).map(([v, lbl]) => (
-                            <option key={v} value={v}>{lbl}</option>
+                            <option key={v} value={v}>
+                              {lbl}
+                            </option>
                           ))}
                         </select>
                       </td>
@@ -186,13 +199,22 @@ function LeadsPage() {
                         {new Date(l.createdAt).toLocaleDateString("pt-PT")}
                       </td>
                       <td className="px-4 py-3 text-right">
-                        <button
-                          onClick={() => remove(l.id)}
-                          aria-label="Eliminar"
-                          className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-                        >
-                          <Trash2 size={14} />
-                        </button>
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            onClick={() => setSelected(l)}
+                            aria-label="Ver detalhes"
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-secondary/10 hover:text-primary"
+                          >
+                            <MessageSquare size={14} />
+                          </button>
+                          <button
+                            onClick={() => remove(l.id)}
+                            aria-label="Eliminar"
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -210,7 +232,9 @@ function LeadsPage() {
                     <div className="font-medium text-foreground truncate">{l.nome}</div>
                     <div className="text-xs text-muted-foreground truncate">{l.email}</div>
                   </button>
-                  <span className={`shrink-0 rounded-md border px-2 py-0.5 text-[10px] font-medium ${STATUS_STYLES[l.status]}`}>
+                  <span
+                    className={`shrink-0 rounded-md border px-2 py-0.5 text-[10px] font-medium ${STATUS_STYLES[l.status]}`}
+                  >
                     {STATUS_LABELS[l.status]}
                   </span>
                 </div>
@@ -224,7 +248,9 @@ function LeadsPage() {
                     className="rounded-md border border-input bg-background px-2 py-1 text-xs"
                   >
                     {Object.entries(STATUS_LABELS).map(([v, lbl]) => (
-                      <option key={v} value={v}>{lbl}</option>
+                      <option key={v} value={v}>
+                        {lbl}
+                      </option>
                     ))}
                   </select>
                   <button
@@ -241,7 +267,14 @@ function LeadsPage() {
       )}
 
       {/* detail drawer */}
-      {selected && <LeadDrawer lead={selected} onClose={() => setSelected(null)} onChangeStatus={changeStatus} onDelete={remove} />}
+      {selected && (
+        <LeadDrawer
+          lead={selected}
+          onClose={() => setSelected(null)}
+          onChangeStatus={changeStatus}
+          onDelete={remove}
+        />
+      )}
     </div>
   );
 }
@@ -257,13 +290,20 @@ function LeadDrawer({
   onChangeStatus: (id: string, s: LeadStatus) => void;
   onDelete: (id: string) => void;
 }) {
+  const whatsappText = formatLeadWhatsAppText(lead);
+  const whatsappUrl = buildWhatsAppUrl(whatsappText);
+
   return (
     <div className="fixed inset-0 z-50 flex">
       <div className="absolute inset-0 bg-foreground/40" onClick={onClose} />
       <aside className="relative ml-auto h-full w-full max-w-md overflow-y-auto bg-card shadow-elegant">
         <header className="sticky top-0 flex items-center justify-between border-b border-border bg-card px-5 py-4">
           <h2 className="font-display text-lg font-bold text-primary">Detalhes do lead</h2>
-          <button onClick={onClose} aria-label="Fechar" className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-secondary">
+          <button
+            onClick={onClose}
+            aria-label="Fechar"
+            className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-secondary"
+          >
             <X size={16} />
           </button>
         </header>
@@ -273,12 +313,18 @@ function LeadDrawer({
             <div className="mt-1 font-medium text-foreground">{lead.nome}</div>
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <a href={`mailto:${lead.email}`} className="rounded-md border border-border bg-secondary/40 p-3 text-xs text-foreground hover:border-gold">
+            <a
+              href={`mailto:${lead.email}`}
+              className="rounded-md border border-border bg-secondary/40 p-3 text-xs text-foreground hover:border-gold"
+            >
               <Mail size={14} className="text-gold" />
               <div className="mt-1.5 break-all">{lead.email}</div>
             </a>
             {lead.telefone ? (
-              <a href={`tel:${lead.telefone}`} className="rounded-md border border-border bg-secondary/40 p-3 text-xs text-foreground hover:border-gold">
+              <a
+                href={`tel:${lead.telefone}`}
+                className="rounded-md border border-border bg-secondary/40 p-3 text-xs text-foreground hover:border-gold"
+              >
                 <Phone size={14} className="text-gold" />
                 <div className="mt-1.5 break-all">{lead.telefone}</div>
               </a>
@@ -304,6 +350,20 @@ function LeadDrawer({
               {lead.mensagem}
             </p>
           </div>
+          <div className="rounded-2xl border border-border bg-secondary/40 p-4">
+            <div className="text-xs uppercase tracking-wider text-muted-foreground">
+              Mensagem automática para WhatsApp
+            </div>
+            <p className="mt-2 whitespace-pre-wrap text-sm text-foreground/90">{whatsappText}</p>
+            <a
+              href={whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-4 inline-flex w-full items-center justify-center rounded-md bg-gold px-4 py-2 text-sm font-semibold text-gold-foreground hover:brightness-95 transition"
+            >
+              Abrir WhatsApp com mensagem
+            </a>
+          </div>
           <div>
             <div className="text-xs uppercase tracking-wider text-muted-foreground">Estado</div>
             <select
@@ -312,7 +372,9 @@ function LeadDrawer({
               className={`mt-1.5 w-full rounded-md border px-3 py-2 text-sm font-medium ${STATUS_STYLES[lead.status]}`}
             >
               {Object.entries(STATUS_LABELS).map(([v, l]) => (
-                <option key={v} value={v}>{l}</option>
+                <option key={v} value={v}>
+                  {l}
+                </option>
               ))}
             </select>
           </div>

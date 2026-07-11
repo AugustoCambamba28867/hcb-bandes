@@ -48,10 +48,10 @@
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.18 0.03 142);
 
-  --primary: oklch(0.31 0.06 142);              /* deep green */
+  --primary: oklch(0.31 0.06 142); /* deep green */
   --primary-foreground: oklch(0.985 0.005 100);
 
-  --gold: oklch(0.72 0.14 82);                   /* dourado */
+  --gold: oklch(0.72 0.14 82); /* dourado */
   --gold-foreground: oklch(0.2 0.04 80);
 
   --secondary: oklch(0.96 0.01 130);
@@ -60,7 +60,7 @@
   --muted: oklch(0.96 0.008 130);
   --muted-foreground: oklch(0.48 0.02 142);
 
-  --accent: oklch(0.94 0.04 90);                 /* soft gold tint */
+  --accent: oklch(0.94 0.04 90); /* soft gold tint */
   --accent-foreground: oklch(0.25 0.05 90);
 
   --destructive: oklch(0.58 0.22 27);
@@ -105,7 +105,10 @@
     font-family: var(--font-sans);
     font-feature-settings: "ss01", "cv11";
   }
-  h1, h2, h3, h4 {
+  h1,
+  h2,
+  h3,
+  h4 {
     font-family: var(--font-display);
     letter-spacing: -0.01em;
   }
@@ -129,3 +132,51 @@
 @utility text-gold {
   color: var(--color-gold);
 }
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes appear {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@layer utilities {
+  .animate-float-slow {
+    animation: float 10s ease-in-out infinite;
+  }
+
+  .animate-appear {
+    opacity: 0;
+    animation: appear 0.9s ease forwards;
+  }
+}
+
+/* ===================================================
+   🚫 REMOVER MARCAS D'ÁGUA LOVABLE
+   =================================================== */
+ a[href*="lovable.dev"],
+ a[href="lovable.dev"],
+ iframe[src*="lovable.dev"],
+ div[style*="Edit with lovable"],
+ .lovable-badge {
+   display: none !important;
+   opacity: 0 !important;
+   visibility: hidden !important;
+   pointer-events: none !important;
+   position: absolute !important;
+   z-index: -9999 !important;
+ }

@@ -1,9 +1,17 @@
 import { MessageCircle } from "lucide-react";
+import { getSettings } from "@/lib/site-settings";
+import { buildWhatsAppUrl } from "@/lib/leads-store";
 
 export function WhatsappFab() {
+  const settings = getSettings();
+  const href = buildWhatsAppUrl(
+    "Olá HCB-BANDES, gostaria de receber mais informações sobre a sua solução habitacional.",
+    settings.whatsapp,
+  );
+
   return (
     <a
-      href="https://wa.me/244935105538?text=Olá%20HCB-BANDES%2C%20gostaria%20de%20mais%20informações."
+      href={href}
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Falar no WhatsApp"
