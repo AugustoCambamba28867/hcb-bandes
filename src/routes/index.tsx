@@ -400,8 +400,9 @@ function HomePage() {
               <ArrowRight size={16} className="transition-transform duration-300 group-hover:translate-x-1" />
             </Link>
           </div>
-
+        </div>
       </section>
+
     </>
   );
 }
