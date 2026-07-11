@@ -163,21 +163,28 @@ function HomePage() {
 
 
       {/* STATS */}
-      <section className="border-b border-border bg-secondary/40">
-        <div className="container-page grid gap-8 py-12 md:grid-cols-4">
+      <section className="border-b border-border bg-gradient-to-r from-secondary/60 via-background to-secondary/60">
+        <div className="container-page grid gap-8 py-14 md:grid-cols-4">
           {[
             { k: "4", v: "Actores conectados" },
             { k: "7", v: "Etapas do nosso modelo" },
             { k: "100%", v: "Transparência no processo" },
             { k: "AO", v: "Cobertura nacional" },
-          ].map((s) => (
-            <div key={s.v} className="text-center md:text-left">
-              <div className="font-display text-4xl font-bold text-primary">{s.k}</div>
+          ].map((s, i) => (
+            <div
+              key={s.v}
+              className="text-center md:text-left animate-slide-up hover-lift rounded-xl px-2 py-1"
+              style={{ animationDelay: `${i * 0.1}s` }}
+            >
+              <div className="font-display text-4xl md:text-5xl font-bold text-primary tabular-nums">
+                {s.k}
+              </div>
               <div className="mt-1 text-sm text-muted-foreground">{s.v}</div>
             </div>
           ))}
         </div>
       </section>
+
 
       {/* SERVIÇOS */}
       <Section>
