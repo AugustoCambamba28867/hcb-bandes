@@ -257,14 +257,17 @@ function HomePage() {
 
 
       {/* ECOSSISTEMA */}
-      <section className="bg-primary text-primary-foreground">
-        <div className="container-page grid gap-12 py-20 md:py-28 lg:grid-cols-2 lg:items-center">
-          <div>
+      <section className="relative overflow-hidden bg-gradient-to-br from-primary via-primary to-[oklch(0.32_0.09_145)] text-primary-foreground animate-gradient">
+        <div className="absolute inset-0 bg-grid-primary opacity-30 pointer-events-none" />
+        <div className="absolute -top-40 -left-32 h-96 w-96 rounded-full bg-gold/15 blur-3xl animate-blob" />
+        <div className="absolute -bottom-32 -right-24 h-[24rem] w-[24rem] rounded-full bg-accent/25 blur-3xl animate-blob" style={{ animationDelay: "-8s" }} />
+        <div className="container-page relative grid gap-12 py-20 md:py-28 lg:grid-cols-2 lg:items-center">
+          <div className="animate-slide-in-left">
             <div className="text-xs font-semibold uppercase tracking-[0.22em] text-gold">
               O Ecossistema
             </div>
             <h2 className="mt-3 font-display text-3xl md:text-4xl font-bold leading-tight">
-              Um modelo que une quatro actores num só propósito.
+              Um modelo que une quatro actores num só <span className="text-gradient-gold">propósito</span>.
             </h2>
             <p className="mt-4 text-primary-foreground/80 leading-relaxed">
               Promotores, empresas empregadoras, bancos e trabalhadores: cada peça encaixa para que
@@ -276,29 +279,35 @@ function HomePage() {
                 "Empresas empregadoras — oferecem o benefício habitacional",
                 "Bancos comerciais — financiam o crédito imobiliário",
                 "Trabalhadores — beneficiários finais da solução",
-              ].map((t) => (
-                <li key={t} className="flex items-start gap-3 text-sm text-primary-foreground/90">
+              ].map((t, i) => (
+                <li
+                  key={t}
+                  className="flex items-start gap-3 text-sm text-primary-foreground/90 animate-slide-up"
+                  style={{ animationDelay: `${0.2 + i * 0.1}s` }}
+                >
                   <CheckCircle2 size={18} className="mt-0.5 text-gold shrink-0" /> {t}
                 </li>
               ))}
             </ul>
           </div>
-          <div className="relative">
+          <div className="relative animate-slide-in-right">
+            <div className="absolute -inset-4 rounded-2xl bg-gradient-to-tr from-gold/40 via-transparent to-accent/40 blur-2xl opacity-70" />
             <img
               src={partnershipImg}
               alt="Parceria corporativa"
               loading="lazy"
               width={1280}
               height={960}
-              className="rounded-xl shadow-elegant border border-gold/20"
+              className="relative rounded-xl shadow-elegant border border-gold/30 transition-transform duration-700 hover:scale-[1.02]"
             />
-            <div className="absolute -bottom-6 -left-6 hidden md:block rounded-lg bg-gold p-5 text-gold-foreground shadow-gold max-w-[220px]">
+            <div className="absolute -bottom-6 -left-6 hidden md:block rounded-lg bg-gold p-5 text-gold-foreground shadow-gold max-w-[220px] animate-float-slow">
               <div className="font-display text-2xl font-bold">+250</div>
               <div className="text-xs">trabalhadores impactados anualmente</div>
             </div>
           </div>
         </div>
       </section>
+
 
       {/* BENEFÍCIOS PARA */}
       <Section>
