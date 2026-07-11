@@ -33,43 +33,45 @@
   --color-ring-offset-background: var(--background);
   --font-display: "Playfair Display", Georgia, serif;
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --shadow-elegant: 0 20px 60px -20px oklch(0.31 0.06 142 / 0.35);
-  --shadow-gold: 0 12px 40px -12px oklch(0.72 0.14 82 / 0.4);
+  --shadow-elegant: 0 24px 70px -22px oklch(0.24 0.07 145 / 0.45);
+  --shadow-gold: 0 14px 44px -14px oklch(0.86 0.19 120 / 0.55);
 }
 
+
 :root {
-  --radius: 0.5rem;
-  /* HCB-BANDES brand: deep green #1A3D1F, gold #C9A227, white */
-  --background: oklch(0.99 0.005 100);
-  --foreground: oklch(0.18 0.03 142);
+  --radius: 0.75rem;
+  /* HCB-BANDES brand (from apresentação corporativa): deep forest green, vivid brand green, lime accent, white */
+  --background: oklch(0.995 0.004 120);
+  --foreground: oklch(0.16 0.04 145);
 
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.18 0.03 142);
+  --card-foreground: oklch(0.16 0.04 145);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.18 0.03 142);
+  --popover-foreground: oklch(0.16 0.04 145);
 
-  --primary: oklch(0.31 0.06 142); /* deep green */
-  --primary-foreground: oklch(0.985 0.005 100);
+  --primary: oklch(0.24 0.07 145); /* deep forest green #0B3D1E */
+  --primary-foreground: oklch(0.99 0.005 120);
 
-  --gold: oklch(0.72 0.14 82); /* dourado */
-  --gold-foreground: oklch(0.2 0.04 80);
+  --gold: oklch(0.86 0.19 120); /* lime/yellow-green accent */
+  --gold-foreground: oklch(0.18 0.05 145);
 
-  --secondary: oklch(0.96 0.01 130);
-  --secondary-foreground: oklch(0.22 0.04 142);
+  --secondary: oklch(0.965 0.012 130);
+  --secondary-foreground: oklch(0.22 0.05 145);
 
-  --muted: oklch(0.96 0.008 130);
-  --muted-foreground: oklch(0.48 0.02 142);
+  --muted: oklch(0.96 0.01 130);
+  --muted-foreground: oklch(0.46 0.02 145);
 
-  --accent: oklch(0.94 0.04 90); /* soft gold tint */
-  --accent-foreground: oklch(0.25 0.05 90);
+  --accent: oklch(0.55 0.19 145); /* vivid brand green */
+  --accent-foreground: oklch(0.99 0.005 120);
 
   --destructive: oklch(0.58 0.22 27);
   --destructive-foreground: oklch(0.985 0.005 100);
 
-  --border: oklch(0.9 0.01 130);
-  --input: oklch(0.9 0.01 130);
-  --ring: oklch(0.72 0.14 82);
+  --border: oklch(0.9 0.012 130);
+  --input: oklch(0.9 0.012 130);
+  --ring: oklch(0.86 0.19 120);
 }
+
 
 .dark {
   --background: oklch(0.15 0.02 142);
@@ -134,36 +136,131 @@
 }
 
 @keyframes float {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-8px);
-  }
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
 }
 
 @keyframes appear {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(28px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-in-left {
+  from { opacity: 0; transform: translateX(-28px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slide-in-right {
+  from { opacity: 0; transform: translateX(28px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.94); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 oklch(0.86 0.19 120 / 0.55); }
+  50% { box-shadow: 0 0 0 14px oklch(0.86 0.19 120 / 0); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@keyframes blob {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -40px) scale(1.08); }
+  66% { transform: translate(-25px, 25px) scale(0.94); }
 }
 
 @layer utilities {
-  .animate-float-slow {
-    animation: float 10s ease-in-out infinite;
+  .animate-float-slow { animation: float 10s ease-in-out infinite; }
+  .animate-appear { opacity: 0; animation: appear 0.9s ease forwards; }
+  .animate-slide-up { opacity: 0; animation: slide-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+  .animate-slide-in-left { opacity: 0; animation: slide-in-left 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+  .animate-slide-in-right { opacity: 0; animation: slide-in-right 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+  .animate-scale-in { opacity: 0; animation: scale-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+  .animate-glow-pulse { animation: glow-pulse 2.4s ease-in-out infinite; }
+  .animate-blob { animation: blob 18s ease-in-out infinite; }
+  .animate-marquee { animation: marquee 30s linear infinite; }
+  .animate-gradient {
+    background-size: 200% 200%;
+    animation: gradient-shift 8s ease-in-out infinite;
   }
 
-  .animate-appear {
-    opacity: 0;
-    animation: appear 0.9s ease forwards;
+  .delay-100 { animation-delay: 0.1s; }
+  .delay-200 { animation-delay: 0.2s; }
+  .delay-300 { animation-delay: 0.3s; }
+  .delay-400 { animation-delay: 0.4s; }
+  .delay-500 { animation-delay: 0.5s; }
+  .delay-700 { animation-delay: 0.7s; }
+
+  .hover-lift {
+    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+                box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+                border-color 0.35s ease;
+  }
+  .hover-lift:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--shadow-elegant);
+  }
+
+  .text-gradient-gold {
+    background: linear-gradient(90deg,
+      oklch(0.86 0.19 120),
+      oklch(0.92 0.17 110),
+      oklch(0.78 0.2 135),
+      oklch(0.86 0.19 120));
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: shimmer 6s linear infinite;
+  }
+
+  .bg-grid-primary {
+    background-image:
+      linear-gradient(oklch(0.86 0.19 120 / 0.08) 1px, transparent 1px),
+      linear-gradient(90deg, oklch(0.86 0.19 120 / 0.08) 1px, transparent 1px);
+    background-size: 44px 44px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-float-slow,
+    .animate-appear,
+    .animate-slide-up,
+    .animate-slide-in-left,
+    .animate-slide-in-right,
+    .animate-scale-in,
+    .animate-glow-pulse,
+    .animate-blob,
+    .animate-marquee,
+    .animate-gradient,
+    .text-gradient-gold {
+      animation: none !important;
+      opacity: 1 !important;
+    }
   }
 }
+
 
 /* ===================================================
    🚫 REMOVER MARCAS D'ÁGUA LOVABLE
