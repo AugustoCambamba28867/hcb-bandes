@@ -4,7 +4,7 @@ import { contactSchema } from "@/lib/validation";
 const base = {
   nome: "Ana Silva",
   email: "ana@example.com",
-  telefone: "+244 935 105 538",
+  telefone: "+244 952 300 277",
   empresa: "HCB",
   perfil: "Empresa empregadora" as const,
   mensagem: "Gostaria de saber mais sobre o modelo profissional.",

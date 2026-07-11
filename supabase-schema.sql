@@ -5,8 +5,8 @@ create table if not exists public.site_settings (
   empresa text not null default 'HCB-BANDES',
   tagline text not null default 'Conectamos pessoas, empresas, bancos e imóveis',
   email text not null default 'geral@hcb-bandes.com',
-  telefone text not null default '+244 935 105 538',
-  whatsapp text not null default '+244 935 105 538',
+  telefone text not null default '+244 952 300 277',
+  whatsapp text not null default '+244 952 300 277',
   endereco text not null default 'Luanda, Angola',
   banks_partners jsonb default '[]'::jsonb,
   companies_partners jsonb default '[]'::jsonb,
@@ -71,7 +71,7 @@ create table if not exists public.admin_users (
 );
 
 insert into public.site_settings (empresa, tagline, email, telefone, whatsapp, endereco, banks_partners, companies_partners, promoters_partners)
-select 'HCB-BANDES', 'Conectamos pessoas, empresas, bancos e imóveis', 'geral@hcb-bandes.com', '+244 935 105 538', '+244 935 105 538', 'Luanda, Angola', '[]'::jsonb, '[]'::jsonb, '[]'::jsonb
+select 'HCB-BANDES', 'Conectamos pessoas, empresas, bancos e imóveis', 'geral@hcb-bandes.com', '+244 952 300 277', '+244 952 300 277', 'Luanda, Angola', '[]'::jsonb, '[]'::jsonb, '[]'::jsonb
 where not exists (select 1 from public.site_settings limit 1);
 
 insert into public.services (slug, title, description, points, order_index)

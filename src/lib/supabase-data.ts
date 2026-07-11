@@ -47,8 +47,8 @@ function normalizeSettings(row: Record<string, unknown>): SiteSettings {
     empresa: typeof row.empresa === "string" ? row.empresa : "HCB-BANDES",
     tagline: typeof row.tagline === "string" ? row.tagline : "Conectamos pessoas, empresas, bancos e imóveis",
     email: typeof row.email === "string" ? row.email : "geral@hcb-bandes.com",
-    telefone: typeof row.telefone === "string" ? row.telefone : "+244 935 105 538",
-    whatsapp: typeof row.whatsapp === "string" ? row.whatsapp : "+244 935 105 538",
+    telefone: typeof row.telefone === "string" ? row.telefone : "+244 952 300 277",
+    whatsapp: typeof row.whatsapp === "string" ? row.whatsapp : "+244 952 300 277",
     endereco: typeof row.endereco === "string" ? row.endereco : "Luanda, Angola",
     bancosParceiros: banks.filter((value): value is string => typeof value === "string"),
     empresasParceiras: companies.filter((value): value is string => typeof value === "string"),
@@ -113,8 +113,8 @@ export async function ensureSupabaseSchema() {
       empresa text not null default 'HCB-BANDES',
       tagline text not null default 'Conectamos pessoas, empresas, bancos e imóveis',
       email text not null default 'geral@hcb-bandes.com',
-      telefone text not null default '+244 935 105 538',
-      whatsapp text not null default '+244 935 105 538',
+      telefone text not null default '+244 952 300 277',
+      whatsapp text not null default '+244 952 300 277',
       endereco text not null default 'Luanda, Angola',
       banks_partners jsonb default '[]'::jsonb,
       companies_partners jsonb default '[]'::jsonb,
@@ -170,7 +170,7 @@ export async function ensureSupabaseSchema() {
     );
 
     insert into public.site_settings (empresa, tagline, email, telefone, whatsapp, endereco, banks_partners, companies_partners, promoters_partners)
-    select 'HCB-BANDES', 'Conectamos pessoas, empresas, bancos e imóveis', 'geral@hcb-bandes.com', '+244 935 105 538', '+244 935 105 538', 'Luanda, Angola', '[]'::jsonb, '[]'::jsonb, '[]'::jsonb
+    select 'HCB-BANDES', 'Conectamos pessoas, empresas, bancos e imóveis', 'geral@hcb-bandes.com', '+244 952 300 277', '+244 952 300 277', 'Luanda, Angola', '[]'::jsonb, '[]'::jsonb, '[]'::jsonb
     where not exists (select 1 from public.site_settings limit 1);
 
     insert into public.services (slug, title, description, points, order_index)

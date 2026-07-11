@@ -10,10 +10,19 @@ import {
   Sparkles,
   TrendingUp,
 } from "lucide-react";
+import { useEffect, useState } from "react";
 import heroImg from "@/assets/hero-building.jpg";
 import familyImg from "@/assets/family-keys.jpg";
 import partnershipImg from "@/assets/partnership.jpg";
 import { Section, SectionHeader } from "@/components/section";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+  type CarouselApi,
+} from "@/components/ui/carousel";
 import { getSettings } from "@/lib/site-settings";
 
 export const Route = createFileRoute("/")({
@@ -64,25 +73,54 @@ const SERVICOS = [
 
 const PROCESSO = [
   {
-    title: "Diagnóstico rápido",
-    description: "Mapeamos o seu perfil, a empresa e os requisitos do crédito habitacional.",
+    title: "Identificação de Empresas",
+    description: "Mapeamos empresas públicas e privadas com potencial para oferecer habitação como benefício corporativo.",
   },
   {
-    title: "Conexão com parceiros",
-    description: "Articulamos empresas, bancos e promotores para encontrar a solução ideal.",
+    title: "Parceria Corporativa",
+    description: "Formalizamos protocolos de parceria que definem condições especiais para os colaboradores.",
   },
   {
-    title: "Proposta transparente",
-    description: "Apresentamos uma oferta clara, com custos e cronograma definidos.",
+    title: "Levantamento de Necessidades",
+    description: "Avaliamos o perfil habitacional dos trabalhadores: tipologia, localização e capacidade financeira.",
   },
   {
-    title: "Acompanhamento contínuo",
-    description: "Acompanhamos cada etapa até à entrega das chaves.",
+    title: "Seleção de Imóveis",
+    description: "Apresentamos uma carteira curada de imóveis e condomínios adequados a cada perfil.",
+  },
+  {
+    title: "Articulação com Bancos",
+    description: "Conectamos o trabalhador às instituições financeiras parceiras para análise de crédito.",
+  },
+  {
+    title: "Aquisição",
+    description: "Acompanhamos toda a documentação, escritura e entrega das chaves.",
+  },
+  {
+    title: "Pós‑Venda",
+    description: "Continuamos presentes com suporte, gestão condominial e atendimento permanente.",
   },
 ];
 
 function HomePage() {
   const settings = getSettings();
+  const [emblaApi, setEmblaApi] = useState<CarouselApi | null>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  useEffect(() => {
+    if (!emblaApi) return;
+
+    const onSelect = () => setActiveIndex(emblaApi.selectedScrollSnap());
+    onSelect();
+    emblaApi.on("select", onSelect);
+
+    const interval = window.setInterval(() => emblaApi.scrollNext(), 5000);
+    return () => {
+      emblaApi.off("select", onSelect);
+      window.clearInterval(interval);
+    };
+  }, [emblaApi]);
+
   return (
     <>
       {/* HERO */}
@@ -229,28 +267,48 @@ function HomePage() {
             title="Um processo claro para empresas, bancos e trabalhadores"
             description="Cada etapa é pensada para reduzir riscos, acelerar decisões e garantir a melhor proposta habitacional."
           />
-          <div className="mt-12 grid gap-6 md:grid-cols-2">
-            {PROCESSO.map((item, index) => (
-              <div
-                key={item.title}
-                className="group relative overflow-hidden rounded-3xl border border-border bg-card p-6 shadow-elegant hover-lift hover:border-gold/60 animate-slide-up"
-                style={{ animationDelay: `${index * 0.12}s` }}
-              >
-                <div className="absolute -top-16 -right-16 h-40 w-40 rounded-full bg-gold/10 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <div className="relative flex items-center justify-between gap-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-gold/25 to-accent/25 text-primary font-display font-bold text-lg ring-1 ring-gold/40">
-                    {index + 1}
-                  </div>
-                  <div className="text-right text-xs uppercase tracking-[0.25em] text-muted-foreground">
-                    Etapa {index + 1}
-                  </div>
-                </div>
-                <h3 className="relative mt-5 font-display text-xl font-semibold text-primary">{item.title}</h3>
-                <p className="relative mt-3 text-sm leading-relaxed text-muted-foreground">
-                  {item.description}
-                </p>
-              </div>
-            ))}
+          <div className="mt-12 overflow-hidden rounded-[2rem] border border-border bg-card/90 p-4 shadow-elegant">
+            <Carousel
+              opts={{ loop: true, align: "center", skipSnaps: false }}
+              className="relative"
+              setApi={setEmblaApi}
+            >
+              <CarouselContent className="flex gap-4 py-4 md:py-6">
+                {PROCESSO.map((item, index) => (
+                  <CarouselItem
+                    key={item.title}
+                    className="rounded-[2rem] border border-border bg-background p-6 shadow-elegant transition-transform duration-500 hover:-translate-y-1 md:min-w-[32rem]"
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex h-14 w-14 items-center justify-center rounded-3xl bg-gradient-to-br from-gold/30 to-accent/30 text-primary font-display text-2xl font-bold ring-1 ring-gold/40">
+                        {index + 1}
+                      </div>
+                      <div className="text-right text-xs uppercase tracking-[0.25em] text-muted-foreground">
+                        Etapa {index + 1}
+                      </div>
+                    </div>
+                    <h3 className="mt-6 font-display text-2xl font-semibold text-primary">{item.title}</h3>
+                    <p className="mt-4 text-base leading-relaxed text-muted-foreground">{item.description}</p>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+
+              <CarouselPrevious className="hidden md:block" aria-label="Slide anterior" />
+              <CarouselNext className="hidden md:block" aria-label="Próximo slide" />
+            </Carousel>
+            <div className="mt-6 flex items-center justify-center gap-2 md:gap-3">
+              {PROCESSO.map((_, index) => (
+                <button
+                  key={index}
+                  type="button"
+                  onClick={() => emblaApi?.scrollTo(index)}
+                  className={`h-2.5 w-2.5 rounded-full transition-all duration-300 ${
+                    index === activeIndex ? "bg-gold w-3.5" : "bg-muted-foreground/40 hover:bg-primary"
+                  }`}
+                  aria-label={`Ir para etapa ${index + 1}`}
+                />
+              ))}
+            </div>
           </div>
         </div>
       </Section>

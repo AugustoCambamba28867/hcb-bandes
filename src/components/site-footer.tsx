@@ -36,7 +36,8 @@ export function SiteFooter() {
           <h4 className="text-sm font-semibold uppercase tracking-wider text-gold">Contactos</h4>
           <ul className="mt-4 space-y-3 text-sm text-primary-foreground/80">
             <li className="flex items-start gap-2"><MapPin size={16} className="mt-0.5 text-gold" /> Luanda, Angola</li>
-            <li className="flex items-start gap-2"><Phone size={16} className="mt-0.5 text-gold" /> +244 935 105 538</li>
+            <li className="flex items-start gap-2"><Phone size={16} className="mt-0.5 text-gold" /> +244 952 300 277</li>
+            <li className="flex items-start gap-2"><Phone size={16} className="mt-0.5 text-gold" /> +244 927 213 722</li>
             <li className="flex items-start gap-2"><Mail size={16} className="mt-0.5 text-gold" /> geral@hcb-bandes.com</li>
           </ul>
         </div>

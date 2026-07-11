@@ -87,7 +87,7 @@ export function addLead(
   return lead;
 }
 
-export const SUPPORT_WHATSAPP_NUMBER = "+244935105538";
+export const SUPPORT_WHATSAPP_NUMBER = "+244952300277";
 
 export function buildWhatsAppUrl(message: string, phone: string = SUPPORT_WHATSAPP_NUMBER) {
   const digits = phone.replace(/\D+/g, "");

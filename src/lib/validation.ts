@@ -27,7 +27,7 @@ export const contactSchema = z.object({
     .trim()
     .max(20, { message: "O telefone é demasiado longo." })
     .refine((v) => v === "" || phoneRegex.test(v.replace(/\s/g, "")), {
-      message: "Indique um telefone válido (ex: +244 935 105 538).",
+      message: "Indique um telefone válido (ex: +244 952 300 277).",
     })
     .optional()
     .or(z.literal("")),
