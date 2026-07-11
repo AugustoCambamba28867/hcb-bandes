@@ -221,34 +221,40 @@ function HomePage() {
       </Section>
 
       {/* PROCESSO */}
-      <Section className="bg-[radial-gradient(circle_at_top_left,_rgba(201,162,39,0.12),_transparent_40%),_rgba(255,255,255,0.5)]">
-        <SectionHeader
-          eyebrow="Passo a passo"
-          title="Um processo claro para empresas, bancos e trabalhadores"
-          description="Cada etapa é pensada para reduzir riscos, acelerar decisões e garantir a melhor proposta habitacional."
-        />
-        <div className="mt-12 grid gap-6 md:grid-cols-2">
-          {PROCESSO.map((item, index) => (
-            <div
-              key={item.title}
-              className="group rounded-3xl border border-border bg-card p-6 shadow-elegant transition hover:-translate-y-1 hover:border-gold/60"
-            >
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gold/15 text-gold font-semibold">
-                  {index + 1}
+      <Section className="relative overflow-hidden bg-[radial-gradient(circle_at_top_left,_oklch(0.86_0.19_120/0.15),_transparent_45%),_radial-gradient(circle_at_bottom_right,_oklch(0.55_0.19_145/0.12),_transparent_50%)]">
+        <div className="absolute inset-0 bg-grid-primary opacity-30 pointer-events-none" />
+        <div className="relative">
+          <SectionHeader
+            eyebrow="Passo a passo"
+            title="Um processo claro para empresas, bancos e trabalhadores"
+            description="Cada etapa é pensada para reduzir riscos, acelerar decisões e garantir a melhor proposta habitacional."
+          />
+          <div className="mt-12 grid gap-6 md:grid-cols-2">
+            {PROCESSO.map((item, index) => (
+              <div
+                key={item.title}
+                className="group relative overflow-hidden rounded-3xl border border-border bg-card p-6 shadow-elegant hover-lift hover:border-gold/60 animate-slide-up"
+                style={{ animationDelay: `${index * 0.12}s` }}
+              >
+                <div className="absolute -top-16 -right-16 h-40 w-40 rounded-full bg-gold/10 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="relative flex items-center justify-between gap-3">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-gold/25 to-accent/25 text-primary font-display font-bold text-lg ring-1 ring-gold/40">
+                    {index + 1}
+                  </div>
+                  <div className="text-right text-xs uppercase tracking-[0.25em] text-muted-foreground">
+                    Etapa {index + 1}
+                  </div>
                 </div>
-                <div className="text-right text-xs uppercase tracking-[0.25em] text-muted-foreground">
-                  Etapa {index + 1}
-                </div>
+                <h3 className="relative mt-5 font-display text-xl font-semibold text-primary">{item.title}</h3>
+                <p className="relative mt-3 text-sm leading-relaxed text-muted-foreground">
+                  {item.description}
+                </p>
               </div>
-              <h3 className="mt-5 font-display text-xl font-semibold text-primary">{item.title}</h3>
-              <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-                {item.description}
-              </p>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </Section>
+
 
       {/* ECOSSISTEMA */}
       <section className="bg-primary text-primary-foreground">
