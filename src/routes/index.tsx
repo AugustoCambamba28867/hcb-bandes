@@ -286,9 +286,10 @@ function HomePage() {
                   <CarouselItem
                     key={item.title}
                     className={cn(
-                      "rounded-[2rem] border bg-background p-6 transition-all duration-500 min-w-[18rem] sm:min-w-[20rem] md:min-w-[22rem] lg:min-w-[24rem]",
+                      "rounded-[2rem] bg-background p-6 transition-all duration-500",
+                      "min-w-full sm:min-w-[48%] md:min-w-[45%] lg:min-w-[32%]",
                       index === activeIndex
-                        ? "scale-[1.03] border-gold/50 shadow-2xl ring-1 ring-gold/20"
+                        ? "border-gold/50 shadow-2xl ring-1 ring-gold/20 scale-[1.03]"
                         : "border-border border-opacity-60 opacity-80 hover:-translate-y-2 hover:shadow-2xl hover:opacity-100",
                     )}
                   >
@@ -308,8 +309,8 @@ function HomePage() {
                 ))}
               </CarouselContent>
 
-              <CarouselPrevious className="hidden md:block" aria-label="Slide anterior" />
-              <CarouselNext className="hidden md:block" aria-label="Próximo slide" />
+              <CarouselPrevious className="left-2 md:-left-12 top-1/2 -translate-y-1/2" aria-label="Slide anterior" />
+              <CarouselNext className="right-2 md:-right-12 top-1/2 -translate-y-1/2" aria-label="Próximo slide" />
             </Carousel>
             <div className="mt-6 flex items-center justify-center gap-2 md:gap-3">
               {PROCESSO.map((_, index) => (
@@ -317,11 +318,12 @@ function HomePage() {
                   key={index}
                   type="button"
                   onClick={() => emblaApi?.scrollTo(index)}
-                  className={`h-2.5 rounded-full transition-all duration-300 ${
+                  className={cn(
+                    "h-3 rounded-full transition-all duration-300",
                     index === activeIndex
-                      ? "bg-gold w-3.5 shadow-glow"
-                      : "bg-muted-foreground/40 hover:bg-primary"
-                  }`}
+                      ? "bg-gold w-4 shadow-glow scale-110"
+                      : "bg-muted-foreground/40 hover:bg-primary w-3",
+                  )}
                   aria-label={`Ir para etapa ${index + 1}`}
                 />
               ))}
