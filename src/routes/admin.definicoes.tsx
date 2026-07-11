@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Save, RotateCcw, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
-import { getSettings, saveSettings, resetSettings, type SiteSettings, DEFAULT_SETTINGS } from "@/lib/site-settings";
+import { getSettingsAsync, saveSettings, resetSettings, type SiteSettings, DEFAULT_SETTINGS } from "@/lib/site-settings";
 import { clearLeads } from "@/lib/leads-store";
 
 export const Route = createFileRoute("/admin/definicoes")({
@@ -11,8 +11,24 @@ export const Route = createFileRoute("/admin/definicoes")({
 
 function DefinicoesPage() {
   const [s, setS] = useState<SiteSettings | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => { setS(getSettings()); }, []);
+  useEffect(() => {
+    async function load() {
+      const settings = await getSettingsAsync();
+      setS(settings);
+      setLoading(false);
+    }
+    load();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="rounded-xl border border-border bg-card p-10 text-center text-sm text-muted-foreground">
+        A carregar definições...
+      </div>
+    );
+  }
 
   if (!s) return null;
 

@@ -9,21 +9,18 @@ import {
   Users,
   Sparkles,
   TrendingUp,
+  Target,
+  Handshake,
+  Search,
+  Banknote,
+  FileText,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import heroImg from "@/assets/hero-building.jpg";
 import familyImg from "@/assets/family-keys.jpg";
 import partnershipImg from "@/assets/partnership.jpg";
 import { cn } from "@/lib/utils";
 import { Section, SectionHeader } from "@/components/section";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-  type CarouselApi,
-} from "@/components/ui/carousel";
 import { getSettings } from "@/lib/site-settings";
 
 export const Route = createFileRoute("/")({
@@ -74,30 +71,37 @@ const SERVICOS = [
 
 const PROCESSO = [
   {
+    icon: Target,
     title: "Identificação de Empresas",
     description: "Mapeamos empresas públicas e privadas com potencial para oferecer habitação como benefício corporativo.",
   },
   {
+    icon: Handshake,
     title: "Parceria Corporativa",
     description: "Formalizamos protocolos de parceria que definem condições especiais para os colaboradores.",
   },
   {
+    icon: Search,
     title: "Levantamento de Necessidades",
     description: "Avaliamos o perfil habitacional dos trabalhadores: tipologia, localização e capacidade financeira.",
   },
   {
+    icon: Home,
     title: "Seleção de Imóveis",
     description: "Apresentamos uma carteira curada de imóveis e condomínios adequados a cada perfil.",
   },
   {
+    icon: Banknote,
     title: "Articulação com Bancos",
     description: "Conectamos o trabalhador às instituições financeiras parceiras para análise de crédito.",
   },
   {
+    icon: FileText,
     title: "Aquisição",
     description: "Acompanhamos toda a documentação, escritura e entrega das chaves.",
   },
   {
+    icon: ShieldCheck,
     title: "Pós‑Venda",
     description: "Continuamos presentes com suporte, gestão condominial e atendimento permanente.",
   },
@@ -105,22 +109,6 @@ const PROCESSO = [
 
 function HomePage() {
   const settings = getSettings();
-  const [emblaApi, setEmblaApi] = useState<CarouselApi | null>(null);
-  const [activeIndex, setActiveIndex] = useState(0);
-
-  useEffect(() => {
-    if (!emblaApi) return;
-
-    const onSelect = () => setActiveIndex(emblaApi.selectedScrollSnap());
-    onSelect();
-    emblaApi.on("select", onSelect);
-
-    const interval = window.setInterval(() => emblaApi.scrollNext(), 5000);
-    return () => {
-      emblaApi.off("select", onSelect);
-      window.clearInterval(interval);
-    };
-  }, [emblaApi]);
 
   return (
     <>
@@ -142,7 +130,7 @@ function HomePage() {
         </div>
 
         <div className="container-page relative py-24 md:py-32">
-          <div className="grid gap-12 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
+          <div className="grid gap-12">
             <div className="max-w-2xl text-primary-foreground animate-slide-in-left">
               <div className="inline-flex items-center gap-2 rounded-full border border-gold/50 bg-primary/40 px-4 py-1.5 text-xs font-medium uppercase tracking-[0.2em] text-gold backdrop-blur animate-glow-pulse">
                 <Sparkles size={12} /> {settings.empresa}
@@ -168,32 +156,6 @@ function HomePage() {
                 >
                   Ver serviços
                 </Link>
-              </div>
-            </div>
-
-            <div className="relative animate-slide-in-right delay-200">
-              <div className="absolute -right-12 top-0 hidden h-40 w-40 rounded-full bg-gold/25 blur-3xl lg:block animate-float-slow" />
-              <div className="relative overflow-hidden rounded-[2rem] border border-gold/25 bg-primary/20 p-6 shadow-elegant backdrop-blur-md">
-                <div className="text-xs font-semibold uppercase tracking-[0.24em] text-gold">
-                  Como funciona
-                </div>
-                <div className="mt-6 space-y-4">
-                  {PROCESSO.map((item, index) => (
-                    <div
-                      key={item.title}
-                      className="rounded-3xl border border-border bg-background/95 p-4 hover-lift hover:border-gold/60 animate-slide-up"
-                      style={{ animationDelay: `${0.35 + index * 0.12}s` }}
-                    >
-                      <div className="flex items-center justify-between gap-4">
-                        <span className="text-sm font-semibold text-primary">{item.title}</span>
-                        <div className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-gold/20 text-gold text-sm font-bold ring-1 ring-gold/40">
-                          {index + 1}
-                        </div>
-                      </div>
-                      <p className="mt-2 text-sm text-muted-foreground">{item.description}</p>
-                    </div>
-                  ))}
-                </div>
               </div>
             </div>
           </div>
@@ -263,96 +225,34 @@ function HomePage() {
       <Section className="relative overflow-hidden bg-[radial-gradient(circle_at_top_left,_oklch(0.86_0.19_120/0.15),_transparent_45%),_radial-gradient(circle_at_bottom_right,_oklch(0.55_0.19_145/0.12),_transparent_50%)]">
         <div className="absolute inset-0 bg-grid-primary opacity-30 pointer-events-none" />
         <div className="relative">
-          <SectionHeader
-            eyebrow="Como funciona"
-            title="Como funciona"
-          />
-          <div className="mt-12 overflow-hidden rounded-[2rem] border border-border bg-card/90 p-4 shadow-elegant">
-            {/* Carousel for small screens */}
-            <div className="md:hidden">
-              <Carousel
-                opts={{
-                  loop: true,
-                  align: "start",
-                  skipSnaps: false,
-                  slidesToScroll: 1,
-                  containScroll: "trimSnaps",
-                  speed: 12,
-                }}
-                className="relative"
-                setApi={setEmblaApi}
-              >
-                <CarouselContent className="flex gap-4 py-4 md:py-6">
-                  {PROCESSO.map((item, index) => (
-                    <CarouselItem
-                      key={item.title}
-                      className={cn(
-                        "rounded-[2rem] bg-background p-6 transition-all duration-500",
-                        "min-w-full",
-                        index === activeIndex
-                          ? "border-gold/50 shadow-2xl ring-1 ring-gold/20 scale-[1.03]"
-                          : "border-border border-opacity-60 opacity-80 hover:-translate-y-2 hover:shadow-2xl hover:opacity-100",
-                      )}
-                    >
+          <SectionHeader title="Como funciona" />
+          <div className="mt-12 overflow-hidden rounded-[2rem] border border-border bg-card/90 p-6 shadow-elegant">
+            <div className="relative">
+              <div className="hidden md:block absolute left-12 top-10 bottom-10 w-px bg-muted-foreground/15" />
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {PROCESSO.map((item, index) => (
+                  <div
+                    key={item.title}
+                    className="group relative overflow-hidden rounded-[1.8rem] border border-border bg-background p-6 shadow-sm transition hover:-translate-y-1 hover:border-gold/40 hover:shadow-2xl"
+                  >
+                    <div className="absolute left-6 top-6 flex h-14 w-14 items-center justify-center rounded-full bg-gold/10 text-gold ring-1 ring-gold/30">
+                      <item.icon size={20} />
+                    </div>
+                    <div className="ml-20">
                       <div className="flex items-center justify-between gap-3">
-                        <div className="flex h-14 w-14 items-center justify-center rounded-3xl bg-gradient-to-br from-gold/30 to-accent/30 text-primary font-display text-2xl font-bold ring-1 ring-gold/40">
+                        <span className="text-xs font-semibold uppercase tracking-[0.25em] text-muted-foreground">
+                          Etapa {index + 1}
+                        </span>
+                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gold/10 text-gold font-semibold ring-1 ring-gold/30">
                           {index + 1}
                         </div>
-                        <div className="text-right text-xs uppercase tracking-[0.25em] text-muted-foreground">
-                          Etapa {index + 1}
-                        </div>
                       </div>
-                      <h3 className="mt-6 font-display text-2xl font-semibold text-primary">{item.title}</h3>
-                      <p className="mt-4 text-base leading-relaxed text-muted-foreground">
-                        {item.description}
-                      </p>
-                    </CarouselItem>
-                  ))}
-                </CarouselContent>
-
-                <CarouselPrevious className="left-2 top-1/2 -translate-y-1/2" aria-label="Slide anterior" />
-                <CarouselNext className="right-2 top-1/2 -translate-y-1/2" aria-label="Próximo slide" />
-              </Carousel>
-              <div className="mt-6 flex items-center justify-center gap-2 md:gap-3">
-                {PROCESSO.map((_, index) => (
-                  <button
-                    key={index}
-                    type="button"
-                    onClick={() => emblaApi?.scrollTo(index)}
-                    className={cn(
-                      "h-3 rounded-full transition-all duration-300",
-                      index === activeIndex
-                        ? "bg-gold w-4 shadow-glow scale-110"
-                        : "bg-muted-foreground/40 hover:bg-primary w-3",
-                    )}
-                    aria-label={`Ir para etapa ${index + 1}`}
-                  />
+                      <h3 className="mt-4 font-display text-xl font-semibold text-primary">{item.title}</h3>
+                      <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{item.description}</p>
+                    </div>
+                  </div>
                 ))}
               </div>
-            </div>
-
-            {/* Grid for md+ screens */}
-            <div className="hidden md:grid md:grid-cols-3 gap-6">
-              {PROCESSO.map((item, index) => (
-                <div
-                  key={item.title}
-                  className={cn(
-                    "rounded-[1.5rem] bg-background p-6 transition-all duration-500",
-                    index === activeIndex
-                      ? "border-gold/50 shadow-2xl ring-1 ring-gold/20 scale-[1.01]"
-                      : "border-border border-opacity-60 hover:-translate-y-1 hover:shadow-md",
-                  )}
-                >
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-3xl bg-gradient-to-br from-gold/25 to-accent/25 text-primary font-display text-xl font-bold ring-1 ring-gold/30">
-                      {index + 1}
-                    </div>
-                    <div className="text-right text-xs uppercase tracking-[0.25em] text-muted-foreground">Etapa {index + 1}</div>
-                  </div>
-                  <h3 className="mt-4 font-display text-xl font-semibold text-primary">{item.title}</h3>
-                  <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{item.description}</p>
-                </div>
-              ))}
             </div>
           </div>
         </div>

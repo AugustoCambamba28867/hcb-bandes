@@ -13,6 +13,8 @@ export const supabase = supabaseUrl && supabaseAnonKey
     })
   : null;
 
+export const supabaseEnabled = Boolean(supabase);
+
 export async function isSupabaseConfigured() {
   return Boolean(supabase && supabaseUrl && supabaseAnonKey);
 }

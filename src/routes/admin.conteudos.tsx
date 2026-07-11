@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Save, Info } from "lucide-react";
+import { Save, Info, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { listPageContentFromSupabase, savePageContentToSupabase } from "@/lib/supabase-data";
+import { isSupabaseConfigured } from "@/lib/supabase-client";
 
 export const Route = createFileRoute("/admin/conteudos")({
   component: ConteudosPage,
@@ -38,18 +40,61 @@ const KEY = "hcb_content_v1";
 function ConteudosPage() {
   const [data, setData] = useState<Record<string, PageContent>>(DEFAULTS);
   const [activeTab, setActiveTab] = useState<string>("home");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    try {
-      const raw = window.localStorage.getItem(KEY);
-      if (raw) setData({ ...DEFAULTS, ...JSON.parse(raw) });
-    } catch { /* ignore */ }
+    async function load() {
+      if (await isSupabaseConfigured()) {
+        const rows = await listPageContentFromSupabase();
+        if (rows.length > 0) {
+          const loaded: Record<string, PageContent> = { ...DEFAULTS };
+          rows.forEach((row) => {
+            loaded[row.page_key] = {
+              title: row.title,
+              description: row.description,
+              hero: row.hero ?? undefined,
+            };
+          });
+          setData(loaded);
+          setLoading(false);
+          return;
+        }
+      }
+
+      try {
+        const raw = window.localStorage.getItem(KEY);
+        if (raw) setData({ ...DEFAULTS, ...JSON.parse(raw) });
+      } catch {
+        /* ignore */
+      }
+      setLoading(false);
+    }
+
+    load();
   }, []);
 
-  function save() {
+  async function save() {
+    if (await isSupabaseConfigured()) {
+      const rows = Object.entries(data).map(([page_key, value]) => ({
+        page_key,
+        title: value.title,
+        description: value.description,
+        hero: value.hero ?? null,
+      }));
+      const results = await Promise.all(rows.map((row) => savePageContentToSupabase(row)));
+      if (results.every((result) => result !== null)) {
+        toast.success("Conteúdos guardados", {
+          description: "Alterações foram publicadas com sucesso.",
+        });
+        return;
+      }
+      toast.error("Falha ao guardar no backend. Consulte a consola.");
+      return;
+    }
+
     window.localStorage.setItem(KEY, JSON.stringify(data));
     toast.success("Conteúdos guardados", {
-      description: "Alterações sincronizadas com o site quando o backend for ligado.",
+      description: "Alterações guardadas localmente.",
     });
   }
 

@@ -301,3 +301,74 @@ export async function listLeadsFromSupabase(): Promise<Lead[]> {
   }
   return (data ?? []).map((row) => normalizeLead(row as Record<string, unknown>));
 }
+
+export async function updateLeadStatusInSupabase(id: string, status: Lead["status"]): Promise<boolean> {
+  if (!supabase) return false;
+  const { error } = await supabase
+    .from(TABLES.leads)
+    .update({ status, updated_at: new Date().toISOString() })
+    .eq("id", id);
+  if (error) {
+    console.warn("Supabase lead status update warning:", error.message);
+    return false;
+  }
+  return true;
+}
+
+export async function deleteLeadFromSupabase(id: string): Promise<boolean> {
+  if (!supabase) return false;
+  const { error } = await supabase.from(TABLES.leads).delete().eq("id", id);
+  if (error) {
+    console.warn("Supabase lead delete warning:", error.message);
+    return false;
+  }
+  return true;
+}
+
+export async function savePageContentToSupabase(content: DbPageContent): Promise<DbPageContent | null> {
+  if (!supabase) return null;
+  const payload = {
+    page_key: content.page_key,
+    title: content.title,
+    description: content.description,
+    hero: content.hero ?? null,
+  };
+  const { data, error } = await supabase.from(TABLES.content).upsert(payload, { onConflict: ["page_key"] }).select().single();
+  if (error) {
+    console.warn("Supabase content save warning:", error.message);
+    return null;
+  }
+  return normalizePageContent(data as Record<string, unknown>);
+}
+
+export async function saveServiceToSupabase(service: DbService): Promise<DbService | null> {
+  if (!supabase) return null;
+  const payload = {
+    slug: service.slug,
+    title: service.title,
+    description: service.description,
+    points: service.points,
+    order_index: service.order_index ?? 0,
+    is_active: service.is_active ?? true,
+  };
+  const { data, error } = await supabase
+    .from(TABLES.services)
+    .upsert(payload, { onConflict: ["slug"] })
+    .select()
+    .single();
+  if (error) {
+    console.warn("Supabase service save warning:", error.message);
+    return null;
+  }
+  return normalizeService(data as Record<string, unknown>);
+}
+
+export async function deleteServiceFromSupabase(id: string): Promise<boolean> {
+  if (!supabase) return false;
+  const { error } = await supabase.from(TABLES.services).delete().eq("id", id);
+  if (error) {
+    console.warn("Supabase service delete warning:", error.message);
+    return false;
+  }
+  return true;
+}

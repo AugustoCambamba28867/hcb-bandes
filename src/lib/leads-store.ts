@@ -1,4 +1,10 @@
-import { listLeadsFromSupabase, saveLeadToSupabase } from "@/lib/supabase-data";
+import { isSupabaseConfigured } from "@/lib/supabase-client";
+import {
+  listLeadsFromSupabase,
+  saveLeadToSupabase,
+  updateLeadStatusInSupabase,
+  deleteLeadFromSupabase,
+} from "@/lib/supabase-data";
 
 const KEY = "hcb_leads_v1";
 
@@ -47,6 +53,14 @@ function write(leads: Lead[]) {
 
 export function listLeads(): Lead[] {
   return read().sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+}
+
+export async function listLeadsDynamic(): Promise<Lead[]> {
+  if (await isSupabaseConfigured()) {
+    const remote = await listLeadsFromSupabase();
+    if (remote.length > 0) return remote;
+  }
+  return listLeads();
 }
 
 export async function addLeadAsync(
@@ -110,13 +124,19 @@ export function buildLeadWhatsAppUrl(lead: Pick<Lead, "nome" | "empresa" | "perf
   return buildWhatsAppUrl(formatLeadWhatsAppText(lead));
 }
 
-export function updateLeadStatus(id: string, status: LeadStatus) {
+export async function updateLeadStatus(id: string, status: LeadStatus) {
   const all = read().map((l) => (l.id === id ? { ...l, status } : l));
   write(all);
+  if (await isSupabaseConfigured()) {
+    await updateLeadStatusInSupabase(id, status).catch(() => undefined);
+  }
 }
 
-export function deleteLead(id: string) {
+export async function deleteLead(id: string) {
   write(read().filter((l) => l.id !== id));
+  if (await isSupabaseConfigured()) {
+    await deleteLeadFromSupabase(id).catch(() => undefined);
+  }
 }
 
 export function clearLeads() {

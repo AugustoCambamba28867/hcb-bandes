@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Download, Search, Trash2, Mail, Phone, X, MessageSquare } from "lucide-react";
 import { toast } from "sonner";
 import {
-  listLeads,
+  listLeadsDynamic,
   updateLeadStatus,
   deleteLead,
   exportLeadsCSV,
@@ -43,7 +43,10 @@ function LeadsPage() {
   const [selected, setSelected] = useState<Lead | null>(null);
 
   useEffect(() => {
-    const load = () => setLeads(listLeads());
+    const load = async () => {
+      const dynamicLeads = await listLeadsDynamic();
+      setLeads(dynamicLeads);
+    };
     load();
     window.addEventListener("hcb_leads_changed", load);
     return () => window.removeEventListener("hcb_leads_changed", load);
