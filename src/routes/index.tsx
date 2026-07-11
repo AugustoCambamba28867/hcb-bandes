@@ -194,19 +194,22 @@ function HomePage() {
           description="Integramos toda a cadeia de valor habitacional num ecossistema único."
         />
         <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-          {SERVICOS.map((s) => (
+          {SERVICOS.map((s, i) => (
             <div
               key={s.title}
-              className="group rounded-xl border border-border bg-card p-6 transition hover:-translate-y-1 hover:border-gold/60 hover:shadow-elegant"
+              className="group relative overflow-hidden rounded-xl border border-border bg-card p-6 hover-lift hover:border-gold/60 animate-slide-up"
+              style={{ animationDelay: `${i * 0.1}s` }}
             >
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary group-hover:bg-gold group-hover:text-gold-foreground transition">
+              <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-gold/0 blur-2xl transition-all duration-500 group-hover:bg-gold/25" />
+              <div className="relative flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary transition-all duration-300 group-hover:bg-gold group-hover:text-gold-foreground group-hover:rotate-6 group-hover:scale-110">
                 <s.icon size={22} />
               </div>
-              <h3 className="mt-5 font-display text-lg font-semibold text-primary">{s.title}</h3>
-              <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
+              <h3 className="relative mt-5 font-display text-lg font-semibold text-primary">{s.title}</h3>
+              <p className="relative mt-2 text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
             </div>
           ))}
         </div>
+
         <div className="mt-10">
           <Link
             to="/servicos"
