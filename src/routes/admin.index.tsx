@@ -1,8 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Inbox, TrendingUp, Users, CheckCircle2, ArrowRight, Clock, ShoppingCart, Package, DollarSign, FileBarChart, Activity, UserCog } from "lucide-react";
-import { listLeads, type Lead } from "@/lib/leads-store";
-import { DASHBOARD_STATS, MOCK_ACTIVITIES } from "@/lib/mock-data";
+import { Inbox, TrendingUp, Users, CheckCircle2, ArrowRight, Clock, Package, FileBarChart } from "lucide-react";
+import { listLeadsDynamic, type Lead } from "@/lib/leads-store";
+import { listPageContentFromSupabase, listServicesFromSupabase } from "@/lib/supabase-data";
+import { getSettingsAsync, type SiteSettings } from "@/lib/site-settings";
 import { StatCard, Badge } from "@/components/ui-kit";
 
 export const Route = createFileRoute("/admin/")({
@@ -11,12 +12,34 @@ export const Route = createFileRoute("/admin/")({
 
 function AdminDashboard() {
   const [leads, setLeads] = useState<Lead[]>([]);
+  const [services, setServices] = useState<Array<{ title: string }>>([]);
+  const [pages, setPages] = useState<Array<{ page_key: string }>>([]);
+  const [settings, setSettings] = useState<SiteSettings | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const load = () => setLeads(listLeads());
-    load();
-    window.addEventListener("hcb_leads_changed", load);
-    return () => window.removeEventListener("hcb_leads_changed", load);
+    const load = async () => {
+      setLoading(true);
+      const [remoteLeads, remoteServices, remotePages, remoteSettings] = await Promise.all([
+        listLeadsDynamic(),
+        listServicesFromSupabase(),
+        listPageContentFromSupabase(),
+        getSettingsAsync(),
+      ]);
+      setLeads(remoteLeads);
+      setServices(remoteServices);
+      setPages(remotePages);
+      setSettings(remoteSettings);
+      setLoading(false);
+    };
+
+    const handleLeadChange = () => {
+      void load();
+    };
+
+    void load();
+    window.addEventListener("hcb_leads_changed", handleLeadChange);
+    return () => window.removeEventListener("hcb_leads_changed", handleLeadChange);
   }, []);
 
   const total = leads.length;
@@ -30,6 +53,7 @@ function AdminDashboard() {
   }).length;
 
   const recentes = leads.slice(0, 5);
+  const partnerCount = (settings?.bancosParceiros?.length ?? 0) + (settings?.empresasParceiras?.length ?? 0) + (settings?.promotoresParceiros?.length ?? 0);
 
   const stats = [
     { label: "Leads totais", value: total, icon: Inbox, color: "bg-primary text-primary-foreground" },
@@ -62,36 +86,55 @@ function AdminDashboard() {
         ))}
       </div>
 
-      {/* Widgets institucionais (mock) */}
       <section>
-        <h2 className="font-display text-lg font-semibold text-primary">Visão geral (dados simulados)</h2>
+        <h2 className="font-display text-lg font-semibold text-primary">Visão geral dinâmica</h2>
         <div className="mt-3 grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
-          <StatCard label="Utilizadores" value={DASHBOARD_STATS.totalUsers} icon={Users} tone="primary" />
-          <StatCard label="Administradores" value={DASHBOARD_STATS.administrators} icon={UserCog} tone="gold" />
-          <StatCard label="Clientes" value={DASHBOARD_STATS.clients.toLocaleString("pt-PT")} icon={Users} tone="primary" />
-          <StatCard label="Pedidos" value={DASHBOARD_STATS.orders} icon={ShoppingCart} tone="success" />
-          <StatCard label="Produtos" value={DASHBOARD_STATS.products} icon={Package} tone="primary" />
-          <StatCard label="Receita (AOA)" value={(DASHBOARD_STATS.revenue / 1_000_000).toFixed(1) + "M"} icon={DollarSign} tone="success" />
-          <StatCard label="Relatórios" value={DASHBOARD_STATS.reports} icon={FileBarChart} tone="primary" />
-          <StatCard label="Actividades" value={DASHBOARD_STATS.activities} icon={Activity} tone="gold" />
+          <StatCard label="Serviços activos" value={services.length} icon={Package} tone="primary" />
+          <StatCard label="Conteúdos publicados" value={pages.length} icon={FileBarChart} tone="gold" />
+          <StatCard label="Parcerias registadas" value={partnerCount} icon={Users} tone="primary" />
+          <StatCard label="Leads qualificados" value={qualificados} icon={CheckCircle2} tone="success" />
+          <StatCard label="Leads fechados" value={fechados} icon={CheckCircle2} tone="success" />
         </div>
       </section>
 
-      {/* Actividade recente */}
       <section className="rounded-xl border border-border bg-card">
         <header className="border-b border-border px-5 py-4">
           <h2 className="font-display text-lg font-semibold text-primary">Actividade recente</h2>
         </header>
         <ul className="divide-y divide-border">
-          {MOCK_ACTIVITIES.map((a) => (
-            <li key={a.id} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-5 py-3 text-sm">
-              <div className="min-w-0">
-                <div className="truncate text-foreground"><span className="font-semibold">{a.actor}</span> {a.action} <span className="text-muted-foreground">{a.target}</span></div>
-                <div className="text-xs text-muted-foreground">{new Date(a.at).toLocaleString("pt-PT")}</div>
-              </div>
-              <Badge tone={a.type === "success" ? "success" : a.type === "error" ? "danger" : a.type === "warn" ? "gold" : "primary"}>{a.type}</Badge>
-            </li>
-          ))}
+          {loading ? (
+            <li className="px-5 py-6 text-sm text-muted-foreground">A carregar actividade...</li>
+          ) : (
+            [
+              ...leads.slice(0, 3).map((lead) => ({
+                id: `lead-${lead.id}`,
+                actor: lead.nome,
+                action: "enviou um novo lead",
+                target: lead.perfil,
+                at: lead.createdAt,
+                type: "info" as const,
+              })),
+              ...services.slice(0, 2).map((service, index) => ({
+                id: `service-${index}`,
+                actor: "Admin",
+                action: "actualizou o serviço",
+                target: service.title,
+                at: new Date().toISOString(),
+                type: "success" as const,
+              })),
+            ]
+              .sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime())
+              .slice(0, 5)
+              .map((a) => (
+                <li key={a.id} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-5 py-3 text-sm">
+                  <div className="min-w-0">
+                    <div className="truncate text-foreground"><span className="font-semibold">{a.actor}</span> {a.action} <span className="text-muted-foreground">{a.target}</span></div>
+                    <div className="text-xs text-muted-foreground">{new Date(a.at).toLocaleString("pt-PT")}</div>
+                  </div>
+                  <Badge tone={a.type === "success" ? "success" : a.type === "error" ? "danger" : a.type === "warn" ? "gold" : "primary"}>{a.type}</Badge>
+                </li>
+              ))
+          )}
         </ul>
       </section>
 
