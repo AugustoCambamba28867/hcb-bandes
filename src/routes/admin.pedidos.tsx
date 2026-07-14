@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Search,
   Download,
@@ -12,11 +12,11 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import {
-  MOCK_ORDERS,
   ORDER_STATUS_LABELS,
   type Order,
   type OrderStatus,
 } from "@/lib/mock-data";
+import { listOrders, updateOrderStatus } from "@/lib/admin-dynamic-store";
 import { Badge, EmptyState, ConfirmDialog, StatCard } from "@/components/ui-kit";
 import { canAccessAdminModule, getAdminAccessMessage } from "@/lib/admin-permissions";
 import { addAuditEvent } from "@/lib/audit-store";
@@ -43,7 +43,7 @@ function formatAOA(n: number) {
 }
 
 function PedidosPage() {
-  const [orders, setOrders] = useState<Order[]>(MOCK_ORDERS);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [q, setQ] = useState("");
   const [statusFilter, setStatusFilter] = useState<OrderStatus | "todos">("todos");
   const [page, setPage] = useState(1);
@@ -51,6 +51,13 @@ function PedidosPage() {
   const [confirm, setConfirm] = useState<{ order: Order; next: OrderStatus } | null>(null);
   const canView = canAccessAdminModule(undefined, "Pedidos", "View");
   const canApprove = canAccessAdminModule(undefined, "Pedidos", "Approve");
+
+  useEffect(() => {
+    const sync = () => setOrders(listOrders());
+    sync();
+    window.addEventListener("hcb_admin_data_changed", sync);
+    return () => window.removeEventListener("hcb_admin_data_changed", sync);
+  }, []);
 
   const filtered = useMemo(() => {
     const term = q.trim().toLowerCase();
@@ -86,11 +93,10 @@ function PedidosPage() {
       toast.error(getAdminAccessMessage(undefined, "Pedidos", "Approve"));
       return;
     }
-    setOrders((prev) =>
-      prev.map((o) => (o.id === id ? { ...o, status, updatedAt: new Date().toISOString() } : o)),
-    );
+    const next = updateOrderStatus(id, status);
+    setOrders(next);
     if (selected?.id === id) setSelected((s) => (s ? { ...s, status } : s));
-    const order = orders.find((o) => o.id === id);
+    const order = next.find((o) => o.id === id);
     addAuditEvent({
       actor: "Administrador",
       action:

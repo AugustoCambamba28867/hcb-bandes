@@ -1,13 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Search, Download, FileBarChart, Calendar } from "lucide-react";
 import { toast } from "sonner";
 import {
-  MOCK_REPORTS,
   REPORT_CATEGORY_LABELS,
   type ReportCategory,
   type ReportItem,
 } from "@/lib/mock-data";
+import { listReports } from "@/lib/admin-dynamic-store";
 import { Badge, EmptyState, StatCard } from "@/components/ui-kit";
 import { canAccessAdminModule, getAdminAccessMessage } from "@/lib/admin-permissions";
 import { addAuditEvent } from "@/lib/audit-store";
@@ -31,15 +31,23 @@ const STATUS_LABEL: Record<ReportItem["status"], string> = {
 };
 
 function RelatoriosPage() {
+  const [reports, setReports] = useState<ReportItem[]>([]);
   const [q, setQ] = useState("");
   const [cat, setCat] = useState<ReportCategory | "todas">("todas");
   const [status, setStatus] = useState<ReportItem["status"] | "todos">("todos");
   const [period, setPeriod] = useState("");
   const canView = canAccessAdminModule(undefined, "Relatórios", "View");
 
+  useEffect(() => {
+    const sync = () => setReports(listReports());
+    sync();
+    window.addEventListener("hcb_admin_data_changed", sync);
+    return () => window.removeEventListener("hcb_admin_data_changed", sync);
+  }, []);
+
   const filtered = useMemo(() => {
     const term = q.trim().toLowerCase();
-    return MOCK_REPORTS.filter((r) => {
+    return reports.filter((r) => {
       if (cat !== "todas" && r.category !== cat) return false;
       if (status !== "todos" && r.status !== status) return false;
       if (period && !r.period.includes(period)) return false;
@@ -54,12 +62,12 @@ function RelatoriosPage() {
 
   const kpis = useMemo(() => {
     return {
-      total: MOCK_REPORTS.length,
-      publicados: MOCK_REPORTS.filter((r) => r.status === "publicado").length,
-      rascunhos: MOCK_REPORTS.filter((r) => r.status === "rascunho").length,
-      registos: MOCK_REPORTS.reduce((s, r) => s + r.records, 0),
+      total: reports.length,
+      publicados: reports.filter((r) => r.status === "publicado").length,
+      rascunhos: reports.filter((r) => r.status === "rascunho").length,
+      registos: reports.reduce((s, r) => s + r.records, 0),
     };
-  }, []);
+  }, [reports]);
 
   function exportSingle(r: ReportItem) {
     const rows: (string | number)[][] = [

@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { Plus, Search, Pencil, Trash2, Archive, Copy, ArchiveRestore, X, Users2 } from "lucide-react";
 import { toast } from "sonner";
-import { MOCK_USERS, ROLES, type Role, type User } from "@/lib/mock-data";
+import { ROLES, type Role, type User } from "@/lib/mock-data";
+import { listUsers, upsertUser } from "@/lib/admin-dynamic-store";
 import { Badge, ConfirmDialog, EmptyState, PasswordStrength } from "@/components/ui-kit";
 import { maskPhoneAO } from "@/lib/masks";
 import { evaluatePassword } from "@/lib/password-strength";
@@ -18,7 +19,7 @@ const STATUS_TONES: Record<User["status"], "success" | "muted" | "danger"> = {
 };
 
 function UsersPage() {
-  const [users, setUsers] = useState<User[]>(MOCK_USERS);
+  const [users, setUsers] = useState<User[]>([]);
   const [q, setQ] = useState("");
   const [roleFilter, setRoleFilter] = useState<Role | "todos">("todos");
   const [statusFilter, setStatusFilter] = useState<User["status"] | "todos">("todos");
@@ -30,6 +31,13 @@ function UsersPage() {
   const [confirmDel, setConfirmDel] = useState<User | null>(null);
 
   const perPage = 8;
+
+  useEffect(() => {
+    const sync = () => setUsers(listUsers());
+    sync();
+    window.addEventListener("hcb_admin_data_changed", sync);
+    return () => window.removeEventListener("hcb_admin_data_changed", sync);
+  }, []);
 
   const filtered = useMemo(() => {
     const term = q.trim().toLowerCase();
@@ -62,11 +70,12 @@ function UsersPage() {
   }
 
   function save(user: User) {
+    const saved = upsertUser(user);
     setUsers((prev) => {
       const idx = prev.findIndex((p) => p.id === user.id);
-      if (idx === -1) return [user, ...prev];
+      if (idx === -1) return [saved, ...prev];
       const next = [...prev];
-      next[idx] = user;
+      next[idx] = saved;
       return next;
     });
     toast.success("Utilizador guardado");

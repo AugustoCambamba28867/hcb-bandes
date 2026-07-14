@@ -1,6 +1,7 @@
 import { isSupabaseConfigured, supabase, getSupabaseErrorMessage } from "@/lib/supabase-client";
 import type { SiteSettings } from "@/lib/site-settings";
 import type { Lead } from "@/lib/leads-store";
+import type { AuditEvent, Order, ReportItem, User } from "@/lib/mock-data";
 
 const TABLES = {
   settings: "site_settings",
@@ -8,6 +9,10 @@ const TABLES = {
   services: "services",
   stages: "stages",
   content: "page_content",
+  orders: "admin_orders",
+  reports: "admin_reports",
+  users: "admin_users",
+  auditEvents: "admin_audit_events",
 };
 
 export interface DbService {
@@ -104,6 +109,63 @@ function normalizePageContent(row: Record<string, unknown>): DbPageContent {
   };
 }
 
+function normalizeOrder(row: Record<string, unknown>): Order {
+  return {
+    id: String(row.id ?? crypto.randomUUID()),
+    reference: typeof row.reference === "string" ? row.reference : "",
+    client: typeof row.client === "string" ? row.client : "",
+    email: typeof row.email === "string" ? row.email : "",
+    service: typeof row.service === "string" ? row.service : "",
+    amount: typeof row.amount === "number" ? row.amount : Number(row.amount ?? 0),
+    status: (typeof row.status === "string" ? row.status : "pendente") as Order["status"],
+    createdAt: typeof row.created_at === "string" ? row.created_at : new Date().toISOString(),
+    updatedAt: typeof row.updated_at === "string" ? row.updated_at : new Date().toISOString(),
+  };
+}
+
+function normalizeReport(row: Record<string, unknown>): ReportItem {
+  return {
+    id: String(row.id ?? crypto.randomUUID()),
+    title: typeof row.title === "string" ? row.title : "",
+    category: (typeof row.category === "string" ? row.category : "financeiro") as ReportItem["category"],
+    period: typeof row.period === "string" ? row.period : "",
+    author: typeof row.author === "string" ? row.author : "",
+    records: typeof row.records === "number" ? row.records : Number(row.records ?? 0),
+    generatedAt: typeof row.generated_at === "string" ? row.generated_at : new Date().toISOString(),
+    status: (typeof row.status === "string" ? row.status : "rascunho") as ReportItem["status"],
+  };
+}
+
+function normalizeUser(row: Record<string, unknown>): User {
+  return {
+    id: String(row.id ?? crypto.randomUUID()),
+    firstName: typeof row.first_name === "string" ? row.first_name : "",
+    lastName: typeof row.last_name === "string" ? row.last_name : "",
+    email: typeof row.email === "string" ? row.email : "",
+    phone: typeof row.phone === "string" ? row.phone : "",
+    department: typeof row.department === "string" ? row.department : "",
+    position: typeof row.position === "string" ? row.position : "",
+    role: (typeof row.role === "string" ? row.role : "Operator") as User["role"],
+    status: (typeof row.status === "string" ? row.status : "activo") as User["status"],
+    avatar: typeof row.avatar === "string" ? row.avatar : undefined,
+    createdAt: typeof row.created_at === "string" ? row.created_at : new Date().toISOString(),
+    lastLogin: typeof row.last_login === "string" ? row.last_login : undefined,
+    archived: typeof row.archived === "boolean" ? row.archived : false,
+  };
+}
+
+function normalizeAuditEvent(row: Record<string, unknown>): AuditEvent {
+  return {
+    id: String(row.id ?? crypto.randomUUID()),
+    actor: typeof row.actor === "string" ? row.actor : "Sistema",
+    action: typeof row.action === "string" ? row.action : "",
+    target: typeof row.target === "string" ? row.target : "",
+    details: typeof row.details === "string" ? row.details : "",
+    at: typeof row.at === "string" ? row.at : new Date().toISOString(),
+    type: (typeof row.type === "string" ? row.type : "info") as AuditEvent["type"],
+  };
+}
+
 export async function ensureSupabaseSchema() {
   if (!(await isSupabaseConfigured()) || !supabase) return false;
 
@@ -167,6 +229,55 @@ export async function ensureSupabaseSchema() {
       hero text,
       created_at timestamptz default now(),
       updated_at timestamptz default now()
+    );
+
+    create table if not exists public.admin_orders (
+      id text primary key,
+      reference text not null,
+      client text not null,
+      email text not null,
+      service text not null,
+      amount numeric not null default 0,
+      status text not null default 'pendente',
+      created_at timestamptz default now(),
+      updated_at timestamptz default now()
+    );
+
+    create table if not exists public.admin_reports (
+      id text primary key,
+      title text not null,
+      category text not null,
+      period text not null,
+      author text not null,
+      records integer not null default 0,
+      generated_at timestamptz default now(),
+      status text not null default 'rascunho'
+    );
+
+    create table if not exists public.admin_users (
+      id text primary key,
+      first_name text not null,
+      last_name text not null,
+      email text not null,
+      phone text,
+      department text,
+      position text,
+      role text not null,
+      status text not null default 'activo',
+      avatar text,
+      created_at timestamptz default now(),
+      last_login timestamptz,
+      archived boolean default false
+    );
+
+    create table if not exists public.admin_audit_events (
+      id text primary key,
+      actor text not null,
+      action text not null,
+      target text not null,
+      details text not null,
+      at timestamptz default now(),
+      type text not null default 'info'
     );
 
     insert into public.site_settings (empresa, tagline, email, telefone, whatsapp, endereco, banks_partners, companies_partners, promoters_partners)
@@ -320,6 +431,131 @@ export async function deleteLeadFromSupabase(id: string): Promise<boolean> {
   const { error } = await supabase.from(TABLES.leads).delete().eq("id", id);
   if (error) {
     console.warn("Supabase lead delete warning:", error.message);
+    return false;
+  }
+  return true;
+}
+
+export async function listOrdersFromSupabase(): Promise<Order[]> {
+  if (!supabase) return [];
+  const { data, error } = await supabase.from(TABLES.orders).select("*").order("created_at", { ascending: false });
+  if (error) {
+    console.warn("Supabase orders read warning:", error.message);
+    return [];
+  }
+  return (data ?? []).map((row) => normalizeOrder(row as Record<string, unknown>));
+}
+
+export async function saveOrderToSupabase(order: Order): Promise<boolean> {
+  if (!supabase) return false;
+  const payload = {
+    id: order.id,
+    reference: order.reference,
+    client: order.client,
+    email: order.email,
+    service: order.service,
+    amount: order.amount,
+    status: order.status,
+    created_at: order.createdAt,
+    updated_at: order.updatedAt,
+  };
+  const { error } = await supabase.from(TABLES.orders).upsert(payload, { onConflict: ["id"] });
+  if (error) {
+    console.warn("Supabase order save warning:", error.message);
+    return false;
+  }
+  return true;
+}
+
+export async function listReportsFromSupabase(): Promise<ReportItem[]> {
+  if (!supabase) return [];
+  const { data, error } = await supabase.from(TABLES.reports).select("*").order("generated_at", { ascending: false });
+  if (error) {
+    console.warn("Supabase reports read warning:", error.message);
+    return [];
+  }
+  return (data ?? []).map((row) => normalizeReport(row as Record<string, unknown>));
+}
+
+export async function saveReportToSupabase(report: ReportItem): Promise<boolean> {
+  if (!supabase) return false;
+  const payload = {
+    id: report.id,
+    title: report.title,
+    category: report.category,
+    period: report.period,
+    author: report.author,
+    records: report.records,
+    generated_at: report.generatedAt,
+    status: report.status,
+  };
+  const { error } = await supabase.from(TABLES.reports).upsert(payload, { onConflict: ["id"] });
+  if (error) {
+    console.warn("Supabase report save warning:", error.message);
+    return false;
+  }
+  return true;
+}
+
+export async function listUsersFromSupabase(): Promise<User[]> {
+  if (!supabase) return [];
+  const { data, error } = await supabase.from(TABLES.users).select("*").order("created_at", { ascending: false });
+  if (error) {
+    console.warn("Supabase users read warning:", error.message);
+    return [];
+  }
+  return (data ?? []).map((row) => normalizeUser(row as Record<string, unknown>));
+}
+
+export async function saveUserToSupabase(user: User): Promise<boolean> {
+  if (!supabase) return false;
+  const payload = {
+    id: user.id,
+    first_name: user.firstName,
+    last_name: user.lastName,
+    email: user.email,
+    phone: user.phone,
+    department: user.department,
+    position: user.position,
+    role: user.role,
+    status: user.status,
+    avatar: user.avatar ?? null,
+    created_at: user.createdAt,
+    last_login: user.lastLogin ?? null,
+    archived: user.archived ?? false,
+  };
+  const { error } = await supabase.from(TABLES.users).upsert(payload, { onConflict: ["id"] });
+  if (error) {
+    console.warn("Supabase user save warning:", error.message);
+    return false;
+  }
+  return true;
+}
+
+export async function listAuditEventsFromSupabase(): Promise<AuditEvent[]> {
+  if (!supabase) return [];
+  const { data, error } = await supabase.from(TABLES.auditEvents).select("*").order("at", { ascending: false });
+  if (error) {
+    console.warn("Supabase audit events read warning:", error.message);
+    return [];
+  }
+  return (data ?? []).map((row) => normalizeAuditEvent(row as Record<string, unknown>));
+}
+
+export async function saveAuditEventToSupabase(event: AuditEvent): Promise<boolean> {
+  if (!supabase) return false;
+  const payload = {
+    id: event.id,
+    actor: event.actor,
+    action: event.action,
+    target: event.target,
+    details: event.details,
+    at: event.at,
+    type: event.type,
+  };
+  const { error } = await supabase.from(TABLES.auditEvents).upsert(payload, { onConflict: ["id"] });
+  if (error) {
+    console.warn("Supabase audit event save warning:", error.message);
     return false;
   }
   return true;

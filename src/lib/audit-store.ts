@@ -1,4 +1,6 @@
 import { MOCK_AUDIT_EVENTS, type AuditEvent } from "@/lib/mock-data";
+import { isSupabaseConfigured } from "@/lib/supabase-client";
+import { saveAuditEventToSupabase } from "@/lib/supabase-data";
 
 const KEY = "hcb_audit_events_v1";
 
@@ -34,5 +36,10 @@ export function addAuditEvent(event: Omit<AuditEvent, "id" | "at"> & { at?: stri
     at: event.at ?? new Date().toISOString(),
   };
   writeStored([next, ...readStored()]);
+  void (async () => {
+    if (await isSupabaseConfigured()) {
+      await saveAuditEventToSupabase(next).catch(() => undefined);
+    }
+  })();
   return next;
 }

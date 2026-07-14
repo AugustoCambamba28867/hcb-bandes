@@ -2,9 +2,10 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Inbox, TrendingUp, Users, CheckCircle2, ArrowRight, Clock, Package, FileBarChart } from "lucide-react";
 import { listLeadsDynamic, type Lead } from "@/lib/leads-store";
-import { listPageContentFromSupabase, listServicesFromSupabase } from "@/lib/supabase-data";
+import { listAuditEventsFromSupabase, listOrdersFromSupabase, listPageContentFromSupabase, listReportsFromSupabase, listServicesFromSupabase, listUsersFromSupabase } from "@/lib/supabase-data";
 import { getSettingsAsync, type SiteSettings } from "@/lib/site-settings";
 import { StatCard, Badge } from "@/components/ui-kit";
+import type { AuditEvent, Order, ReportItem, User } from "@/lib/mock-data";
 
 export const Route = createFileRoute("/admin/")({
   component: AdminDashboard,
@@ -14,32 +15,53 @@ function AdminDashboard() {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [services, setServices] = useState<Array<{ title: string }>>([]);
   const [pages, setPages] = useState<Array<{ page_key: string }>>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [reports, setReports] = useState<ReportItem[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
+  const [auditEvents, setAuditEvents] = useState<AuditEvent[]>([]);
   const [settings, setSettings] = useState<SiteSettings | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const load = async () => {
       setLoading(true);
-      const [remoteLeads, remoteServices, remotePages, remoteSettings] = await Promise.all([
-        listLeadsDynamic(),
-        listServicesFromSupabase(),
-        listPageContentFromSupabase(),
-        getSettingsAsync(),
-      ]);
-      setLeads(remoteLeads);
-      setServices(remoteServices);
-      setPages(remotePages);
-      setSettings(remoteSettings);
-      setLoading(false);
+      try {
+        const [remoteLeads, remoteServices, remotePages, remoteSettings, remoteOrders, remoteReports, remoteUsers, remoteAuditEvents] = await Promise.all([
+          listLeadsDynamic(),
+          listServicesFromSupabase(),
+          listPageContentFromSupabase(),
+          getSettingsAsync(),
+          listOrdersFromSupabase(),
+          listReportsFromSupabase(),
+          listUsersFromSupabase(),
+          listAuditEventsFromSupabase(),
+        ]);
+        setLeads(remoteLeads);
+        setServices(remoteServices);
+        setPages(remotePages);
+        setOrders(remoteOrders);
+        setReports(remoteReports);
+        setUsers(remoteUsers);
+        setAuditEvents(remoteAuditEvents);
+        setSettings(remoteSettings);
+      } finally {
+        setLoading(false);
+      }
     };
 
-    const handleLeadChange = () => {
+    const handleDataChange = () => {
       void load();
     };
 
     void load();
-    window.addEventListener("hcb_leads_changed", handleLeadChange);
-    return () => window.removeEventListener("hcb_leads_changed", handleLeadChange);
+    window.addEventListener("hcb_leads_changed", handleDataChange);
+    window.addEventListener("hcb_admin_data_changed", handleDataChange);
+    window.addEventListener("hcb_settings_changed", handleDataChange);
+    return () => {
+      window.removeEventListener("hcb_leads_changed", handleDataChange);
+      window.removeEventListener("hcb_admin_data_changed", handleDataChange);
+      window.removeEventListener("hcb_settings_changed", handleDataChange);
+    };
   }, []);
 
   const total = leads.length;
@@ -54,6 +76,47 @@ function AdminDashboard() {
 
   const recentes = leads.slice(0, 5);
   const partnerCount = (settings?.bancosParceiros?.length ?? 0) + (settings?.empresasParceiras?.length ?? 0) + (settings?.promotoresParceiros?.length ?? 0);
+  const pendingOrders = orders.filter((order) => order.status === "pendente").length;
+  const approvedOrders = orders.filter((order) => order.status === "aprovado").length;
+  const completedOrders = orders.filter((order) => order.status === "concluido").length;
+  const activeUsers = users.filter((user) => user.status === "activo" && !user.archived).length;
+  const reportsCount = reports.length;
+  const recentActivity = [
+    ...auditEvents.slice(0, 4).map((event) => ({
+      id: `audit-${event.id}`,
+      actor: event.actor,
+      action: event.action,
+      target: event.target,
+      at: event.at,
+      type: event.type === "warning" ? "warn" as const : event.type === "error" ? "danger" as const : event.type === "success" ? "success" as const : "info" as const,
+    })),
+    ...leads.slice(0, 2).map((lead) => ({
+      id: `lead-${lead.id}`,
+      actor: lead.nome,
+      action: "enviou um novo lead",
+      target: lead.perfil,
+      at: lead.createdAt,
+      type: "info" as const,
+    })),
+    ...orders.slice(0, 1).map((order) => ({
+      id: `order-${order.id}`,
+      actor: order.client,
+      action: "registou um pedido",
+      target: order.service,
+      at: order.createdAt,
+      type: "success" as const,
+    })),
+    ...reports.slice(0, 1).map((report) => ({
+      id: `report-${report.id}`,
+      actor: report.author,
+      action: "gerou um relatório",
+      target: report.title,
+      at: report.generatedAt,
+      type: "primary" as const,
+    })),
+  ]
+    .sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime())
+    .slice(0, 5);
 
   const stats = [
     { label: "Leads totais", value: total, icon: Inbox, color: "bg-primary text-primary-foreground" },
@@ -97,6 +160,17 @@ function AdminDashboard() {
         </div>
       </section>
 
+      <section>
+        <h2 className="font-display text-lg font-semibold text-primary">Resumo operacional</h2>
+        <div className="mt-3 grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
+          <StatCard label="Pedidos pendentes" value={pendingOrders} icon={Clock} tone="gold" />
+          <StatCard label="Pedidos aprovados" value={approvedOrders} icon={CheckCircle2} tone="success" />
+          <StatCard label="Pedidos concluídos" value={completedOrders} icon={Package} tone="primary" />
+          <StatCard label="Utilizadores activos" value={activeUsers} icon={Users} tone="primary" />
+          <StatCard label="Relatórios gerados" value={reportsCount} icon={FileBarChart} tone="gold" />
+        </div>
+      </section>
+
       <section className="rounded-xl border border-border bg-card">
         <header className="border-b border-border px-5 py-4">
           <h2 className="font-display text-lg font-semibold text-primary">Actividade recente</h2>
@@ -104,36 +178,18 @@ function AdminDashboard() {
         <ul className="divide-y divide-border">
           {loading ? (
             <li className="px-5 py-6 text-sm text-muted-foreground">A carregar actividade...</li>
+          ) : recentActivity.length === 0 ? (
+            <li className="px-5 py-6 text-sm text-muted-foreground">Ainda não há actividade registada no painel.</li>
           ) : (
-            [
-              ...leads.slice(0, 3).map((lead) => ({
-                id: `lead-${lead.id}`,
-                actor: lead.nome,
-                action: "enviou um novo lead",
-                target: lead.perfil,
-                at: lead.createdAt,
-                type: "info" as const,
-              })),
-              ...services.slice(0, 2).map((service, index) => ({
-                id: `service-${index}`,
-                actor: "Admin",
-                action: "actualizou o serviço",
-                target: service.title,
-                at: new Date().toISOString(),
-                type: "success" as const,
-              })),
-            ]
-              .sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime())
-              .slice(0, 5)
-              .map((a) => (
-                <li key={a.id} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-5 py-3 text-sm">
-                  <div className="min-w-0">
-                    <div className="truncate text-foreground"><span className="font-semibold">{a.actor}</span> {a.action} <span className="text-muted-foreground">{a.target}</span></div>
-                    <div className="text-xs text-muted-foreground">{new Date(a.at).toLocaleString("pt-PT")}</div>
-                  </div>
-                  <Badge tone={a.type === "success" ? "success" : a.type === "error" ? "danger" : a.type === "warn" ? "gold" : "primary"}>{a.type}</Badge>
-                </li>
-              ))
+            recentActivity.map((a) => (
+              <li key={a.id} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-5 py-3 text-sm">
+                <div className="min-w-0">
+                  <div className="truncate text-foreground"><span className="font-semibold">{a.actor}</span> {a.action} <span className="text-muted-foreground">{a.target}</span></div>
+                  <div className="text-xs text-muted-foreground">{new Date(a.at).toLocaleString("pt-PT")}</div>
+                </div>
+                <Badge tone={a.type === "success" ? "success" : a.type === "danger" ? "danger" : a.type === "warn" ? "gold" : "primary"}>{a.type}</Badge>
+              </li>
+            ))
           )}
         </ul>
       </section>

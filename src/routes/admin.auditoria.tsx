@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { type AuditEvent } from "@/lib/mock-data";
 import { Badge, EmptyState, StatCard } from "@/components/ui-kit";
 import { listAuditEvents } from "@/lib/audit-store";
+import { listAuditEventsDynamic } from "@/lib/admin-dynamic-store";
 import { downloadCsv } from "@/lib/export-utils";
 
 export const Route = createFileRoute("/admin/auditoria")({
@@ -25,9 +26,14 @@ function AuditoriaPage() {
   const [type, setType] = useState<AuditEvent["type"] | "todos">("todos");
 
   useEffect(() => {
-    const sync = () => setEvents(listAuditEvents());
+    const sync = () => setEvents([...listAuditEvents(), ...listAuditEventsDynamic()]);
+    sync();
     window.addEventListener("hcb_audit_changed", sync);
-    return () => window.removeEventListener("hcb_audit_changed", sync);
+    window.addEventListener("hcb_admin_data_changed", sync);
+    return () => {
+      window.removeEventListener("hcb_audit_changed", sync);
+      window.removeEventListener("hcb_admin_data_changed", sync);
+    };
   }, []);
 
   const filtered = useMemo(() => {
