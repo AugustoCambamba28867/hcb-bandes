@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Download, Search, Trash2, Mail, Phone, X, MessageSquare } from "lucide-react";
+import { Download, Search, Trash2, Mail, Phone, X, MessageSquare, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 import {
   listLeadsDynamic,
@@ -182,6 +182,9 @@ function LeadsPage() {
                         <button onClick={() => setSelected(l)} className="text-left">
                           <div className="font-medium text-foreground">{l.nome}</div>
                           <div className="text-xs text-muted-foreground">{l.email}</div>
+                          <div className="mt-1 text-[11px] uppercase tracking-wide text-muted-foreground">
+                            Canal: {l.canal === "whatsapp" ? "WhatsApp" : "Site"}
+                          </div>
                         </button>
                       </td>
                       <td className="px-4 py-3 text-xs text-foreground/80">{l.perfil}</td>
@@ -234,6 +237,9 @@ function LeadsPage() {
                   <button onClick={() => setSelected(l)} className="min-w-0 text-left">
                     <div className="font-medium text-foreground truncate">{l.nome}</div>
                     <div className="text-xs text-muted-foreground truncate">{l.email}</div>
+                    <div className="mt-1 text-[11px] uppercase tracking-wide text-muted-foreground">
+                      Canal: {l.canal === "whatsapp" ? "WhatsApp" : "Site"}
+                    </div>
                   </button>
                   <span
                     className={`shrink-0 rounded-md border px-2 py-0.5 text-[10px] font-medium ${STATUS_STYLES[l.status]}`}
@@ -295,6 +301,10 @@ function LeadDrawer({
 }) {
   const whatsappText = formatLeadWhatsAppText(lead);
   const whatsappUrl = buildWhatsAppUrl(whatsappText);
+  const history = [
+    { label: "Recebido", at: lead.createdAt, status: lead.status },
+    { label: "Estado atual", at: lead.createdAt, status: lead.status },
+  ];
 
   return (
     <div className="fixed inset-0 z-50 flex">
@@ -314,6 +324,9 @@ function LeadDrawer({
           <div>
             <div className="text-xs uppercase tracking-wider text-muted-foreground">Nome</div>
             <div className="mt-1 font-medium text-foreground">{lead.nome}</div>
+            <div className="mt-1 text-sm text-muted-foreground">
+              Canal: <span className="font-medium text-foreground">{lead.canal === "whatsapp" ? "WhatsApp" : "Site"}</span>
+            </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <a
@@ -362,10 +375,21 @@ function LeadDrawer({
               href={whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-4 inline-flex w-full items-center justify-center rounded-md bg-gold px-4 py-2 text-sm font-semibold text-gold-foreground hover:brightness-95 transition"
+              className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-md bg-gold px-4 py-2 text-sm font-semibold text-gold-foreground hover:brightness-95 transition"
             >
-              Abrir WhatsApp com mensagem
+              <MessageCircle size={14} /> Abrir WhatsApp com mensagem
             </a>
+          </div>
+          <div className="rounded-2xl border border-border bg-secondary/30 p-4">
+            <div className="text-xs uppercase tracking-wider text-muted-foreground">Histórico de estado</div>
+            <div className="mt-3 space-y-2">
+              {history.map((item) => (
+                <div key={`${item.label}-${item.at}`} className="flex items-center justify-between gap-3 rounded-md border border-border bg-card px-3 py-2 text-sm">
+                  <span className="text-foreground">{item.label}</span>
+                  <span className="text-xs text-muted-foreground">{new Date(item.at).toLocaleString("pt-PT")}</span>
+                </div>
+              ))}
+            </div>
           </div>
           <div>
             <div className="text-xs uppercase tracking-wider text-muted-foreground">Estado</div>

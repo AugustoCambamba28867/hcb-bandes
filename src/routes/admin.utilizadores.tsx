@@ -1,9 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
-import { Plus, Search, Pencil, Trash2, Archive, Copy, ArchiveRestore, X, Users2 } from "lucide-react";
+import { Plus, Search, Pencil, Trash2, Archive, Copy, ArchiveRestore, X, Users2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { ROLES, type Role, type User } from "@/lib/mock-data";
-import { listUsers, upsertUser } from "@/lib/admin-dynamic-store";
+import { listUsers, upsertUser, fetchUsersRemote } from "@/lib/admin-dynamic-store";
+import { isSupabaseConfigured } from "@/lib/supabase-client";
 import { Badge, ConfirmDialog, EmptyState, PasswordStrength } from "@/components/ui-kit";
 import { maskPhoneAO } from "@/lib/masks";
 import { evaluatePassword } from "@/lib/password-strength";
@@ -32,9 +33,25 @@ function UsersPage() {
 
   const perPage = 8;
 
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
+    async function load() {
+      setLoading(true);
+      if (await isSupabaseConfigured()) {
+        const remote = await fetchUsersRemote();
+        if (remote && remote.length > 0) {
+          setUsers(remote);
+          setLoading(false);
+          return;
+        }
+      }
+      setUsers(listUsers());
+      setLoading(false);
+    }
+
+    load();
     const sync = () => setUsers(listUsers());
-    sync();
     window.addEventListener("hcb_admin_data_changed", sync);
     return () => window.removeEventListener("hcb_admin_data_changed", sync);
   }, []);
@@ -107,6 +124,14 @@ function UsersPage() {
     setUsers((p) => p.filter((u) => u.id !== id));
     toast.success("Utilizador eliminado");
     setConfirmDel(null);
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="mr-3 h-5 w-5 animate-spin text-primary" /> Carregando utilizadores...
+      </div>
+    );
   }
 
   return (

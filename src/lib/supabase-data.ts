@@ -70,6 +70,7 @@ function normalizeLead(row: Record<string, unknown>): Lead {
     empresa: typeof row.empresa === "string" ? row.empresa : undefined,
     perfil: (typeof row.perfil === "string" ? row.perfil : "Outro") as Lead["perfil"],
     mensagem: typeof row.mensagem === "string" ? row.mensagem : "",
+    canal: (typeof row.canal === "string" ? row.canal : "site") as Lead["canal"],
     status: (typeof row.status === "string" ? row.status : "novo") as Lead["status"],
     createdAt: typeof row.created_at === "string" ? row.created_at : new Date().toISOString(),
   };
@@ -166,10 +167,40 @@ function normalizeAuditEvent(row: Record<string, unknown>): AuditEvent {
   };
 }
 
+function setSupabaseSchemaStatus(status: { ok: boolean; error?: string; migration?: string }) {
+  if (typeof window === "undefined") return;
+  try {
+    (window as any).__HCB_SUPABASE_SCHEMA_STATUS = status;
+    window.dispatchEvent(new CustomEvent("hcb_supabase_schema_status_changed", { detail: status }));
+  } catch {
+    // Ignore if the browser does not support CustomEvent or window is read-only.
+  }
+}
+
 export async function ensureSupabaseSchema() {
   if (!(await isSupabaseConfigured()) || !supabase) return false;
 
-  const migration = `
+  // Migration SQL exported for manual execution if RPC is unavailable
+  const migration = SUPABASE_MIGRATION_SQL;
+
+  try {
+    const { error } = await supabase.rpc("exec_sql", { sql: migration });
+    if (error) {
+      console.warn("Supabase schema bootstrap warning:", error.message);
+      setSupabaseSchemaStatus({ ok: false, error: error.message, migration });
+      return false;
+    }
+    setSupabaseSchemaStatus({ ok: true });
+    return true;
+  } catch (err) {
+    console.warn("Supabase schema bootstrap failed:", err);
+    setSupabaseSchemaStatus({ ok: false, error: String(err), migration });
+    return false;
+  }
+}
+
+// Export migration SQL so users can run it manually in Supabase SQL Editor if needed.
+export const SUPABASE_MIGRATION_SQL = `
     create table if not exists public.site_settings (
       id uuid primary key default gen_random_uuid(),
       empresa text not null default 'HCB-BANDES',
@@ -193,6 +224,7 @@ export async function ensureSupabaseSchema() {
       empresa text,
       perfil text not null default 'Outro',
       mensagem text not null default '',
+      canal text not null default 'site',
       status text not null default 'novo',
       created_at timestamptz default now(),
       updated_at timestamptz default now()
@@ -310,16 +342,7 @@ export async function ensureSupabaseSchema() {
       ('servicos', 'Quatro pilares para uma solução habitacional completa.', 'Habitação Corporativa, Crédito, Imobiliário, Gestão Condominial.', null),
       ('beneficios', 'Vantagens concretas para cada parceiro do ecossistema.', 'Empresas, bancos e trabalhadores.', null)
     on conflict (page_key) do nothing;
-  `;
-
-  const { error } = await supabase.rpc("exec_sql", { sql: migration });
-  if (error) {
-    console.warn("Supabase schema bootstrap warning:", error.message);
-    return false;
-  }
-
-  return true;
-}
+`;
 
 export async function readSettings() {
   if (!supabase) return null;
@@ -392,6 +415,7 @@ export async function saveLeadToSupabase(lead: Omit<Lead, "id" | "createdAt" | "
     empresa: lead.empresa,
     perfil: lead.perfil,
     mensagem: lead.mensagem,
+    canal: lead.canal ?? "site",
     status: lead.status ?? "novo",
   };
 
@@ -459,7 +483,7 @@ export async function saveOrderToSupabase(order: Order): Promise<boolean> {
     created_at: order.createdAt,
     updated_at: order.updatedAt,
   };
-  const { error } = await supabase.from(TABLES.orders).upsert(payload, { onConflict: ["id"] });
+  const { error } = await supabase.from(TABLES.orders).upsert(payload, { onConflict: "id" });
   if (error) {
     console.warn("Supabase order save warning:", error.message);
     return false;
@@ -489,7 +513,7 @@ export async function saveReportToSupabase(report: ReportItem): Promise<boolean>
     generated_at: report.generatedAt,
     status: report.status,
   };
-  const { error } = await supabase.from(TABLES.reports).upsert(payload, { onConflict: ["id"] });
+  const { error } = await supabase.from(TABLES.reports).upsert(payload, { onConflict: "id" });
   if (error) {
     console.warn("Supabase report save warning:", error.message);
     return false;
@@ -524,7 +548,7 @@ export async function saveUserToSupabase(user: User): Promise<boolean> {
     last_login: user.lastLogin ?? null,
     archived: user.archived ?? false,
   };
-  const { error } = await supabase.from(TABLES.users).upsert(payload, { onConflict: ["id"] });
+  const { error } = await supabase.from(TABLES.users).upsert(payload, { onConflict: "id" });
   if (error) {
     console.warn("Supabase user save warning:", error.message);
     return false;
@@ -553,7 +577,7 @@ export async function saveAuditEventToSupabase(event: AuditEvent): Promise<boole
     at: event.at,
     type: event.type,
   };
-  const { error } = await supabase.from(TABLES.auditEvents).upsert(payload, { onConflict: ["id"] });
+  const { error } = await supabase.from(TABLES.auditEvents).upsert(payload, { onConflict: "id" });
   if (error) {
     console.warn("Supabase audit event save warning:", error.message);
     return false;
@@ -569,7 +593,7 @@ export async function savePageContentToSupabase(content: DbPageContent): Promise
     description: content.description,
     hero: content.hero ?? null,
   };
-  const { data, error } = await supabase.from(TABLES.content).upsert(payload, { onConflict: ["page_key"] }).select().single();
+  const { data, error } = await supabase.from(TABLES.content).upsert(payload, { onConflict: "page_key" }).select().single();
   if (error) {
     console.warn("Supabase content save warning:", error.message);
     return null;
@@ -589,7 +613,7 @@ export async function saveServiceToSupabase(service: DbService): Promise<DbServi
   };
   const { data, error } = await supabase
     .from(TABLES.services)
-    .upsert(payload, { onConflict: ["slug"] })
+    .upsert(payload, { onConflict: "slug" })
     .select()
     .single();
   if (error) {

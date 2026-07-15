@@ -9,6 +9,7 @@ import {
   X as XIcon,
   Eye,
   ShoppingCart,
+  Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -16,7 +17,8 @@ import {
   type Order,
   type OrderStatus,
 } from "@/lib/mock-data";
-import { listOrders, updateOrderStatus } from "@/lib/admin-dynamic-store";
+import { listOrders, updateOrderStatus, fetchOrdersRemote } from "@/lib/admin-dynamic-store";
+import { isSupabaseConfigured } from "@/lib/supabase-client";
 import { Badge, EmptyState, ConfirmDialog, StatCard } from "@/components/ui-kit";
 import { canAccessAdminModule, getAdminAccessMessage } from "@/lib/admin-permissions";
 import { addAuditEvent } from "@/lib/audit-store";
@@ -44,6 +46,7 @@ function formatAOA(n: number) {
 
 function PedidosPage() {
   const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
   const [statusFilter, setStatusFilter] = useState<OrderStatus | "todos">("todos");
   const [page, setPage] = useState(1);
@@ -53,8 +56,22 @@ function PedidosPage() {
   const canApprove = canAccessAdminModule(undefined, "Pedidos", "Approve");
 
   useEffect(() => {
+    async function load() {
+      setLoading(true);
+      if (await isSupabaseConfigured()) {
+        const remote = await fetchOrdersRemote();
+        if (remote && remote.length > 0) {
+          setOrders(remote);
+          setLoading(false);
+          return;
+        }
+      }
+      setOrders(listOrders());
+      setLoading(false);
+    }
+
+    load();
     const sync = () => setOrders(listOrders());
-    sync();
     window.addEventListener("hcb_admin_data_changed", sync);
     return () => window.removeEventListener("hcb_admin_data_changed", sync);
   }, []);
@@ -150,6 +167,14 @@ function PedidosPage() {
         description={getAdminAccessMessage(undefined, "Pedidos", "View")}
         icon={ShoppingCart}
       />
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="mr-3 h-5 w-5 animate-spin text-primary" /> Carregando pedidos...
+      </div>
     );
   }
 

@@ -75,6 +75,12 @@ describe("leads store", () => {
     expect(all[0].id).toBeTruthy();
   });
 
+  it("guarda o canal de contacto escolhido pelo utilizador", () => {
+    const lead = addLead({ ...sample, canal: "site" as const });
+    expect(listLeads()[0].canal).toBe("site");
+    expect(lead.canal).toBe("site");
+  });
+
   it("actualiza estado do lead", () => {
     const lead = addLead(sample);
     updateLeadStatus(lead.id, "qualificado");

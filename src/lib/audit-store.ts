@@ -1,4 +1,4 @@
-import { MOCK_AUDIT_EVENTS, type AuditEvent } from "@/lib/mock-data";
+import { type AuditEvent } from "@/lib/mock-data";
 import { isSupabaseConfigured } from "@/lib/supabase-client";
 import { saveAuditEventToSupabase } from "@/lib/supabase-data";
 
@@ -26,7 +26,7 @@ function writeStored(events: AuditEvent[]) {
 }
 
 export function listAuditEvents(): AuditEvent[] {
-  return [...readStored(), ...MOCK_AUDIT_EVENTS].sort((a, b) => (a.at < b.at ? 1 : -1));
+  return [...readStored()].sort((a, b) => (a.at < b.at ? 1 : -1));
 }
 
 export function addAuditEvent(event: Omit<AuditEvent, "id" | "at"> & { at?: string }) {

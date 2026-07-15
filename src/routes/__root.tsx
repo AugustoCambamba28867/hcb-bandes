@@ -1,14 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import {
-  Outlet,
-  Link,
-  createRootRouteWithContext,
-  useRouter,
-  useRouterState,
-  HeadContent,
-  Scripts,
-} from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { Outlet, Link, createRootRouteWithContext, HeadContent, Scripts } from "@tanstack/react-router";
+import { type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -16,7 +8,6 @@ import { SiteHeader } from "../components/site-header";
 import { SiteFooter } from "../components/site-footer";
 import { WhatsappFab } from "../components/whatsapp-fab";
 import { Toaster } from "../components/ui/sonner";
-import { ensureSupabaseSchema } from "@/lib/supabase-data";
 
 function NotFoundComponent() {
   return (
@@ -137,21 +128,6 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const isAdmin = pathname.startsWith("/admin");
-
-  useEffect(() => {
-    void ensureSupabaseSchema();
-  }, []);
-
-  if (isAdmin) {
-    return (
-      <QueryClientProvider client={queryClient}>
-        <Outlet />
-        <Toaster />
-      </QueryClientProvider>
-    );
-  }
 
   return (
     <QueryClientProvider client={queryClient}>

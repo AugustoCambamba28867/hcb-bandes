@@ -1,13 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Search, Download, FileBarChart, Calendar } from "lucide-react";
+import { Search, Download, FileBarChart, Calendar, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import {
   REPORT_CATEGORY_LABELS,
   type ReportCategory,
   type ReportItem,
 } from "@/lib/mock-data";
-import { listReports } from "@/lib/admin-dynamic-store";
+import { listReports, fetchReportsRemote } from "@/lib/admin-dynamic-store";
+import { isSupabaseConfigured } from "@/lib/supabase-client";
 import { Badge, EmptyState, StatCard } from "@/components/ui-kit";
 import { canAccessAdminModule, getAdminAccessMessage } from "@/lib/admin-permissions";
 import { addAuditEvent } from "@/lib/audit-store";
@@ -32,6 +33,7 @@ const STATUS_LABEL: Record<ReportItem["status"], string> = {
 
 function RelatoriosPage() {
   const [reports, setReports] = useState<ReportItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
   const [cat, setCat] = useState<ReportCategory | "todas">("todas");
   const [status, setStatus] = useState<ReportItem["status"] | "todos">("todos");
@@ -39,8 +41,22 @@ function RelatoriosPage() {
   const canView = canAccessAdminModule(undefined, "Relatórios", "View");
 
   useEffect(() => {
+    async function load() {
+      setLoading(true);
+      if (await isSupabaseConfigured()) {
+        const remote = await fetchReportsRemote();
+        if (remote && remote.length > 0) {
+          setReports(remote);
+          setLoading(false);
+          return;
+        }
+      }
+      setReports(listReports());
+      setLoading(false);
+    }
+
+    load();
     const sync = () => setReports(listReports());
-    sync();
     window.addEventListener("hcb_admin_data_changed", sync);
     return () => window.removeEventListener("hcb_admin_data_changed", sync);
   }, []);
@@ -130,6 +146,14 @@ function RelatoriosPage() {
         description={getAdminAccessMessage(undefined, "Relatórios", "View")}
         icon={FileBarChart}
       />
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="mr-3 h-5 w-5 animate-spin text-primary" /> Carregando relatórios...
+      </div>
     );
   }
 

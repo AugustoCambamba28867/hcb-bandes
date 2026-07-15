@@ -4,7 +4,7 @@ import { Mail, Phone, MapPin, MessageCircle, Send, AlertCircle } from "lucide-re
 import { toast } from "sonner";
 import { PageHero, Section } from "@/components/section";
 import { contactSchema } from "@/lib/validation";
-import { addLead, buildWhatsAppUrl, formatLeadWhatsAppText } from "@/lib/leads-store";
+import { addLead, buildWhatsAppUrl, formatLeadWhatsAppText, type LeadCanal } from "@/lib/leads-store";
 import { getSettings } from "@/lib/site-settings";
 
 export const Route = createFileRoute("/contactos")({
@@ -43,6 +43,7 @@ function ContactosPage() {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Errors>({});
   const [mensagemLen, setMensagemLen] = useState(0);
+  const [canal, setCanal] = useState<LeadCanal>("whatsapp");
   const settings = getSettings();
   const quickWhatsAppLink = buildWhatsAppUrl(
     "Olá HCB-BANDES, gostaria de solicitar um orçamento e saber como podemos avançar.",
@@ -83,6 +84,9 @@ function ContactosPage() {
     }
 
     setLoading(true);
+    const selectedCanal = (raw.canal as LeadCanal | undefined) ?? canal;
+    setCanal(selectedCanal);
+
     const lead = addLead({
       nome: result.data.nome,
       email: result.data.email,
@@ -90,18 +94,25 @@ function ContactosPage() {
       empresa: result.data.empresa || undefined,
       perfil: result.data.perfil,
       mensagem: result.data.mensagem,
+      canal: selectedCanal,
     });
 
     const whatsappText = formatLeadWhatsAppText(lead);
     const whatsappUrl = buildWhatsAppUrl(whatsappText, settings.whatsapp);
-    window.open(whatsappUrl, "_blank", "noopener,noreferrer");
+
+    if (selectedCanal === "whatsapp") {
+      window.open(whatsappUrl, "_blank", "noopener,noreferrer");
+    }
 
     setLoading(false);
     setErrors({});
     setMensagemLen(0);
     form.reset();
-    toast.success("Pedido enviado com sucesso", {
-      description: "A sua mensagem foi guardada e o WhatsApp será aberto com o seu pedido.",
+    toast.success(selectedCanal === "whatsapp" ? "Pedido enviado com sucesso" : "Pedido recebido no site", {
+      description:
+        selectedCanal === "whatsapp"
+          ? "A sua mensagem foi guardada e o WhatsApp será aberto com o seu pedido."
+          : "O pedido foi guardado no painel admin e ficará disponível para acompanhamento.",
     });
   }
 
@@ -288,6 +299,43 @@ function ContactosPage() {
                 placeholder="Conte-nos como podemos ajudar (mínimo 10 caracteres)…"
               />
               {errors.mensagem && <FieldError id="mensagem-error" msg={errors.mensagem} />}
+            </div>
+
+            <div className="mt-4 rounded-lg border border-border bg-secondary/50 p-4">
+              <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Como prefere receber o pedido?
+              </div>
+              <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                <label className={`flex cursor-pointer items-start gap-2 rounded-md border p-3 text-sm transition ${canal === "whatsapp" ? "border-primary bg-primary/5" : "border-border bg-background"}`}>
+                  <input
+                    type="radio"
+                    name="canal"
+                    value="whatsapp"
+                    checked={canal === "whatsapp"}
+                    onChange={() => setCanal("whatsapp")}
+                    className="mt-1"
+                  />
+                  <span>
+                    <span className="block font-semibold text-foreground">WhatsApp</span>
+                    <span className="block text-xs text-muted-foreground">Abre o chat com a equipa imediatamente.</span>
+                  </span>
+                </label>
+                <label className={`flex cursor-pointer items-start gap-2 rounded-md border p-3 text-sm transition ${canal === "site" ? "border-primary bg-primary/5" : "border-border bg-background"}`}>
+                  <input
+                    type="radio"
+                    name="canal"
+                    value="site"
+                    checked={canal === "site"}
+                    onChange={() => setCanal("site")}
+                    className="mt-1"
+                  />
+                  <span>
+                    <span className="block font-semibold text-foreground">Enviar pelo site</span>
+                    <span className="block text-xs text-muted-foreground">O pedido fica registado no painel admin.</span>
+                  </span>
+                </label>
+              </div>
+              <input type="hidden" name="canal" value={canal} />
             </div>
 
             <button

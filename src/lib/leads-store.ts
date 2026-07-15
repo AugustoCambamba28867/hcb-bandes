@@ -16,6 +16,7 @@ export type LeadPerfil =
   | "Outro";
 
 export type LeadStatus = "novo" | "em_contacto" | "qualificado" | "fechado" | "descartado";
+export type LeadCanal = "whatsapp" | "site";
 
 export interface Lead {
   id: string;
@@ -25,6 +26,7 @@ export interface Lead {
   empresa?: string;
   perfil: LeadPerfil;
   mensagem: string;
+  canal: LeadCanal;
   status: LeadStatus;
   createdAt: string; // ISO
 }

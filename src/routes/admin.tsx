@@ -19,6 +19,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { adminLogin, adminLogout, isAdminAuthenticated, getAdminSession } from "@/lib/leads-store";
+import { ensureSupabaseSchema } from "@/lib/supabase-data";
+import { SupabaseSchemaWarning } from "@/components/supabase-schema-warning";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -31,37 +33,132 @@ export const Route = createFileRoute("/admin")({
   component: AdminLayout,
 });
 
-type NavItem = {
-  to:
-    | "/admin"
-    | "/admin/leads"
-    | "/admin/pedidos"
-    | "/admin/relatorios"
-    | "/admin/auditoria"
-    | "/admin/utilizadores"
-    | "/admin/permissoes"
-    | "/admin/database"
-    | "/admin/conteudos"
-    | "/admin/parceiros"
-    | "/admin/definicoes";
+type AdminNavItem = {
+  to: string;
   label: string;
   icon: typeof LayoutDashboard;
   exact?: boolean;
 };
 
-const NAV: NavItem[] = [
-  { to: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
-  { to: "/admin/leads", label: "Leads", icon: Inbox },
-  { to: "/admin/pedidos", label: "Pedidos", icon: ShoppingCart },
-  { to: "/admin/relatorios", label: "Relatórios", icon: FileBarChart },
-  { to: "/admin/auditoria", label: "Auditoria", icon: ShieldCheck },
-  { to: "/admin/utilizadores", label: "Utilizadores", icon: UserCog },
-  { to: "/admin/permissoes", label: "Permissões", icon: ShieldCheck },
-  { to: "/admin/database", label: "Base de Dados", icon: Database },
-  { to: "/admin/conteudos", label: "Conteúdos", icon: FileText },
-  { to: "/admin/parceiros", label: "Parceiros", icon: Users2 },
-  { to: "/admin/definicoes", label: "Definições", icon: Settings },
+const ADMIN_ROUTE_LABELS: Record<string, string> = {
+  "": "Dashboard",
+  "leads": "Leads",
+  "pedidos": "Pedidos",
+  "relatorios": "Relatórios",
+  "auditoria": "Auditoria",
+  "utilizadores": "Utilizadores",
+  "permissoes": "Permissões",
+  "database": "Base de Dados",
+  "conteudos": "Conteúdos",
+  "parceiros": "Parceiros",
+  "definicoes": "Definições",
+};
+
+const ADMIN_ROUTE_ICONS: Record<string, typeof LayoutDashboard> = {
+  "": LayoutDashboard,
+  leads: Inbox,
+  pedidos: ShoppingCart,
+  relatorios: FileBarChart,
+  auditoria: ShieldCheck,
+  utilizadores: UserCog,
+  permissoes: ShieldCheck,
+  database: Database,
+  conteudos: FileText,
+  parceiros: Users2,
+  definicoes: Settings,
+};
+
+const ADMIN_ROUTE_ORDER = [
+  "/admin",
+  "/admin/leads",
+  "/admin/pedidos",
+  "/admin/relatorios",
+  "/admin/auditoria",
+  "/admin/utilizadores",
+  "/admin/permissoes",
+  "/admin/database",
+  "/admin/conteudos",
+  "/admin/parceiros",
+  "/admin/definicoes",
 ];
+
+function getAdminRouteLabel(path: string) {
+  const segment = path === "/" ? "" : path.replace(/^\//, "").replace(/\/$/, "");
+  return ADMIN_ROUTE_LABELS[segment] ?? segment.replace(/-/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+function getAdminRouteIcon(path: string) {
+  const segment = path === "/" ? "" : path.replace(/^\//, "").replace(/\/$/, "");
+  return ADMIN_ROUTE_ICONS[segment] ?? LayoutDashboard;
+}
+
+function normalizeAdminRoutePath(fullPath: string) {
+  return fullPath === "/admin/" ? "/admin" : fullPath;
+}
+
+function getAdminRoutes() {
+  const fallbackRoutes: AdminNavItem[] = [
+    { to: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
+    { to: "/admin/leads", label: "Leads", icon: Inbox },
+    { to: "/admin/pedidos", label: "Pedidos", icon: ShoppingCart },
+    { to: "/admin/relatorios", label: "Relatórios", icon: FileBarChart },
+    { to: "/admin/auditoria", label: "Auditoria", icon: ShieldCheck },
+    { to: "/admin/utilizadores", label: "Utilizadores", icon: UserCog },
+    { to: "/admin/permissoes", label: "Permissões", icon: ShieldCheck },
+    { to: "/admin/database", label: "Base de Dados", icon: Database },
+    { to: "/admin/conteudos", label: "Conteúdos", icon: FileText },
+    { to: "/admin/parceiros", label: "Parceiros", icon: Users2 },
+    { to: "/admin/definicoes", label: "Definições", icon: Settings },
+  ];
+
+  const glob = (import.meta as any).globEager;
+  if (typeof glob !== "function") {
+    return fallbackRoutes;
+  }
+
+  try {
+    const modules = glob("./admin.*.tsx") as Record<
+      string,
+      { Route?: { options?: { path?: string; fullPath?: string; id?: string } } }
+    >;
+
+    const routes = Object.values(modules)
+      .map((module) => {
+        const route = module.Route;
+        const rawPath = route?.options?.path ?? "/";
+        const rawFullPath = route?.options?.fullPath ?? route?.options?.id ?? rawPath;
+        if (!rawFullPath) return null;
+
+        const fullPath = normalizeAdminRoutePath(
+          rawFullPath === "/"
+            ? "/admin"
+            : rawFullPath.startsWith("/admin")
+            ? rawFullPath
+            : `/admin${rawFullPath}`,
+        );
+
+        const label = getAdminRouteLabel(rawPath);
+        const icon = getAdminRouteIcon(rawPath);
+        return { to: fullPath, label, icon, exact: rawPath === "/" } as AdminNavItem;
+      })
+      .filter((route): route is AdminNavItem => route !== null)
+      .sort((a, b) => {
+        const aIndex = ADMIN_ROUTE_ORDER.indexOf(a.to);
+        const bIndex = ADMIN_ROUTE_ORDER.indexOf(b.to);
+        if (aIndex !== bIndex) {
+          if (aIndex === -1) return 1;
+          if (bIndex === -1) return -1;
+          return aIndex - bIndex;
+        }
+        return a.label.localeCompare(b.label, "pt", { sensitivity: "base" });
+      });
+
+    return routes.length > 0 ? routes : fallbackRoutes;
+  } catch (error) {
+    console.error("Falha ao carregar rotas admin dinamicamente", error);
+    return fallbackRoutes;
+  }
+}
 
 function AdminLayout() {
   const [auth, setAuth] = useState<boolean | null>(null);
@@ -84,6 +181,10 @@ function AdminLayout() {
   useEffect(() => {
     setOpen(false);
   }, [path]);
+
+  useEffect(() => {
+    void ensureSupabaseSchema();
+  }, []);
 
   if (auth === null) {
     return <div className="min-h-screen bg-secondary/30" />;
@@ -125,7 +226,7 @@ function AdminLayout() {
             </div>
 
             <nav className="flex-1 space-y-1 overflow-y-auto p-3">
-              {NAV.map((n) => (
+              {getAdminRoutes().map((n) => (
                 <Link
                   key={n.to}
                   to={n.to}
@@ -174,6 +275,9 @@ function AdminLayout() {
         {/* content */}
         <main className="min-w-0 flex-1">
           <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-8 lg:px-10 lg:py-10">
+            <div className="mb-6">
+              <SupabaseSchemaWarning />
+            </div>
             <Outlet />
           </div>
         </main>
@@ -212,23 +316,19 @@ function LoginScreen({ onSuccess }: { onSuccess: () => void }) {
     const username = String(fd.get("username") ?? "").trim();
     const password = String(fd.get("password") ?? "");
     const remember = fd.get("remember") === "on";
-    if (!username) {
-      setError("Indique o nome de utilizador.");
-      return;
-    }
-    if (password.length < 4) {
+    if (!password) {
       setError("Indique a palavra-passe.");
       return;
     }
     setLoading(true);
     setTimeout(() => {
-      const ok = adminLogin(username, password, remember);
+      const ok = username ? adminLogin(username, password, remember) : adminLogin(password, remember);
       setLoading(false);
       if (ok) {
         toast.success("Bem-vindo ao painel");
         onSuccess();
       } else {
-        setError("Nome de utilizador ou palavra-passe incorrectos.");
+        setError("Nome de utilizador ou palavra-passe incorrecta.");
       }
     }, 400);
   }

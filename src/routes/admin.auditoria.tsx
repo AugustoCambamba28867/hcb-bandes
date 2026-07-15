@@ -1,11 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Download, FileText, Search, ShieldCheck } from "lucide-react";
+import { Download, FileText, Search, ShieldCheck, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { type AuditEvent } from "@/lib/mock-data";
 import { Badge, EmptyState, StatCard } from "@/components/ui-kit";
 import { listAuditEvents } from "@/lib/audit-store";
-import { listAuditEventsDynamic } from "@/lib/admin-dynamic-store";
+import { listAuditEventsDynamic, fetchAuditEventsRemote } from "@/lib/admin-dynamic-store";
+import { isSupabaseConfigured } from "@/lib/supabase-client";
 import { downloadCsv } from "@/lib/export-utils";
 
 export const Route = createFileRoute("/admin/auditoria")({
@@ -22,12 +23,27 @@ const EVENT_TONE: Record<AuditEvent["type"], "primary" | "gold" | "success" | "d
 
 function AuditoriaPage() {
   const [events, setEvents] = useState(() => listAuditEvents());
+  const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
   const [type, setType] = useState<AuditEvent["type"] | "todos">("todos");
 
   useEffect(() => {
+    async function load() {
+      setLoading(true);
+      if (await isSupabaseConfigured()) {
+        const remote = await fetchAuditEventsRemote();
+        if (remote && remote.length > 0) {
+          setEvents([...listAuditEvents(), ...remote]);
+          setLoading(false);
+          return;
+        }
+      }
+      setEvents([...listAuditEvents(), ...listAuditEventsDynamic()]);
+      setLoading(false);
+    }
+
+    load();
     const sync = () => setEvents([...listAuditEvents(), ...listAuditEventsDynamic()]);
-    sync();
     window.addEventListener("hcb_audit_changed", sync);
     window.addEventListener("hcb_admin_data_changed", sync);
     return () => {
@@ -35,6 +51,14 @@ function AuditoriaPage() {
       window.removeEventListener("hcb_admin_data_changed", sync);
     };
   }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="mr-3 h-5 w-5 animate-spin text-primary" /> Carregando auditoria...
+      </div>
+    );
+  }
 
   const filtered = useMemo(() => {
     const term = q.trim().toLowerCase();

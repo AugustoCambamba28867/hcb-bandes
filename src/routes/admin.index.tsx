@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Inbox, TrendingUp, Users, CheckCircle2, ArrowRight, Clock, Package, FileBarChart } from "lucide-react";
+import { Inbox, TrendingUp, Users, CheckCircle2, ArrowRight, Clock, Package, FileBarChart, MessageCircle, Globe2, ExternalLink } from "lucide-react";
 import { listLeadsDynamic, type Lead } from "@/lib/leads-store";
 import { listAuditEventsFromSupabase, listOrdersFromSupabase, listPageContentFromSupabase, listReportsFromSupabase, listServicesFromSupabase, listUsersFromSupabase } from "@/lib/supabase-data";
 import { getSettingsAsync, type SiteSettings } from "@/lib/site-settings";
@@ -68,6 +68,10 @@ function AdminDashboard() {
   const novos = leads.filter((l) => l.status === "novo").length;
   const qualificados = leads.filter((l) => l.status === "qualificado").length;
   const fechados = leads.filter((l) => l.status === "fechado").length;
+  const leadsSite = leads.filter((l) => l.canal === "site").length;
+  const leadsWhatsapp = leads.filter((l) => l.canal === "whatsapp").length;
+  const taxaConversao = total > 0 ? Math.round((qualificados / total) * 100) : 0;
+  const tempoMedio = total > 0 ? Math.round((leads.reduce((acc, lead) => acc + (Date.now() - new Date(lead.createdAt).getTime()), 0) / total) / (1000 * 60 * 60)) : 0;
 
   const last7 = leads.filter((l) => {
     const d = new Date(l.createdAt).getTime();
@@ -122,8 +126,9 @@ function AdminDashboard() {
     { label: "Leads totais", value: total, icon: Inbox, color: "bg-primary text-primary-foreground" },
     { label: "Novos por tratar", value: novos, icon: Clock, color: "bg-gold text-gold-foreground" },
     { label: "Últimos 7 dias", value: last7, icon: TrendingUp, color: "bg-primary/10 text-primary" },
-    { label: "Qualificados", value: qualificados, icon: Users, color: "bg-primary/10 text-primary" },
-    { label: "Fechados", value: fechados, icon: CheckCircle2, color: "bg-primary/10 text-primary" },
+    { label: "Leads por site", value: leadsSite, icon: Globe2, color: "bg-primary/10 text-primary" },
+    { label: "Leads por WhatsApp", value: leadsWhatsapp, icon: MessageCircle, color: "bg-primary/10 text-primary" },
+    { label: "Conversão", value: `${taxaConversao}%`, icon: CheckCircle2, color: "bg-primary/10 text-primary" },
   ];
 
   return (
@@ -135,7 +140,7 @@ function AdminDashboard() {
         </p>
       </header>
 
-      <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
+      <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
         {stats.map((s) => (
           <div key={s.label} className="rounded-xl border border-border bg-card p-4 sm:p-5">
             <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${s.color}`}>
@@ -168,6 +173,20 @@ function AdminDashboard() {
           <StatCard label="Pedidos concluídos" value={completedOrders} icon={Package} tone="primary" />
           <StatCard label="Utilizadores activos" value={activeUsers} icon={Users} tone="primary" />
           <StatCard label="Relatórios gerados" value={reportsCount} icon={FileBarChart} tone="gold" />
+        </div>
+      </section>
+
+      <section className="rounded-xl border border-border bg-card p-5">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h2 className="font-display text-lg font-semibold text-primary">Resumo de conversão</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {total > 0 ? `A taxa atual é de ${taxaConversao}% de leads qualificados.` : "Ainda não há leads suficientes para calcular uma taxa."}
+            </p>
+          </div>
+          <div className="rounded-lg border border-border bg-secondary/50 px-3 py-2 text-sm text-muted-foreground">
+            Tempo médio desde o pedido: {tempoMedio}h
+          </div>
         </div>
       </section>
 
@@ -211,15 +230,20 @@ function AdminDashboard() {
         ) : (
           <ul className="divide-y divide-border">
             {recentes.map((l) => (
-              <li key={l.id} className="flex flex-col gap-1 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+              <li key={l.id} className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0">
                   <div className="font-medium text-foreground truncate">{l.nome}</div>
                   <div className="text-xs text-muted-foreground truncate">
                     {l.perfil} · {l.email}
                   </div>
                 </div>
-                <div className="text-xs text-muted-foreground sm:text-right">
-                  {new Date(l.createdAt).toLocaleString("pt-PT")}
+                <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+                  <Badge tone={l.canal === "whatsapp" ? "gold" : "primary"}>
+                    {l.canal === "whatsapp" ? "WhatsApp" : "Site"}
+                  </Badge>
+                  <div className="text-xs text-muted-foreground">
+                    {new Date(l.createdAt).toLocaleString("pt-PT")}
+                  </div>
                 </div>
               </li>
             ))}
