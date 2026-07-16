@@ -45,7 +45,7 @@ function RelatoriosPage() {
       setLoading(true);
       if (await isSupabaseConfigured()) {
         const remote = await fetchReportsRemote();
-        if (remote && remote.length > 0) {
+        if (remote !== null) {
           setReports(remote);
           setLoading(false);
           return;

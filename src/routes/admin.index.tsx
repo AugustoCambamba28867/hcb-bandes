@@ -2,7 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Inbox, TrendingUp, Users, CheckCircle2, ArrowRight, Clock, Package, FileBarChart, MessageCircle, Globe2, ExternalLink } from "lucide-react";
 import { listLeadsDynamic, type Lead } from "@/lib/leads-store";
-import { listAuditEventsFromSupabase, listOrdersFromSupabase, listPageContentFromSupabase, listReportsFromSupabase, listServicesFromSupabase, listUsersFromSupabase } from "@/lib/supabase-data";
+import { listPageContentFromSupabase, listServicesFromSupabase } from "@/lib/supabase-data";
+import { listOrdersDynamic, listReportsDynamic, listUsersDynamic, listAuditEventsDynamicAsync } from "@/lib/admin-dynamic-store";
 import { getSettingsAsync, type SiteSettings } from "@/lib/site-settings";
 import { StatCard, Badge } from "@/components/ui-kit";
 import type { AuditEvent, Order, ReportItem, User } from "@/lib/mock-data";
@@ -31,10 +32,10 @@ function AdminDashboard() {
           listServicesFromSupabase(),
           listPageContentFromSupabase(),
           getSettingsAsync(),
-          listOrdersFromSupabase(),
-          listReportsFromSupabase(),
-          listUsersFromSupabase(),
-          listAuditEventsFromSupabase(),
+          listOrdersDynamic(),
+          listReportsDynamic(),
+          listUsersDynamic(),
+          listAuditEventsDynamicAsync(),
         ]);
         setLeads(remoteLeads);
         setServices(remoteServices);

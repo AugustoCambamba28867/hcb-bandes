@@ -66,13 +66,16 @@ export async function listLeadsDynamic(): Promise<Lead[]> {
 }
 
 export async function addLeadAsync(
-  data: Omit<Lead, "id" | "createdAt" | "status"> & { status?: LeadStatus },
+  data: Omit<Lead, "id" | "createdAt" | "status" | "canal"> & { status?: LeadStatus; canal?: LeadCanal },
 ): Promise<Lead> {
   const lead: Lead = {
     ...data,
-    id: `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`,
+    id: typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+      ? crypto.randomUUID()
+      : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`,
     createdAt: new Date().toISOString(),
     status: data.status ?? "novo",
+    canal: data.canal ?? "site",
   };
 
   const all = read();
@@ -88,13 +91,16 @@ export async function addLeadAsync(
 }
 
 export function addLead(
-  data: Omit<Lead, "id" | "createdAt" | "status"> & { status?: LeadStatus },
+  data: Omit<Lead, "id" | "createdAt" | "status" | "canal"> & { status?: LeadStatus; canal?: LeadCanal },
 ): Lead {
   const lead: Lead = {
     ...data,
-    id: `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`,
+    id: typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+      ? crypto.randomUUID()
+      : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`,
     createdAt: new Date().toISOString(),
     status: data.status ?? "novo",
+    canal: data.canal ?? "site",
   };
   const all = read();
   all.push(lead);

@@ -60,7 +60,7 @@ function PedidosPage() {
       setLoading(true);
       if (await isSupabaseConfigured()) {
         const remote = await fetchOrdersRemote();
-        if (remote && remote.length > 0) {
+        if (remote !== null) {
           setOrders(remote);
           setLoading(false);
           return;

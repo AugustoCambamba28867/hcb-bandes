@@ -180,6 +180,17 @@ function setSupabaseSchemaStatus(status: { ok: boolean; error?: string; migratio
 export async function ensureSupabaseSchema() {
   if (!(await isSupabaseConfigured()) || !supabase) return false;
 
+  // Check if the tables already exist (e.g. they were created manually or from a previous run)
+  try {
+    const { error: checkError } = await supabase.from("site_settings").select("id").limit(1);
+    if (!checkError) {
+      setSupabaseSchemaStatus({ ok: true });
+      return true;
+    }
+  } catch (err) {
+    // Ignore and proceed to bootstrap
+  }
+
   // Migration SQL exported for manual execution if RPC is unavailable
   const migration = SUPABASE_MIGRATION_SQL;
 
@@ -201,6 +212,17 @@ export async function ensureSupabaseSchema() {
 
 // Export migration SQL so users can run it manually in Supabase SQL Editor if needed.
 export const SUPABASE_MIGRATION_SQL = `
+    -- Function to execute arbitrary SQL (used for bootstrapping/migrations)
+    create or replace function public.exec_sql(sql text)
+    returns void
+    language plpgsql
+    security definer
+    as $$
+    begin
+      execute sql;
+    end;
+    $$;
+
     create table if not exists public.site_settings (
       id uuid primary key default gen_random_uuid(),
       empresa text not null default 'HCB-BANDES',
@@ -406,9 +428,14 @@ export async function listPageContentFromSupabase(): Promise<DbPageContent[]> {
   return (data ?? []).map((row) => normalizePageContent(row as Record<string, unknown>));
 }
 
-export async function saveLeadToSupabase(lead: Omit<Lead, "id" | "createdAt" | "status"> & { status?: Lead["status"] }) {
+function isUuid(str: string): boolean {
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  return uuidRegex.test(str);
+}
+
+export async function saveLeadToSupabase(lead: Omit<Lead, "createdAt" | "status"> & { id?: string; status?: Lead["status"] }) {
   if (!supabase) return false;
-  const payload = {
+  const payload: any = {
     nome: lead.nome,
     email: lead.email,
     telefone: lead.telefone,
@@ -418,6 +445,10 @@ export async function saveLeadToSupabase(lead: Omit<Lead, "id" | "createdAt" | "
     canal: lead.canal ?? "site",
     status: lead.status ?? "novo",
   };
+
+  if (lead.id && isUuid(lead.id)) {
+    payload.id = lead.id;
+  }
 
   const { error } = await supabase.from(TABLES.leads).insert(payload);
   if (error) {
@@ -438,7 +469,7 @@ export async function listLeadsFromSupabase(): Promise<Lead[]> {
 }
 
 export async function updateLeadStatusInSupabase(id: string, status: Lead["status"]): Promise<boolean> {
-  if (!supabase) return false;
+  if (!supabase || !isUuid(id)) return false;
   const { error } = await supabase
     .from(TABLES.leads)
     .update({ status, updated_at: new Date().toISOString() })
@@ -451,7 +482,7 @@ export async function updateLeadStatusInSupabase(id: string, status: Lead["statu
 }
 
 export async function deleteLeadFromSupabase(id: string): Promise<boolean> {
-  if (!supabase) return false;
+  if (!supabase || !isUuid(id)) return false;
   const { error } = await supabase.from(TABLES.leads).delete().eq("id", id);
   if (error) {
     console.warn("Supabase lead delete warning:", error.message);

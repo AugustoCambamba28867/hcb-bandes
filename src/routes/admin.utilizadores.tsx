@@ -40,7 +40,7 @@ function UsersPage() {
       setLoading(true);
       if (await isSupabaseConfigured()) {
         const remote = await fetchUsersRemote();
-        if (remote && remote.length > 0) {
+        if (remote !== null) {
           setUsers(remote);
           setLoading(false);
           return;

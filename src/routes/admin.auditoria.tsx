@@ -27,23 +27,34 @@ function AuditoriaPage() {
   const [q, setQ] = useState("");
   const [type, setType] = useState<AuditEvent["type"] | "todos">("todos");
 
+  const filtered = useMemo(() => {
+    const term = q.trim().toLowerCase();
+    return events.filter((event) => {
+      if (type !== "todos" && event.type !== type) return false;
+      if (!term) return true;
+      return [event.actor, event.action, event.target, event.details].some((value) =>
+        value.toLowerCase().includes(term),
+      );
+    });
+  }, [events, q, type]);
+
   useEffect(() => {
     async function load() {
       setLoading(true);
       if (await isSupabaseConfigured()) {
         const remote = await fetchAuditEventsRemote();
-        if (remote && remote.length > 0) {
-          setEvents([...listAuditEvents(), ...remote]);
+        if (remote !== null) {
+          setEvents(remote);
           setLoading(false);
           return;
         }
       }
-      setEvents([...listAuditEvents(), ...listAuditEventsDynamic()]);
+      setEvents(listAuditEventsDynamic());
       setLoading(false);
     }
 
     load();
-    const sync = () => setEvents([...listAuditEvents(), ...listAuditEventsDynamic()]);
+    const sync = () => setEvents(listAuditEventsDynamic());
     window.addEventListener("hcb_audit_changed", sync);
     window.addEventListener("hcb_admin_data_changed", sync);
     return () => {
@@ -59,17 +70,6 @@ function AuditoriaPage() {
       </div>
     );
   }
-
-  const filtered = useMemo(() => {
-    const term = q.trim().toLowerCase();
-    return events.filter((event) => {
-      if (type !== "todos" && event.type !== type) return false;
-      if (!term) return true;
-      return [event.actor, event.action, event.target, event.details].some((value) =>
-        value.toLowerCase().includes(term),
-      );
-    });
-  }, [events, q, type]);
 
   function exportCsv() {
     if (filtered.length === 0) {

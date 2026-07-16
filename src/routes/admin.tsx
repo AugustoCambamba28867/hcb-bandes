@@ -20,7 +20,6 @@ import {
 import { toast } from "sonner";
 import { adminLogin, adminLogout, isAdminAuthenticated, getAdminSession } from "@/lib/leads-store";
 import { ensureSupabaseSchema } from "@/lib/supabase-data";
-import { SupabaseSchemaWarning } from "@/components/supabase-schema-warning";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -163,7 +162,7 @@ function getAdminRoutes() {
 function AdminLayout() {
   const [auth, setAuth] = useState<boolean | null>(null);
   const [open, setOpen] = useState(false);
-  const path = useRouterState({ select: (s) => s.location.pathname });
+  const path = useRouterState({ select: (s: any) => s.location.pathname });
 
   useEffect(() => {
     const check = () => setAuth(isAdminAuthenticated());
@@ -275,9 +274,6 @@ function AdminLayout() {
         {/* content */}
         <main className="min-w-0 flex-1">
           <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-8 lg:px-10 lg:py-10">
-            <div className="mb-6">
-              <SupabaseSchemaWarning />
-            </div>
             <Outlet />
           </div>
         </main>

@@ -7,8 +7,10 @@ function normalizeSupabaseUrl(url: string | undefined) {
   return trimmed.replace(/\/rest\/v1\/?$/, "");
 }
 
-const supabaseUrl = normalizeSupabaseUrl(import.meta.env.VITE_SUPABASE_URL);
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY?.trim();
+const isTest = typeof process !== "undefined" && process.env.NODE_ENV === "test";
+
+const supabaseUrl = isTest ? undefined : normalizeSupabaseUrl(import.meta.env.VITE_SUPABASE_URL);
+const supabaseAnonKey = isTest ? undefined : import.meta.env.VITE_SUPABASE_ANON_KEY?.trim();
 
 export const supabase = supabaseUrl && supabaseAnonKey
   ? createClient(supabaseUrl, supabaseAnonKey, {

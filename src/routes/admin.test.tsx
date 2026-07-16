@@ -10,7 +10,7 @@ vi.mock("sonner", () => ({
 }));
 
 function buildRouter(initial = "/admin") {
-  const rootRoute = createRootRoute({ component: () => <Outlet /> });
+  const rootRoute: any = createRootRoute({ component: () => <Outlet /> });
   const admin: any = createRoute({
     getParentRoute: () => rootRoute,
     path: "/admin",

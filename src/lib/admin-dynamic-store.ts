@@ -1,6 +1,6 @@
 import { addAuditEvent } from "./audit-store";
 import { MOCK_AUDIT_EVENTS, MOCK_ORDERS, MOCK_REPORTS, MOCK_USERS, type AuditEvent, type Order, type OrderStatus, type ReportItem, type User } from "./mock-data";
-import { isSupabaseConfigured } from "./supabase-client";
+import { isSupabaseConfigured, supabaseEnabled } from "./supabase-client";
 import { ensureSupabaseSchema, listAuditEventsFromSupabase, listOrdersFromSupabase, listReportsFromSupabase, listUsersFromSupabase, saveAuditEventToSupabase, saveOrderToSupabase, saveReportToSupabase, saveUserToSupabase } from "./supabase-data";
 
 const ORDERS_KEY = "hcb_orders_v1";
@@ -32,19 +32,26 @@ function writeStorage<T>(key: string, value: T) {
 }
 
 function getOrdersSeed(): Order[] {
+  if (supabaseEnabled) return [];
   return MOCK_ORDERS.map((order) => ({ ...order }));
 }
 
 function getUsersSeed(): User[] {
+  if (supabaseEnabled) return [];
   return MOCK_USERS.map((user) => ({ ...user }));
 }
 
 function getReportsSeed(): ReportItem[] {
+  if (supabaseEnabled) return [];
   return MOCK_REPORTS.map((report) => ({ ...report }));
 }
 
 function mergeAuditEvents(local: AuditEvent[], remote: AuditEvent[]): AuditEvent[] {
-  return [...remote, ...local, ...MOCK_AUDIT_EVENTS]
+  const baseEvents = supabaseEnabled ? [] : MOCK_AUDIT_EVENTS;
+  const filteredLocal = supabaseEnabled
+    ? local.filter((event) => !event.id.startsWith("aud-") && !/^a\d+$/.test(event.id))
+    : local;
+  return [...remote, ...filteredLocal, ...baseEvents]
     .filter((event, index, array) => array.findIndex((candidate) => candidate.id === event.id) === index)
     .sort((a, b) => (a.at < b.at ? 1 : -1));
 }
@@ -190,16 +197,54 @@ export function listAuditEventsDynamic(): AuditEvent[] {
   return mergeAuditEvents(local, []);
 }
 
+export async function listOrdersDynamic(): Promise<Order[]> {
+  if (await isSupabaseConfigured()) {
+    const remote = await fetchOrdersRemote();
+    if (remote !== null) {
+      return remote;
+    }
+  }
+  return listOrders();
+}
+
+export async function listReportsDynamic(): Promise<ReportItem[]> {
+  if (await isSupabaseConfigured()) {
+    const remote = await fetchReportsRemote();
+    if (remote !== null) {
+      return remote;
+    }
+  }
+  return listReports();
+}
+
+export async function listUsersDynamic(): Promise<User[]> {
+  if (await isSupabaseConfigured()) {
+    const remote = await fetchUsersRemote();
+    if (remote !== null) {
+      return remote;
+    }
+  }
+  return listUsers();
+}
+
+export async function listAuditEventsDynamicAsync(): Promise<AuditEvent[]> {
+  if (await isSupabaseConfigured()) {
+    const remote = await fetchAuditEventsRemote();
+    if (remote !== null) {
+      return remote;
+    }
+  }
+  return listAuditEventsDynamic();
+}
+
 // Remote-first helpers: attempt to fetch from Supabase and return remote data if available.
 export async function fetchOrdersRemote(): Promise<Order[] | null> {
   if (!(await isSupabaseConfigured())) return null;
   try {
     await ensureSupabaseSchema();
     const remote = await listOrdersFromSupabase();
-    if (remote.length > 0) {
-      writeStorage(ORDERS_KEY, remote);
-      return remote;
-    }
+    writeStorage(ORDERS_KEY, remote);
+    return remote;
   } catch (error) {
     console.warn("Failed to fetch remote orders", error);
   }
@@ -211,10 +256,8 @@ export async function fetchReportsRemote(): Promise<ReportItem[] | null> {
   try {
     await ensureSupabaseSchema();
     const remote = await listReportsFromSupabase();
-    if (remote.length > 0) {
-      writeStorage(REPORTS_KEY, remote);
-      return remote;
-    }
+    writeStorage(REPORTS_KEY, remote);
+    return remote;
   } catch (error) {
     console.warn("Failed to fetch remote reports", error);
   }
@@ -226,10 +269,8 @@ export async function fetchUsersRemote(): Promise<User[] | null> {
   try {
     await ensureSupabaseSchema();
     const remote = await listUsersFromSupabase();
-    if (remote.length > 0) {
-      writeStorage(USERS_KEY, remote);
-      return remote;
-    }
+    writeStorage(USERS_KEY, remote);
+    return remote;
   } catch (error) {
     console.warn("Failed to fetch remote users", error);
   }
@@ -241,11 +282,10 @@ export async function fetchAuditEventsRemote(): Promise<AuditEvent[] | null> {
   try {
     await ensureSupabaseSchema();
     const remote = await listAuditEventsFromSupabase();
-    if (remote.length > 0) {
-      const local = readStorage<AuditEvent[]>(AUDIT_EVENTS_KEY, []);
-      writeStorage(AUDIT_EVENTS_KEY, mergeAuditEvents(local, remote));
-      return mergeAuditEvents(local, remote);
-    }
+    const local = readStorage<AuditEvent[]>(AUDIT_EVENTS_KEY, []);
+    const merged = mergeAuditEvents(local, remote);
+    writeStorage(AUDIT_EVENTS_KEY, merged);
+    return merged;
   } catch (error) {
     console.warn("Failed to fetch remote audit events", error);
   }

@@ -1,5 +1,16 @@
 create extension if not exists pgcrypto;
 
+-- Function to execute arbitrary SQL (used for bootstrapping/migrations)
+create or replace function public.exec_sql(sql text)
+returns void
+language plpgsql
+security definer
+as $$
+begin
+  execute sql;
+end;
+$$;
+
 create table if not exists public.site_settings (
   id uuid primary key default gen_random_uuid(),
   empresa text not null default 'HCB-BANDES',
