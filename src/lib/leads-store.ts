@@ -241,10 +241,9 @@ export function downloadCSV(filename: string, content: string) {
 const AUTH_KEY = "hcb_admin_auth_v2";
 const ADMIN_USERNAME = import.meta.env.VITE_ADMIN_USERNAME ?? "admin_hcb";
 const ADMIN_PASSWORDS = [
-  import.meta.env.VITE_ADMIN_PASSWORD ?? "Hcbbandes2026",
+  import.meta.env.VITE_ADMIN_PASSWORD,
   "hcb2026",
-  "Hcb2026",
-].filter((value, index, array) => value && array.indexOf(value) === index);
+].filter((value, index, array): value is string => Boolean(value) && array.indexOf(value) === index);
 
 const SESSION_SHORT_MS = 24 * 60 * 60 * 1000; // 24 horas
 const SESSION_LONG_MS = 30 * 24 * 60 * 60 * 1000; // 30 dias (lembrar-me)

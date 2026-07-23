@@ -156,7 +156,7 @@ hcb-bandes/
    VITE_SUPABASE_URL=https://seu-projeto.supabase.co
    VITE_SUPABASE_ANON_KEY=sua-chave-anonima-aqui
    VITE_ADMIN_USERNAME=admin_hcb
-   VITE_ADMIN_PASSWORD=Hcbbandes2026
+   VITE_ADMIN_PASSWORD=sua_palavra_passe_segura
    ```
 
 4. **Iniciar o Servidor de Desenvolvimento**:
