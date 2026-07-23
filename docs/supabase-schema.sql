@@ -1,14 +1,24 @@
--- Run this once in the Supabase SQL Editor
+-- ============================================================
+-- SCRIPT DE CRIAÇÃO E INICIALIZAÇÃO DA BASE DE DADOS (SUPABASE)
+-- Projeto: HCB-BANDES — Habitação Corporativa
+-- Copie e cole este conteúdo no "SQL Editor" do seu novo Supabase e clique em "Run".
+-- ============================================================
 
+-- Extensão para geração de UUIDs e encriptação
+create extension if not exists pgcrypto;
+
+-- Função auxiliar para execução de SQL remoto
 create or replace function public.exec_sql(sql text)
 returns void
 language plpgsql
+security definer
 as $$
 begin
   execute sql;
 end;
 $$;
 
+-- 1. Tabela de Definições Institucionais do Site
 create table if not exists public.site_settings (
   id uuid primary key default gen_random_uuid(),
   empresa text not null default 'HCB-BANDES',
@@ -24,6 +34,7 @@ create table if not exists public.site_settings (
   updated_at timestamptz default now()
 );
 
+-- 2. Tabela de Leads / Mensagens de Contacto & Pedidos de Orçamento
 create table if not exists public.leads (
   id uuid primary key default gen_random_uuid(),
   nome text not null,
@@ -32,11 +43,13 @@ create table if not exists public.leads (
   empresa text,
   perfil text not null default 'Outro',
   mensagem text not null default '',
+  canal text not null default 'site',
   status text not null default 'novo',
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );
 
+-- 3. Tabela de Serviços
 create table if not exists public.services (
   id uuid primary key default gen_random_uuid(),
   slug text unique not null,
@@ -49,6 +62,7 @@ create table if not exists public.services (
   updated_at timestamptz default now()
 );
 
+-- 4. Tabela de Etapas do Processo / Modelo
 create table if not exists public.stages (
   id uuid primary key default gen_random_uuid(),
   slug text unique not null,
@@ -60,6 +74,7 @@ create table if not exists public.stages (
   updated_at timestamptz default now()
 );
 
+-- 5. Tabela de Conteúdo Editável das Páginas
 create table if not exists public.page_content (
   id uuid primary key default gen_random_uuid(),
   page_key text unique not null,
@@ -70,6 +85,7 @@ create table if not exists public.page_content (
   updated_at timestamptz default now()
 );
 
+-- 6. Tabela de Encomendas / Pedidos do Painel Admin
 create table if not exists public.admin_orders (
   id text primary key,
   reference text not null,
@@ -82,6 +98,7 @@ create table if not exists public.admin_orders (
   updated_at timestamptz default now()
 );
 
+-- 7. Tabela de Relatórios do Painel Admin
 create table if not exists public.admin_reports (
   id text primary key,
   title text not null,
@@ -93,6 +110,7 @@ create table if not exists public.admin_reports (
   status text not null default 'rascunho'
 );
 
+-- 8. Tabela de Utilizadores do Painel Admin
 create table if not exists public.admin_users (
   id text primary key,
   first_name text not null,
@@ -109,6 +127,7 @@ create table if not exists public.admin_users (
   archived boolean default false
 );
 
+-- 9. Tabela de Eventos de Auditoria do Painel Admin
 create table if not exists public.admin_audit_events (
   id text primary key,
   actor text not null,
@@ -119,8 +138,12 @@ create table if not exists public.admin_audit_events (
   type text not null default 'info'
 );
 
+-- ============================================================
+-- DADOS INICIAIS (SEED DATA)
+-- ============================================================
+
 insert into public.site_settings (empresa, tagline, email, telefone, whatsapp, endereco, banks_partners, companies_partners, promoters_partners)
-select 'HCB-BANDES', 'Conectamos pessoas, empresas, bancos e imóveis', 'geral@hcb-bandes.com', '+244 952 300 277', '+244 952 300 277', 'Luanda, Angola', '[]'::jsonb, '[]'::jsonb, '[]'::jsonb
+select 'HCB-BANDES', 'Conectamos pessoas, empresas, bancos e imóveis', 'geral@hcb-bandes.com', '+244 952 300 277', '+244 952 300 277', 'Luanda, Angola', '["BAI", "BFA", "BIC", "Banco Sol"]'::jsonb, '["Sonangol", "Endiama", "TAAG", "Unitel"]'::jsonb, '["Imogestin", "Vida Imobiliária", "Casa Plus"]'::jsonb
 where not exists (select 1 from public.site_settings limit 1);
 
 insert into public.services (slug, title, description, points, order_index)
@@ -149,3 +172,45 @@ values
   ('servicos', 'Quatro pilares para uma solução habitacional completa.', 'Habitação Corporativa, Crédito, Imobiliário, Gestão Condominial.', null),
   ('beneficios', 'Vantagens concretas para cada parceiro do ecossistema.', 'Empresas, bancos e trabalhadores.', null)
 on conflict (page_key) do nothing;
+
+-- ============================================================
+-- POLÍTICAS DE SEGURANÇA (ROW LEVEL SECURITY - RLS)
+-- Permite leitura e escrita sem bloqueios de permissão
+-- ============================================================
+
+alter table public.site_settings enable row level security;
+alter table public.leads enable row level security;
+alter table public.services enable row level security;
+alter table public.stages enable row level security;
+alter table public.page_content enable row level security;
+alter table public.admin_orders enable row level security;
+alter table public.admin_reports enable row level security;
+alter table public.admin_users enable row level security;
+alter table public.admin_audit_events enable row level security;
+
+drop policy if exists "site_settings_all" on public.site_settings;
+create policy "site_settings_all" on public.site_settings for all using (true) with check (true);
+
+drop policy if exists "leads_all" on public.leads;
+create policy "leads_all" on public.leads for all using (true) with check (true);
+
+drop policy if exists "services_all" on public.services;
+create policy "services_all" on public.services for all using (true) with check (true);
+
+drop policy if exists "stages_all" on public.stages;
+create policy "stages_all" on public.stages for all using (true) with check (true);
+
+drop policy if exists "page_content_all" on public.page_content;
+create policy "page_content_all" on public.page_content for all using (true) with check (true);
+
+drop policy if exists "admin_orders_all" on public.admin_orders;
+create policy "admin_orders_all" on public.admin_orders for all using (true) with check (true);
+
+drop policy if exists "admin_reports_all" on public.admin_reports;
+create policy "admin_reports_all" on public.admin_reports for all using (true) with check (true);
+
+drop policy if exists "admin_users_all" on public.admin_users;
+create policy "admin_users_all" on public.admin_users for all using (true) with check (true);
+
+drop policy if exists "admin_audit_events_all" on public.admin_audit_events;
+create policy "admin_audit_events_all" on public.admin_audit_events for all using (true) with check (true);

@@ -1,9 +1,9 @@
 import { MessageCircle } from "lucide-react";
-import { getSettings } from "@/lib/site-settings";
+import { useSiteSettings } from "@/lib/site-settings";
 import { buildWhatsAppUrl } from "@/lib/leads-store";
 
 export function WhatsappFab() {
-  const settings = getSettings();
+  const settings = useSiteSettings();
   const href = buildWhatsAppUrl(
     "Olá HCB-BANDES, gostaria de receber mais informações sobre a sua solução habitacional.",
     settings.whatsapp,
@@ -21,3 +21,4 @@ export function WhatsappFab() {
     </a>
   );
 }
+

@@ -59,8 +59,27 @@ export function listLeads(): Lead[] {
 
 export async function listLeadsDynamic(): Promise<Lead[]> {
   if (await isSupabaseConfigured()) {
-    const remote = await listLeadsFromSupabase();
-    if (remote.length > 0) return remote;
+    try {
+      const remote = await listLeadsFromSupabase();
+      const local = read();
+
+      // Se houver leads criadas localmente durante a queda da ligação que não existem na BD remoto:
+      const remoteIds = new Set(remote.map((r) => r.id));
+      const pendingUploads = local.filter((l) => !remoteIds.has(l.id));
+
+      if (pendingUploads.length > 0) {
+        // Envia as leads pendentes para o Supabase automaticamente
+        for (const lead of pendingUploads) {
+          await saveLeadToSupabase(lead).catch(() => undefined);
+        }
+        // Recarrega a lista consolidada
+        return (await listLeadsFromSupabase()) ?? remote;
+      }
+
+      if (remote.length > 0) return remote;
+    } catch {
+      // fallback para local se falhar a rede
+    }
   }
   return listLeads();
 }

@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { readSettings, saveSettingsToSupabase } from "@/lib/supabase-data";
 
 const KEY = "hcb_site_settings_v1";
@@ -62,6 +63,25 @@ export function getSettings(): SiteSettings {
   }
 }
 
+export function useSiteSettings(): SiteSettings {
+  const [settings, setSettings] = useState<SiteSettings>(getSettings);
+
+  useEffect(() => {
+    getSettingsAsync().then((s) => {
+      if (s) setSettings(s);
+    });
+
+    function handleChange() {
+      setSettings(getSettings());
+    }
+
+    window.addEventListener("hcb_settings_changed", handleChange);
+    return () => window.removeEventListener("hcb_settings_changed", handleChange);
+  }, []);
+
+  return settings;
+}
+
 export async function saveSettings(s: SiteSettings) {
   if (!isBrowser()) return;
   window.localStorage.setItem(KEY, JSON.stringify(s));
@@ -78,3 +98,4 @@ export function resetSettings() {
   window.localStorage.removeItem(KEY);
   window.dispatchEvent(new Event("hcb_settings_changed"));
 }
+

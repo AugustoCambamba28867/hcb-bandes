@@ -21,7 +21,7 @@ import familyImg from "@/assets/family-keys.jpg";
 import partnershipImg from "@/assets/partnership.jpg";
 import { cn } from "@/lib/utils";
 import { Section, SectionHeader } from "@/components/section";
-import { getSettings } from "@/lib/site-settings";
+import { useSiteSettings } from "@/lib/site-settings";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -108,7 +108,8 @@ const PROCESSO = [
 ];
 
 function HomePage() {
-  const settings = getSettings();
+  const settings = useSiteSettings();
+
 
   return (
     <>

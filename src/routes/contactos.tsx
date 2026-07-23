@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { PageHero, Section } from "@/components/section";
 import { contactSchema } from "@/lib/validation";
 import { addLead, buildWhatsAppUrl, formatLeadWhatsAppText, type LeadCanal } from "@/lib/leads-store";
-import { getSettings } from "@/lib/site-settings";
+import { useSiteSettings } from "@/lib/site-settings";
 
 export const Route = createFileRoute("/contactos")({
   head: () => ({
@@ -44,7 +44,8 @@ function ContactosPage() {
   const [errors, setErrors] = useState<Errors>({});
   const [mensagemLen, setMensagemLen] = useState(0);
   const [canal, setCanal] = useState<LeadCanal>("whatsapp");
-  const settings = getSettings();
+  const settings = useSiteSettings();
+
   const quickWhatsAppLink = buildWhatsAppUrl(
     "Olá HCB-BANDES, gostaria de solicitar um orçamento e saber como podemos avançar.",
     settings.whatsapp,
