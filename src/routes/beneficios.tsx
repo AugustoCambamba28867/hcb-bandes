@@ -65,13 +65,15 @@ const BLOCKS = [
 ];
 
 function BeneficiosPage() {
+  const c = usePageContent("beneficios");
   return (
     <>
       <PageHero
         eyebrow="Benefícios"
-        title="Vantagens concretas para cada parceiro do ecossistema."
-        subtitle="A nossa estrutura foi pensada para gerar ganhos reais e mensuráveis para empresas, bancos e clientes finais."
+        title={c.title}
+        subtitle={c.hero || c.description}
       />
+
 
       <Section>
         <div className="space-y-10">
