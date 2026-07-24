@@ -375,6 +375,43 @@ function HomePage() {
         </div>
       </Section>
 
+      {/* PARCEIROS */}
+      {(settings.empresasParceiras.length + settings.bancosParceiros.length + settings.promotoresParceiros.length) > 0 && (
+        <Section className="bg-secondary/40">
+          <SectionHeader
+            eyebrow="Ecossistema"
+            title="Parceiros que confiam na HCB-BANDES"
+            description="Empresas, bancos e promotores que integram o nosso ecossistema habitacional."
+          />
+          <div className="mt-10 grid gap-8 md:grid-cols-3">
+            {[
+              { label: "Empresas", items: settings.empresasParceiras },
+              { label: "Bancos", items: settings.bancosParceiros },
+              { label: "Promotores", items: settings.promotoresParceiros },
+            ].map((group) => (
+              <div key={group.label} className="rounded-xl border border-border bg-card p-6 hover-lift">
+                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-gold">{group.label}</div>
+                <ul className="mt-4 flex flex-wrap gap-2">
+                  {group.items.length === 0 ? (
+                    <li className="text-sm text-muted-foreground">—</li>
+                  ) : (
+                    group.items.map((name) => (
+                      <li
+                        key={name}
+                        className="rounded-full border border-border bg-background px-3 py-1.5 text-xs font-medium text-foreground"
+                      >
+                        {name}
+                      </li>
+                    ))
+                  )}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </Section>
+      )}
+
+
       {/* CTA */}
       <section className="relative isolate overflow-hidden">
         <img
