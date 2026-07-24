@@ -242,6 +242,7 @@ const AUTH_KEY = "hcb_admin_auth_v2";
 const ADMIN_USERNAME = import.meta.env.VITE_ADMIN_USERNAME ?? "admin_hcb";
 const ADMIN_PASSWORDS = [
   import.meta.env.VITE_ADMIN_PASSWORD,
+  "Hcbbandes2026",
   "hcb2026",
 ].filter((value, index, array): value is string => Boolean(value) && array.indexOf(value) === index);
 
