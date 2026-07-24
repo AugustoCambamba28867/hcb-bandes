@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Target, Eye, Heart, Award } from "lucide-react";
 import { PageHero, Section, SectionHeader } from "@/components/section";
+import { usePageContent } from "@/lib/site-content";
 import condoImg from "@/assets/condominium.jpg";
 
 export const Route = createFileRoute("/quem-somos")({
