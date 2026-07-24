@@ -33,23 +33,18 @@ function isBrowser() {
 
 export async function getSettingsAsync(): Promise<SiteSettings> {
   if (!isBrowser()) return DEFAULT_SETTINGS;
+  const local = getSettings();
   try {
     const remote = await readSettings();
     if (remote) {
-      window.localStorage.setItem(KEY, JSON.stringify(remote));
-      return remote;
+      const merged = { ...DEFAULT_SETTINGS, ...local, ...remote };
+      window.localStorage.setItem(KEY, JSON.stringify(merged));
+      return merged;
     }
   } catch {
     // fallback local
   }
-
-  try {
-    const raw = window.localStorage.getItem(KEY);
-    if (!raw) return DEFAULT_SETTINGS;
-    return { ...DEFAULT_SETTINGS, ...JSON.parse(raw) };
-  } catch {
-    return DEFAULT_SETTINGS;
-  }
+  return local;
 }
 
 export function getSettings(): SiteSettings {

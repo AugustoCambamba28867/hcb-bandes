@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
+import { useSiteSettings } from "@/lib/site-settings";
 
 const NAV = [
   { to: "/", label: "Início" },
@@ -14,15 +15,17 @@ const NAV = [
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
+  const settings = useSiteSettings();
+
   return (
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur supports-[backdrop-filter]:bg-background/70">
       <div className="container-page flex h-18 items-center justify-between py-3">
         <Link to="/" className="flex items-center gap-3 group">
           <div className="flex h-11 w-11 items-center justify-center rounded-md bg-primary text-primary-foreground font-display text-lg font-bold shadow-elegant transition-transform group-hover:scale-105">
-            H
+            {settings.empresa ? settings.empresa.charAt(0) : "H"}
           </div>
           <div className="leading-tight">
-            <div className="font-display text-lg font-bold text-primary">HCB-BANDES</div>
+            <div className="font-display text-lg font-bold text-primary">{settings.empresa || "HCB-BANDES"}</div>
             <div className="text-[10px] uppercase tracking-[0.18em] text-gold">Habitação Corporativa</div>
           </div>
         </Link>

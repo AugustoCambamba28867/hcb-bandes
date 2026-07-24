@@ -388,14 +388,33 @@ export async function saveSettingsToSupabase(settings: SiteSettings) {
     banks_partners: settings.bancosParceiros,
     companies_partners: settings.empresasParceiras,
     promoters_partners: settings.promotoresParceiros,
+    updated_at: new Date().toISOString(),
   };
 
-  const { error } = await supabase.from(TABLES.settings).insert(payload).select().single();
-  if (error) {
-    console.warn("Supabase settings save warning:", await getSupabaseErrorMessage(error));
-    return false;
+  try {
+    const { data: existing } = await supabase
+      .from(TABLES.settings)
+      .select("id")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (existing?.id) {
+      const { error } = await supabase
+        .from(TABLES.settings)
+        .update(payload)
+        .eq("id", existing.id);
+      if (!error) return true;
+      console.warn("Supabase settings update warning:", error.message);
+    }
+
+    const { error: insertError } = await supabase.from(TABLES.settings).insert(payload);
+    if (!insertError) return true;
+    console.warn("Supabase settings insert warning:", insertError.message);
+  } catch (err) {
+    console.warn("Supabase settings save exception:", err);
   }
-  return true;
+  return false;
 }
 
 export async function listServicesFromSupabase(): Promise<DbService[]> {
