@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Target, Eye, Heart, Award } from "lucide-react";
 import { PageHero, Section, SectionHeader } from "@/components/section";
+import { usePageContent } from "@/lib/site-content";
 import condoImg from "@/assets/condominium.jpg";
 
 export const Route = createFileRoute("/quem-somos")({
@@ -25,13 +26,15 @@ export const Route = createFileRoute("/quem-somos")({
 });
 
 function QuemSomos() {
+  const c = usePageContent("quemSomos");
   return (
     <>
       <PageHero
         eyebrow="Quem Somos"
-        title="Uma unidade de negócios dedicada à habitação corporativa em Angola."
-        subtitle="A HCB-BANDES nasce dentro da Bandes Comércio & Serviços com a missão de facilitar o acesso à habitação a trabalhadores de empresas públicas e privadas angolanas."
+        title={c.title}
+        subtitle={c.hero || c.description}
       />
+
 
       <Section>
         <div className="grid gap-12 lg:grid-cols-2 lg:items-center">

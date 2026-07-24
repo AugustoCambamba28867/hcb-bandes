@@ -22,6 +22,7 @@ import partnershipImg from "@/assets/partnership.jpg";
 import { cn } from "@/lib/utils";
 import { Section, SectionHeader } from "@/components/section";
 import { useSiteSettings } from "@/lib/site-settings";
+import { usePageContent } from "@/lib/site-content";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -109,6 +110,7 @@ const PROCESSO = [
 
 function HomePage() {
   const settings = useSiteSettings();
+  const home = usePageContent("home");
 
 
   return (
@@ -137,11 +139,10 @@ function HomePage() {
                 <Sparkles size={12} /> {settings.empresa}
               </div>
               <h1 className="mt-6 font-display text-4xl md:text-6xl font-bold leading-[1.05] animate-slide-up delay-100">
-                Conectamos <span className="text-gradient-gold">empresas, bancos</span> e trabalhadores a
-                imóveis de valor.
+                {home.title}
               </h1>
               <p className="mt-6 max-w-xl text-lg text-primary-foreground/85 leading-relaxed animate-slide-up delay-200">
-                {settings.tagline}. Criamos jornadas habitacionais com clareza, parceria e execução.
+                {home.hero || settings.tagline}
               </p>
               <div className="mt-8 flex flex-wrap gap-3 animate-slide-up delay-300">
                 <Link
@@ -373,6 +374,43 @@ function HomePage() {
 
         </div>
       </Section>
+
+      {/* PARCEIROS */}
+      {(settings.empresasParceiras.length + settings.bancosParceiros.length + settings.promotoresParceiros.length) > 0 && (
+        <Section className="bg-secondary/40">
+          <SectionHeader
+            eyebrow="Ecossistema"
+            title="Parceiros que confiam na HCB-BANDES"
+            description="Empresas, bancos e promotores que integram o nosso ecossistema habitacional."
+          />
+          <div className="mt-10 grid gap-8 md:grid-cols-3">
+            {[
+              { label: "Empresas", items: settings.empresasParceiras },
+              { label: "Bancos", items: settings.bancosParceiros },
+              { label: "Promotores", items: settings.promotoresParceiros },
+            ].map((group) => (
+              <div key={group.label} className="rounded-xl border border-border bg-card p-6 hover-lift">
+                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-gold">{group.label}</div>
+                <ul className="mt-4 flex flex-wrap gap-2">
+                  {group.items.length === 0 ? (
+                    <li className="text-sm text-muted-foreground">—</li>
+                  ) : (
+                    group.items.map((name) => (
+                      <li
+                        key={name}
+                        className="rounded-full border border-border bg-background px-3 py-1.5 text-xs font-medium text-foreground"
+                      >
+                        {name}
+                      </li>
+                    ))
+                  )}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </Section>
+      )}
+
 
       {/* CTA */}
       <section className="relative isolate overflow-hidden">
