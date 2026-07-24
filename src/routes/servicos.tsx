@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Banknote, CheckCircle2, ClipboardList, Settings2 } from "lucide-react";
 import { PageHero, Section } from "@/components/section";
+import { usePageContent } from "@/lib/site-content";
 
 export const Route = createFileRoute("/servicos")({
   head: () => ({
