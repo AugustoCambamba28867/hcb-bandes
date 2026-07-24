@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Users, Landmark, Home, CheckCircle2 } from "lucide-react";
 import { PageHero, Section } from "@/components/section";
+import { usePageContent } from "@/lib/site-content";
 
 export const Route = createFileRoute("/beneficios")({
   head: () => ({
