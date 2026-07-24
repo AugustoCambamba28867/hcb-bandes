@@ -110,6 +110,7 @@ const PROCESSO = [
 
 function HomePage() {
   const settings = useSiteSettings();
+  const home = usePageContent("home");
 
 
   return (
@@ -138,11 +139,10 @@ function HomePage() {
                 <Sparkles size={12} /> {settings.empresa}
               </div>
               <h1 className="mt-6 font-display text-4xl md:text-6xl font-bold leading-[1.05] animate-slide-up delay-100">
-                Conectamos <span className="text-gradient-gold">empresas, bancos</span> e trabalhadores a
-                imóveis de valor.
+                {home.title}
               </h1>
               <p className="mt-6 max-w-xl text-lg text-primary-foreground/85 leading-relaxed animate-slide-up delay-200">
-                {settings.tagline}. Criamos jornadas habitacionais com clareza, parceria e execução.
+                {home.hero || settings.tagline}
               </p>
               <div className="mt-8 flex flex-wrap gap-3 animate-slide-up delay-300">
                 <Link
