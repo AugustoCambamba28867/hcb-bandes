@@ -11,6 +11,7 @@ import {
   type DbService,
 } from "@/lib/supabase-data";
 import { isSupabaseConfigured } from "@/lib/supabase-client";
+import { CONTENT_EVENT, CONTENT_KEY } from "@/lib/site-content";
 
 export const Route = createFileRoute("/admin/conteudos")({
   component: ConteudosPage,
