@@ -113,19 +113,36 @@ create table if not exists public.admin_reports (
 -- 8. Tabela de Utilizadores do Painel Admin
 create table if not exists public.admin_users (
   id text primary key,
+  username text unique,
   first_name text not null,
   last_name text not null,
   email text not null,
   phone text,
   department text,
   position text,
-  role text not null,
+  role text not null default 'SuperAdmin',
   status text not null default 'activo',
   avatar text,
+  password_hash text,
   created_at timestamptz default now(),
   last_login timestamptz,
   archived boolean default false
 );
+
+-- Seed de Utilizador Administrador Inicial
+insert into public.admin_users (id, username, first_name, last_name, email, role, status, password_hash)
+values (
+  'usr-admin-1',
+  'admin_hcb',
+  'Administrador',
+  'HCB',
+  'admin@hcb-bandes.com',
+  'SuperAdmin',
+  'activo',
+  'Hcbbandes2026'
+)
+on conflict (id) do nothing;
+
 
 -- 9. Tabela de Eventos de Auditoria do Painel Admin
 create table if not exists public.admin_audit_events (

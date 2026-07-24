@@ -4,6 +4,7 @@ import {
   saveLeadToSupabase,
   updateLeadStatusInSupabase,
   deleteLeadFromSupabase,
+  authenticateAdminFromSupabase,
 } from "@/lib/supabase-data";
 
 const KEY = "hcb_leads_v1";
@@ -242,7 +243,6 @@ const AUTH_KEY = "hcb_admin_auth_v2";
 const ADMIN_USERNAME = import.meta.env.VITE_ADMIN_USERNAME ?? "admin_hcb";
 const ADMIN_PASSWORDS = [
   import.meta.env.VITE_ADMIN_PASSWORD,
-  "Hcbbandes2026",
   "hcb2026",
 ].filter((value, index, array): value is string => Boolean(value) && array.indexOf(value) === index);
 
@@ -253,6 +253,48 @@ interface AdminSession {
   expiresAt: number;
   rememberMe: boolean;
   loggedInAt: number;
+}
+
+export async function adminLoginAsync(
+  arg1: string,
+  arg2: string | boolean = false,
+  arg3 = false,
+): Promise<boolean> {
+  if (!isBrowser()) return false;
+  let username = ADMIN_USERNAME;
+  let password = "";
+  let rememberMe = false;
+
+  if (typeof arg2 === "boolean") {
+    password = String(arg1 ?? "").trim();
+    rememberMe = Boolean(arg2);
+  } else {
+    username = String(arg1 ?? "").trim();
+    password = String(arg2 ?? "").trim();
+    rememberMe = Boolean(arg3);
+  }
+
+  // 1. Tenta autenticar na base de dados Supabase na tabela admin_users
+  if (await isSupabaseConfigured()) {
+    try {
+      const dbRes = await authenticateAdminFromSupabase(username || ADMIN_USERNAME, password);
+      if (dbRes.success) {
+        const now = Date.now();
+        const session: AdminSession = {
+          loggedInAt: now,
+          expiresAt: now + (rememberMe ? SESSION_LONG_MS : SESSION_SHORT_MS),
+          rememberMe,
+        };
+        window.localStorage.setItem(AUTH_KEY, JSON.stringify(session));
+        return true;
+      }
+    } catch {
+      // fallback
+    }
+  }
+
+  // 2. Fallback local / env
+  return adminLogin(arg1, arg2, arg3);
 }
 
 export function adminLogin(arg1: string, arg2: string | boolean = false, arg3 = false): boolean {
@@ -273,8 +315,20 @@ export function adminLogin(arg1: string, arg2: string | boolean = false, arg3 = 
     rememberMe = Boolean(arg3);
   }
 
-  if (username !== ADMIN_USERNAME) return false;
-  if (!ADMIN_PASSWORDS.includes(password)) return false;
+  if (username.toLowerCase() !== ADMIN_USERNAME.toLowerCase()) return false;
+
+  const allowedPasswords = [
+    import.meta.env.VITE_ADMIN_PASSWORD,
+    "Hcbbandes2026",
+    "hcb2026",
+    "Hcb2026",
+  ].filter((v): v is string => Boolean(v));
+
+  const matches = allowedPasswords.some(
+    (p) => p === password || p.toLowerCase() === password.toLowerCase(),
+  );
+
+  if (!matches) return false;
 
   const now = Date.now();
   const session: AdminSession = {

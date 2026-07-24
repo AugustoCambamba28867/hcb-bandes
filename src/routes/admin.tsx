@@ -18,7 +18,7 @@ import {
   FileBarChart,
 } from "lucide-react";
 import { toast } from "sonner";
-import { adminLogin, adminLogout, isAdminAuthenticated, getAdminSession } from "@/lib/leads-store";
+import { adminLogin, adminLoginAsync, adminLogout, isAdminAuthenticated, getAdminSession } from "@/lib/leads-store";
 import { ensureSupabaseSchema } from "@/lib/supabase-data";
 
 export const Route = createFileRoute("/admin")({
@@ -306,7 +306,7 @@ function LoginScreen({ onSuccess }: { onSuccess: () => void }) {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  function submit(e: FormEvent<HTMLFormElement>) {
+  async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
     const username = String(fd.get("username") ?? "").trim();
@@ -317,8 +317,10 @@ function LoginScreen({ onSuccess }: { onSuccess: () => void }) {
       return;
     }
     setLoading(true);
-    setTimeout(() => {
-      const ok = username ? adminLogin(username, password, remember) : adminLogin(password, remember);
+    try {
+      const ok = username
+        ? await adminLoginAsync(username, password, remember)
+        : await adminLoginAsync(password, remember);
       setLoading(false);
       if (ok) {
         toast.success("Bem-vindo ao painel");
@@ -326,7 +328,10 @@ function LoginScreen({ onSuccess }: { onSuccess: () => void }) {
       } else {
         setError("Nome de utilizador ou palavra-passe incorrecta.");
       }
-    }, 400);
+    } catch {
+      setLoading(false);
+      setError("Falha ao verificar credenciais.");
+    }
   }
 
   return (

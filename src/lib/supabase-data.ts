@@ -587,6 +587,39 @@ export async function saveUserToSupabase(user: User): Promise<boolean> {
   return true;
 }
 
+export async function authenticateAdminFromSupabase(
+  usernameOrEmail: string,
+  password: string,
+): Promise<{ success: boolean; user?: User }> {
+  if (!supabase) return { success: false };
+  try {
+    const { data: listData, error } = await supabase.from(TABLES.users).select("*");
+    if (error || !listData) return { success: false };
+
+    const target = usernameOrEmail.trim().toLowerCase();
+    const found = listData.find((row: any) => {
+      const u = String(row.username ?? "").trim().toLowerCase();
+      const e = String(row.email ?? "").trim().toLowerCase();
+      const id = String(row.id ?? "").trim().toLowerCase();
+      return u === target || e === target || id === target;
+    });
+
+    if (found) {
+      const storedPass = typeof found.password_hash === "string" ? found.password_hash : null;
+      const isPasswordValid = storedPass
+        ? storedPass === password || storedPass.toLowerCase() === password.toLowerCase()
+        : true;
+
+      if (isPasswordValid && found.archived !== true && found.status !== "inactivo") {
+        return { success: true, user: normalizeUser(found) };
+      }
+    }
+  } catch (err) {
+    console.warn("Supabase admin auth check warning:", err);
+  }
+  return { success: false };
+}
+
 export async function listAuditEventsFromSupabase(): Promise<AuditEvent[]> {
   if (!supabase) return [];
   const { data, error } = await supabase.from(TABLES.auditEvents).select("*").order("at", { ascending: false });
