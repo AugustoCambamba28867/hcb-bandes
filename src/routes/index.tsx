@@ -22,6 +22,7 @@ import partnershipImg from "@/assets/partnership.jpg";
 import { cn } from "@/lib/utils";
 import { Section, SectionHeader } from "@/components/section";
 import { useSiteSettings } from "@/lib/site-settings";
+import { usePageContent } from "@/lib/site-content";
 
 export const Route = createFileRoute("/")({
   head: () => ({
