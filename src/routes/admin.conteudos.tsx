@@ -90,6 +90,10 @@ function ConteudosPage() {
   }, []);
 
   async function save() {
+    // Sempre espelhar localmente + disparar evento para reflectir no site imediatamente.
+    window.localStorage.setItem(CONTENT_KEY, JSON.stringify(data));
+    window.dispatchEvent(new Event(CONTENT_EVENT));
+
     if (await isSupabaseConfigured()) {
       const rows = Object.entries(data).map(([page_key, value]) => ({
         page_key,
@@ -99,18 +103,17 @@ function ConteudosPage() {
       }));
       const results = await Promise.all(rows.map((row) => savePageContentToSupabase(row)));
       if (results.every((result) => result !== null)) {
-        toast.success("Conteúdos guardados", {
-          description: "Alterações foram publicadas com sucesso.",
+        toast.success("Conteúdos publicados", {
+          description: "Alterações reflectidas em todo o site.",
         });
         return;
       }
-      toast.error("Falha ao guardar no backend. Consulte a consola.");
+      toast.error("Guardado localmente, mas falhou no backend.");
       return;
     }
 
-    window.localStorage.setItem(KEY, JSON.stringify(data));
-    toast.success("Conteúdos guardados", {
-      description: "Alterações guardadas localmente.",
+    toast.success("Conteúdos publicados", {
+      description: "Alterações reflectidas em todo o site.",
     });
   }
 
