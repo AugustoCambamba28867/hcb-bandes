@@ -60,13 +60,15 @@ const SERVICOS = [
 ];
 
 function ServicosPage() {
+  const c = usePageContent("servicos");
   return (
     <>
       <PageHero
         eyebrow="Os Nossos Servicos"
-        title="Gestao condominial profissional para valorizar patrimonios."
-        subtitle="A HCB-BANDES actua na administracao de condominios com foco em organizacao financeira, rigor administrativo e operacao diaria eficiente."
+        title={c.title}
+        subtitle={c.hero || c.description}
       />
+
 
       <Section>
         <div className="mb-10 overflow-hidden rounded-lg border border-border bg-card">
