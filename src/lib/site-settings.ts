@@ -18,7 +18,7 @@ export interface SiteSettings {
 export const DEFAULT_SETTINGS: SiteSettings = {
   empresa: "HCB-BANDES",
   tagline: "Conectamos pessoas, empresas, bancos e imóveis",
-  email: "geral@hcb-bandes.com",
+  email: "hcb.bandes@gmail.com",
   telefone: "+244 952 300 277",
   whatsapp: "+244 952 300 277",
   endereco: "Luanda, Angola",

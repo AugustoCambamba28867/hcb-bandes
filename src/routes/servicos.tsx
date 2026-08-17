@@ -1,20 +1,20 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Banknote, CheckCircle2, ClipboardList, Settings2 } from "lucide-react";
+import { Building, ClipboardList, Briefcase, Banknote, Home, Key, CheckCircle2 } from "lucide-react";
 import { PageHero, Section } from "@/components/section";
 import { usePageContent } from "@/lib/site-content";
 
 export const Route = createFileRoute("/servicos")({
   head: () => ({
     meta: [
-      { title: "Servicos - HCB-BANDES" },
+      { title: "Serviços - HCB-BANDES" },
       {
         name: "description",
-        content: "Gestao financeira, administrativa e operacional para condominios.",
+        content: "Conheça os serviços da HCB-BANDES, desde habitação corporativa até consultoria imobiliária.",
       },
-      { property: "og:title", content: "Servicos - HCB-BANDES" },
+      { property: "og:title", content: "Serviços - HCB-BANDES" },
       {
         property: "og:description",
-        content: "Servicos profissionais de gestao condominial HCB-BANDES.",
+        content: "Serviços profissionais imobiliários e de habitação HCB-BANDES.",
       },
       { property: "og:url", content: "/servicos" },
     ],
@@ -25,36 +25,57 @@ export const Route = createFileRoute("/servicos")({
 
 const SERVICOS = [
   {
-    icon: Banknote,
-    image: "/legacy/gestao-financeira.jpg",
-    title: "Gestao Financeira",
-    desc: "Organizamos a saude financeira do condominio com cobranca, controlo de caixa, prestacao de contas e relatorios claros.",
+    icon: Building,
+    title: "Habitação Corporativa",
+    desc: "Soluções habitacionais personalizadas para empresas, facilitando o acesso dos trabalhadores à casa própria.",
     pontos: [
-      "Orcamentos, quotas e controlo de inadimplencia",
-      "Relatorios financeiros periodicos",
-      "Transparencia nas receitas e despesas",
+      "Parcerias estratégicas com empregadores",
+      "Processos simplificados",
     ],
   },
   {
     icon: ClipboardList,
-    image: "/legacy/gestao-administrativa.jpg",
-    title: "Gestao Administrativa",
-    desc: "Tratamos dos processos administrativos do condominio, documentacao, comunicacao com moradores e suporte a tomada de decisao.",
+    title: "Gestão de Condomínios",
+    desc: "Administração profissional de condomínios, garantindo organização financeira, administrativa e operacional.",
     pontos: [
-      "Actas, contratos e organizacao documental",
-      "Atendimento e comunicacao com moradores",
-      "Apoio a direccao e assembleias",
+      "Cobrança e prestação de contas",
+      "Manutenção e supervisão operacional",
     ],
   },
   {
-    icon: Settings2,
-    image: "/legacy/gestao-operacional.jpg",
-    title: "Gestao Operacional",
-    desc: "Coordenamos manutencao, limpeza, seguranca e fornecedores para garantir tranquilidade, conservacao e valorizacao do patrimonio.",
+    icon: Briefcase,
+    title: "Consultoria Imobiliária",
+    desc: "Apoio especializado para investimentos e tomada de decisão no mercado imobiliário angolano.",
     pontos: [
-      "Supervisao de manutencao e limpeza",
-      "Coordenacao de seguranca e fornecedores",
-      "Rotinas operacionais acompanhadas de perto",
+      "Análise de mercado",
+      "Aconselhamento estratégico",
+    ],
+  },
+  {
+    icon: Banknote,
+    title: "Intermediação de Crédito Imobiliário",
+    desc: "Facilitamos o processo de financiamento junto da nossa rede de bancos parceiros, com condições vantajosas.",
+    pontos: [
+      "Organização documental",
+      "Negociação de taxas e condições",
+    ],
+  },
+  {
+    icon: Home,
+    title: "Venda de Imóveis",
+    desc: "Ampla carteira de imóveis para venda, seleccionados segundo rigorosos critérios de qualidade.",
+    pontos: [
+      "Imóveis prontos a habitar",
+      "Acompanhamento jurídico",
+    ],
+  },
+  {
+    icon: Key,
+    title: "Arrendamento de Imóveis",
+    desc: "Soluções flexíveis de arrendamento, adequadas a diferentes necessidades e prazos.",
+    pontos: [
+      "Arrendamento mensal e diário",
+      "Gestão de contratos e inquilinos",
     ],
   },
 ];
@@ -85,16 +106,15 @@ function ServicosPage() {
               key={s.title}
               className="group overflow-hidden rounded-lg border border-border bg-card transition hover:border-gold/60 hover:shadow-elegant"
             >
-              <img src={s.image} alt={s.title} className="h-44 w-full object-cover" />
-              <div className="p-6">
-                <div className="flex h-11 w-11 items-center justify-center rounded-md bg-primary text-primary-foreground transition group-hover:bg-gold group-hover:text-gold-foreground">
-                  <s.icon size={21} />
+              <div className="p-8">
+                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary text-primary-foreground transition-transform duration-300 group-hover:-translate-y-1 group-hover:bg-gold group-hover:text-gold-foreground">
+                  <s.icon size={24} />
                 </div>
-                <h2 className="mt-5 font-display text-xl font-bold text-primary">{s.title}</h2>
+                <h2 className="mt-6 font-display text-xl font-bold text-primary">{s.title}</h2>
                 <p className="mt-3 text-sm leading-relaxed text-foreground/75">{s.desc}</p>
-                <ul className="mt-5 space-y-2">
+                <ul className="mt-6 space-y-2.5">
                   {s.pontos.map((p) => (
-                    <li key={p} className="flex items-start gap-2 text-sm text-foreground/80">
+                    <li key={p} className="flex items-start gap-2.5 text-sm text-foreground/80">
                       <CheckCircle2 size={16} className="mt-0.5 shrink-0 text-gold" />
                       {p}
                     </li>

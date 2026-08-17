@@ -11,6 +11,7 @@ const NAV = [
   { to: "/beneficios", label: "Benefícios" },
   { to: "/diferenciais", label: "Diferenciais" },
   { to: "/missao-visao", label: "Missão & Visão" },
+  { to: "/parceiros", label: "Parceiros" },
 ] as const;
 
 export function SiteHeader() {

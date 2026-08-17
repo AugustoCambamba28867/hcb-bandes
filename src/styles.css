@@ -49,7 +49,7 @@
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.16 0.04 145);
 
-  --primary: oklch(0.24 0.07 145); /* deep forest green #0B3D1E */
+  --primary: oklch(0.40 0.09 145); /* softer green */
   --primary-foreground: oklch(0.99 0.005 120);
 
   --gold: oklch(0.86 0.19 120); /* lime/yellow-green accent */
@@ -61,7 +61,7 @@
   --muted: oklch(0.96 0.01 130);
   --muted-foreground: oklch(0.46 0.02 145);
 
-  --accent: oklch(0.55 0.19 145); /* vivid brand green */
+  --accent: oklch(0.65 0.16 145); /* lighter vivid green */
   --accent-foreground: oklch(0.99 0.005 120);
 
   --destructive: oklch(0.58 0.22 27);

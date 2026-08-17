@@ -51,7 +51,7 @@ function normalizeSettings(row: Record<string, unknown>): SiteSettings {
   return {
     empresa: typeof row.empresa === "string" ? row.empresa : "HCB-BANDES",
     tagline: typeof row.tagline === "string" ? row.tagline : "Conectamos pessoas, empresas, bancos e imóveis",
-    email: typeof row.email === "string" ? row.email : "geral@hcb-bandes.com",
+    email: typeof row.email === "string" ? row.email : "hcb.bandes@gmail.com",
     telefone: typeof row.telefone === "string" ? row.telefone : "+244 952 300 277",
     whatsapp: typeof row.whatsapp === "string" ? row.whatsapp : "+244 952 300 277",
     endereco: typeof row.endereco === "string" ? row.endereco : "Luanda, Angola",
@@ -227,7 +227,7 @@ export const SUPABASE_MIGRATION_SQL = `
       id uuid primary key default gen_random_uuid(),
       empresa text not null default 'HCB-BANDES',
       tagline text not null default 'Conectamos pessoas, empresas, bancos e imóveis',
-      email text not null default 'geral@hcb-bandes.com',
+      email text not null default 'hcb.bandes@gmail.com',
       telefone text not null default '+244 952 300 277',
       whatsapp text not null default '+244 952 300 277',
       endereco text not null default 'Luanda, Angola',
@@ -335,7 +335,7 @@ export const SUPABASE_MIGRATION_SQL = `
     );
 
     insert into public.site_settings (empresa, tagline, email, telefone, whatsapp, endereco, banks_partners, companies_partners, promoters_partners)
-    select 'HCB-BANDES', 'Conectamos pessoas, empresas, bancos e imóveis', 'geral@hcb-bandes.com', '+244 952 300 277', '+244 952 300 277', 'Luanda, Angola', '[]'::jsonb, '[]'::jsonb, '[]'::jsonb
+    select 'HCB-BANDES', 'Conectamos pessoas, empresas, bancos e imóveis', 'hcb.bandes@gmail.com', '+244 952 300 277', '+244 952 300 277', 'Luanda, Angola', '[]'::jsonb, '[]'::jsonb, '[]'::jsonb
     where not exists (select 1 from public.site_settings limit 1);
 
     insert into public.services (slug, title, description, points, order_index)

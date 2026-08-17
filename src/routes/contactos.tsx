@@ -173,7 +173,7 @@ function ContactosPage() {
                     label: "Telefone 2",
                     value: "+244 927 213 722",
                   },
-                  { icon: Mail, label: "E-mail", value: settings.email || "geral@hcb-bandes.com" },
+                  { icon: Mail, label: "E-mail", value: settings.email || "hcb.bandes@gmail.com" },
                   {
                     icon: MessageCircle,
                     label: "WhatsApp",

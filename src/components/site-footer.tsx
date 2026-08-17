@@ -31,6 +31,7 @@ export function SiteFooter() {
             <li><Link to="/servicos" className="hover:text-gold">Serviços</Link></li>
             <li><Link to="/beneficios" className="hover:text-gold">Benefícios</Link></li>
             <li><Link to="/diferenciais" className="hover:text-gold">Diferenciais</Link></li>
+            <li><Link to="/parceiros" className="hover:text-gold">Parceiros</Link></li>
           </ul>
         </div>
 
