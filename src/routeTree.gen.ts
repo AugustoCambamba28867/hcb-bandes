@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ServicosRouteImport } from './routes/servicos'
 import { Route as QuemSomosRouteImport } from './routes/quem-somos'
+import { Route as ParceirosRouteImport } from './routes/parceiros'
 import { Route as ModeloRouteImport } from './routes/modelo'
 import { Route as MissaoVisaoRouteImport } from './routes/missao-visao'
 import { Route as DiferenciaisRouteImport } from './routes/diferenciais'
@@ -45,6 +46,11 @@ const ServicosRoute = ServicosRouteImport.update({
 const QuemSomosRoute = QuemSomosRouteImport.update({
   id: '/quem-somos',
   path: '/quem-somos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ParceirosRoute = ParceirosRouteImport.update({
+  id: '/parceiros',
+  path: '/parceiros',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ModeloRoute = ModeloRouteImport.update({
@@ -151,6 +157,7 @@ export interface FileRoutesByFullPath {
   '/diferenciais': typeof DiferenciaisRoute
   '/missao-visao': typeof MissaoVisaoRoute
   '/modelo': typeof ModeloRoute
+  '/parceiros': typeof ParceirosRoute
   '/quem-somos': typeof QuemSomosRoute
   '/servicos': typeof ServicosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -174,6 +181,7 @@ export interface FileRoutesByTo {
   '/diferenciais': typeof DiferenciaisRoute
   '/missao-visao': typeof MissaoVisaoRoute
   '/modelo': typeof ModeloRoute
+  '/parceiros': typeof ParceirosRoute
   '/quem-somos': typeof QuemSomosRoute
   '/servicos': typeof ServicosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -199,6 +207,7 @@ export interface FileRoutesById {
   '/diferenciais': typeof DiferenciaisRoute
   '/missao-visao': typeof MissaoVisaoRoute
   '/modelo': typeof ModeloRoute
+  '/parceiros': typeof ParceirosRoute
   '/quem-somos': typeof QuemSomosRoute
   '/servicos': typeof ServicosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -225,6 +234,7 @@ export interface FileRouteTypes {
     | '/diferenciais'
     | '/missao-visao'
     | '/modelo'
+    | '/parceiros'
     | '/quem-somos'
     | '/servicos'
     | '/sitemap.xml'
@@ -248,6 +258,7 @@ export interface FileRouteTypes {
     | '/diferenciais'
     | '/missao-visao'
     | '/modelo'
+    | '/parceiros'
     | '/quem-somos'
     | '/servicos'
     | '/sitemap.xml'
@@ -272,6 +283,7 @@ export interface FileRouteTypes {
     | '/diferenciais'
     | '/missao-visao'
     | '/modelo'
+    | '/parceiros'
     | '/quem-somos'
     | '/servicos'
     | '/sitemap.xml'
@@ -297,6 +309,7 @@ export interface RootRouteChildren {
   DiferenciaisRoute: typeof DiferenciaisRoute
   MissaoVisaoRoute: typeof MissaoVisaoRoute
   ModeloRoute: typeof ModeloRoute
+  ParceirosRoute: typeof ParceirosRoute
   QuemSomosRoute: typeof QuemSomosRoute
   ServicosRoute: typeof ServicosRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
@@ -323,6 +336,13 @@ declare module '@tanstack/react-router' {
       path: '/quem-somos'
       fullPath: '/quem-somos'
       preLoaderRoute: typeof QuemSomosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/parceiros': {
+      id: '/parceiros'
+      path: '/parceiros'
+      fullPath: '/parceiros'
+      preLoaderRoute: typeof ParceirosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/modelo': {
@@ -501,6 +521,7 @@ const rootRouteChildren: RootRouteChildren = {
   DiferenciaisRoute: DiferenciaisRoute,
   MissaoVisaoRoute: MissaoVisaoRoute,
   ModeloRoute: ModeloRoute,
+  ParceirosRoute: ParceirosRoute,
   QuemSomosRoute: QuemSomosRoute,
   ServicosRoute: ServicosRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,

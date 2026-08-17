@@ -16,7 +16,7 @@ import {
   FileText,
 } from "lucide-react";
 import { useState } from "react";
-import heroImg from "@/assets/hero-building.jpg";
+import heroImg from "@/assets/hero-family.jpg";
 import familyImg from "@/assets/family-keys.jpg";
 import partnershipImg from "@/assets/partnership.jpg";
 import { cn } from "@/lib/utils";

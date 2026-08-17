@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { readSettings, saveSettingsToSupabase } from "@/lib/supabase-data";
 
-const KEY = "hcb_site_settings_v1";
+const KEY = "hcb_site_settings_v2";
 
 export interface SiteSettings {
   empresa: string;

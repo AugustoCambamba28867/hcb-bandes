@@ -6,7 +6,7 @@ export interface PageContent {
   hero?: string;
 }
 
-export const CONTENT_KEY = "hcb_content_v1";
+export const CONTENT_KEY = "hcb_content_v2";
 export const CONTENT_EVENT = "hcb_content_changed";
 
 export const DEFAULT_CONTENT: Record<string, PageContent> = {
