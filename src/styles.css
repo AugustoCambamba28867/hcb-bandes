@@ -43,8 +43,8 @@
 :root {
   --radius: 0.75rem;
   /* HCB-BANDES brand (from apresentação corporativa): deep forest green, vivid brand green, lime accent, white */
-  --background: oklch(0.995 0.004 120);
-  --foreground: oklch(0.16 0.04 145);
+  --background: #F0F7F4;
+  --foreground: #0D4535;
 
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.16 0.04 145);

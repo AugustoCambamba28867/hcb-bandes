@@ -116,7 +116,7 @@ function HomePage() {
   return (
     <>
       {/* HERO */}
-      <section className="relative overflow-hidden bg-white">
+      <section className="relative overflow-hidden bg-background">
         <div className="absolute inset-0 bg-grid-primary opacity-30 pointer-events-none" />
         {/* animated blobs */}
         <div className="absolute top-0 right-0 h-[40rem] w-[40rem] rounded-full bg-bg-medium blur-3xl opacity-50 -z-10" />
