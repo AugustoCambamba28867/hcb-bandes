@@ -126,13 +126,12 @@ function HomePage() {
             className="h-full w-full object-cover scale-105"
           />
           <div className="absolute inset-0 bg-primary/10 mix-blend-multiply" />
-          <div className="absolute inset-0 bg-gradient-to-r from-white/95 via-white/85 to-transparent md:via-white/60" />
-          <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-transparent" />
         </div>
 
-        <div className="container-page relative py-24 md:py-32">
+        <div className="container-page relative py-20 md:py-32">
           <div className="grid gap-12">
-            <div className="max-w-2xl text-foreground animate-slide-in-left">
+            <div className="max-w-2xl animate-slide-in-left rounded-[2rem] bg-white/70 p-8 md:p-12 backdrop-blur-md border border-white/60 shadow-2xl">
               <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-white/80 px-4 py-1.5 text-xs font-medium uppercase tracking-[0.2em] text-primary backdrop-blur">
                 <Sparkles size={12} /> {settings.empresa}
               </div>
