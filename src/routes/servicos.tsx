@@ -25,57 +25,33 @@ export const Route = createFileRoute("/servicos")({
 
 const SERVICOS = [
   {
+    icon: Home,
+    title: "Real Estate",
+    desc: "Engloba a compra, venda, arrendamento de imóveis e gestão de condomínios.",
+    pontos: [
+      "Compra e venda de imóveis",
+      "Arrendamento de imóveis",
+      "Gestão de condomínios",
+    ],
+  },
+  {
     icon: Building,
     title: "Habitação Corporativa",
-    desc: "Soluções habitacionais personalizadas para empresas, facilitando o acesso dos trabalhadores à casa própria.",
+    desc: "Alojamento temporário ou de longa duração para colaboradores em mobilidade profissional, executivos expatriados, consultores em projecto ou equipas em transição.",
     pontos: [
-      "Parcerias estratégicas com empregadores",
-      "Processos simplificados",
-    ],
-  },
-  {
-    icon: ClipboardList,
-    title: "Gestão de Condomínios",
-    desc: "Administração profissional de condomínios, garantindo organização financeira, administrativa e operacional.",
-    pontos: [
-      "Cobrança e prestação de contas",
-      "Manutenção e supervisão operacional",
-    ],
-  },
-  {
-    icon: Briefcase,
-    title: "Consultoria Imobiliária",
-    desc: "Apoio especializado para investimentos e tomada de decisão no mercado imobiliário angolano.",
-    pontos: [
-      "Análise de mercado",
-      "Aconselhamento estratégico",
+      "Alojamento temporário e de longa duração",
+      "Executivos expatriados e equipas em transição",
     ],
   },
   {
     icon: Banknote,
     title: "Intermediação de Crédito Imobiliário",
-    desc: "Facilitamos o processo de financiamento junto da nossa rede de bancos parceiros, com condições vantajosas.",
+    desc: "Soluções integradas de financiamento, desde a avaliação até à escritura do imóvel.",
     pontos: [
-      "Organização documental",
-      "Negociação de taxas e condições",
-    ],
-  },
-  {
-    icon: Home,
-    title: "Venda de Imóveis",
-    desc: "Ampla carteira de imóveis para venda, seleccionados segundo rigorosos critérios de qualidade.",
-    pontos: [
-      "Imóveis prontos a habitar",
-      "Acompanhamento jurídico",
-    ],
-  },
-  {
-    icon: Key,
-    title: "Arrendamento de Imóveis",
-    desc: "Soluções flexíveis de arrendamento, adequadas a diferentes necessidades e prazos.",
-    pontos: [
-      "Arrendamento mensal e diário",
-      "Gestão de contratos e inquilinos",
+      "Análise de Perfil e Capacidade Financeira",
+      "Comparação e Negociação de Propostas",
+      "Montagem e Instrução do Dossier",
+      "Acompanhamento até a Escritura",
     ],
   },
 ];
