@@ -16,8 +16,8 @@ import {
   FileText,
 } from "lucide-react";
 import { useState } from "react";
-import heroImg from "@/assets/hero-family.jpg";
-import familyImg from "@/assets/family-keys.jpg";
+import heroImg from "@/assets/hero-building.jpg";
+import familyImg from "@/assets/hero-family.jpg";
 import partnershipImg from "@/assets/partnership.jpg";
 import { cn } from "@/lib/utils";
 import { Section, SectionHeader } from "@/components/section";
@@ -125,36 +125,33 @@ function HomePage() {
             height={1280}
             className="h-full w-full object-cover scale-105"
           />
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/95 via-primary/85 to-accent/60 animate-gradient" />
-          <div className="absolute inset-0 bg-grid-primary opacity-40" />
-          {/* animated blobs */}
-          <div className="absolute -top-24 -left-24 h-96 w-96 rounded-full bg-gold/25 blur-3xl animate-blob" />
-          <div className="absolute bottom-0 right-0 h-[28rem] w-[28rem] rounded-full bg-accent/30 blur-3xl animate-blob" style={{ animationDelay: "-6s" }} />
+          <div className="absolute inset-0 bg-primary/25 mix-blend-multiply" />
+          <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent" />
         </div>
 
         <div className="container-page relative py-24 md:py-32">
           <div className="grid gap-12">
-            <div className="max-w-2xl text-primary-foreground animate-slide-in-left">
-              <div className="inline-flex items-center gap-2 rounded-full border border-gold/50 bg-primary/40 px-4 py-1.5 text-xs font-medium uppercase tracking-[0.2em] text-gold backdrop-blur animate-glow-pulse">
+            <div className="max-w-2xl text-foreground animate-slide-in-left">
+              <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-white/80 px-4 py-1.5 text-xs font-medium uppercase tracking-[0.2em] text-primary backdrop-blur">
                 <Sparkles size={12} /> {settings.empresa}
               </div>
-              <h1 className="mt-6 font-display text-4xl md:text-6xl font-bold leading-[1.05] animate-slide-up delay-100">
+              <h1 className="mt-6 font-display text-4xl md:text-6xl font-bold leading-[1.05] animate-slide-up delay-100 text-primary">
                 {home.title}
               </h1>
-              <p className="mt-6 max-w-xl text-lg text-primary-foreground/85 leading-relaxed animate-slide-up delay-200">
+              <p className="mt-6 max-w-xl text-lg text-foreground/80 leading-relaxed animate-slide-up delay-200">
                 {home.hero || settings.tagline}
               </p>
               <div className="mt-8 flex flex-wrap gap-3 animate-slide-up delay-300">
                 <Link
                   to="/contactos"
-                  className="group inline-flex items-center gap-2 rounded-md bg-gold px-6 py-3 text-sm font-semibold text-gold-foreground shadow-gold hover:brightness-95 hover:-translate-y-0.5 hover:shadow-elegant transition-all duration-300"
+                  className="group inline-flex items-center gap-2 rounded-md bg-accent px-6 py-3 text-sm font-semibold text-accent-foreground hover:bg-primary transition-all duration-300"
                 >
                   Solicitar orçamento
                   <ArrowRight size={16} className="transition-transform duration-300 group-hover:translate-x-1" />
                 </Link>
                 <Link
                   to="/servicos"
-                  className="inline-flex items-center gap-2 rounded-md border border-primary-foreground/30 bg-primary-foreground/10 px-6 py-3 text-sm font-semibold text-primary-foreground hover:bg-primary-foreground/20 hover:border-gold/60 transition-all duration-300"
+                  className="inline-flex items-center gap-2 rounded-md border border-primary/20 bg-white px-6 py-3 text-sm font-semibold text-primary hover:bg-primary/5 transition-all duration-300"
                 >
                   Ver serviços
                 </Link>
@@ -200,11 +197,11 @@ function HomePage() {
           {SERVICOS.map((s, i) => (
             <div
               key={s.title}
-              className="group relative overflow-hidden rounded-xl border border-border bg-card p-6 hover-lift hover:border-gold/60 animate-slide-up"
+              className="group relative overflow-hidden rounded-xl border border-bg-medium bg-white p-6 hover-lift animate-slide-up"
               style={{ animationDelay: `${i * 0.1}s` }}
             >
-              <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-gold/0 blur-2xl transition-all duration-500 group-hover:bg-gold/25" />
-              <div className="relative flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary transition-all duration-300 group-hover:bg-gold group-hover:text-gold-foreground group-hover:rotate-6 group-hover:scale-110">
+              <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-accent/5 blur-2xl transition-all duration-500 group-hover:bg-accent/10" />
+              <div className="relative flex h-12 w-12 items-center justify-center rounded-lg bg-bg-medium text-primary transition-all duration-300 group-hover:bg-accent group-hover:text-accent-foreground group-hover:rotate-6 group-hover:scale-110">
                 <s.icon size={22} />
               </div>
               <h3 className="relative mt-5 font-display text-lg font-semibold text-primary">{s.title}</h3>
@@ -224,8 +221,7 @@ function HomePage() {
       </Section>
 
       {/* PROCESSO */}
-      <Section className="relative overflow-hidden bg-[radial-gradient(circle_at_top_left,_oklch(0.86_0.19_120/0.15),_transparent_45%),_radial-gradient(circle_at_bottom_right,_oklch(0.55_0.19_145/0.12),_transparent_50%)]">
-        <div className="absolute inset-0 bg-grid-primary opacity-30 pointer-events-none" />
+      <Section className="relative overflow-hidden bg-secondary">
         <div className="relative">
           <SectionHeader title="Como funciona" />
           <div className="mt-12 overflow-hidden rounded-[2rem] border border-border bg-card/90 p-6 shadow-elegant">
@@ -235,9 +231,9 @@ function HomePage() {
                 {PROCESSO.map((item, index) => (
                   <div
                     key={item.title}
-                    className="group relative overflow-hidden rounded-[1.8rem] border border-border bg-background p-6 shadow-sm transition hover:-translate-y-1 hover:border-gold/40 hover:shadow-2xl"
+                    className="group relative overflow-hidden rounded-[1.8rem] border border-border bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-accent/40 hover:shadow-2xl"
                   >
-                    <div className="absolute left-6 top-6 flex h-14 w-14 items-center justify-center rounded-full bg-gold/10 text-gold ring-1 ring-gold/30">
+                    <div className="absolute left-6 top-6 flex h-14 w-14 items-center justify-center rounded-full bg-bg-medium text-primary ring-1 ring-primary/10">
                       <item.icon size={20} />
                     </div>
                     <div className="ml-20">
@@ -245,7 +241,7 @@ function HomePage() {
                         <span className="text-xs font-semibold uppercase tracking-[0.25em] text-muted-foreground">
                           Etapa {index + 1}
                         </span>
-                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gold/10 text-gold font-semibold ring-1 ring-gold/30">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-bg-medium text-primary font-semibold ring-1 ring-primary/10">
                           {index + 1}
                         </div>
                       </div>
@@ -262,19 +258,16 @@ function HomePage() {
 
 
       {/* ECOSSISTEMA */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-primary via-primary to-[oklch(0.32_0.09_145)] text-primary-foreground animate-gradient">
-        <div className="absolute inset-0 bg-grid-primary opacity-30 pointer-events-none" />
-        <div className="absolute -top-40 -left-32 h-96 w-96 rounded-full bg-gold/15 blur-3xl animate-blob" />
-        <div className="absolute -bottom-32 -right-24 h-[24rem] w-[24rem] rounded-full bg-accent/25 blur-3xl animate-blob" style={{ animationDelay: "-8s" }} />
+      <section className="relative overflow-hidden bg-bg-medium text-primary">
         <div className="container-page relative grid gap-12 py-20 md:py-28 lg:grid-cols-2 lg:items-center">
           <div className="animate-slide-in-left">
-            <div className="text-xs font-semibold uppercase tracking-[0.22em] text-gold">
+            <div className="text-xs font-semibold uppercase tracking-[0.22em] text-accent">
               O Ecossistema
             </div>
-            <h2 className="mt-3 font-display text-3xl md:text-4xl font-bold leading-tight">
-              Um modelo que une quatro actores num só <span className="text-gradient-gold">propósito</span>.
+            <h2 className="mt-3 font-display text-3xl md:text-4xl font-bold leading-tight text-primary">
+              Um modelo que une quatro actores num só propósito.
             </h2>
-            <p className="mt-4 text-primary-foreground/80 leading-relaxed">
+            <p className="mt-4 text-primary/80 leading-relaxed">
               Promotores, empresas empregadoras, bancos e trabalhadores: cada peça encaixa para que
               a habitação deixe de ser um sonho distante e se torne uma realidade sustentável.
             </p>
@@ -287,25 +280,25 @@ function HomePage() {
               ].map((t, i) => (
                 <li
                   key={t}
-                  className="flex items-start gap-3 text-sm text-primary-foreground/90 animate-slide-up"
+                  className="flex items-start gap-3 text-sm text-primary/90 animate-slide-up"
                   style={{ animationDelay: `${0.2 + i * 0.1}s` }}
                 >
-                  <CheckCircle2 size={18} className="mt-0.5 text-gold shrink-0" /> {t}
+                  <CheckCircle2 size={18} className="mt-0.5 text-accent shrink-0" /> {t}
                 </li>
               ))}
             </ul>
           </div>
           <div className="relative animate-slide-in-right">
-            <div className="absolute -inset-4 rounded-2xl bg-gradient-to-tr from-gold/40 via-transparent to-accent/40 blur-2xl opacity-70" />
+            <div className="absolute -inset-4 rounded-2xl bg-white/40 blur-2xl opacity-70" />
             <img
               src={partnershipImg}
               alt="Parceria corporativa"
               loading="lazy"
               width={1280}
               height={960}
-              className="relative rounded-xl shadow-elegant border border-gold/30 transition-transform duration-700 hover:scale-[1.02]"
+              className="relative rounded-xl shadow-elegant border border-white/50 transition-transform duration-700 hover:scale-[1.02]"
             />
-            <div className="absolute -bottom-6 -left-6 hidden md:block rounded-lg bg-gold p-5 text-gold-foreground shadow-gold max-w-[220px] animate-float-slow">
+            <div className="absolute -bottom-6 -left-6 hidden md:block rounded-lg bg-accent p-5 text-accent-foreground shadow-lg max-w-[220px] animate-float-slow">
               <div className="font-display text-2xl font-bold">+250</div>
               <div className="text-xs">trabalhadores impactados anualmente</div>
             </div>
@@ -353,18 +346,18 @@ function HomePage() {
           ].map((b, i) => (
             <div
               key={b.title}
-              className="group relative overflow-hidden rounded-xl border border-border bg-card p-7 hover-lift hover:border-gold/60 animate-slide-up"
+              className="group relative overflow-hidden rounded-xl border border-bg-medium bg-white p-7 hover-lift animate-slide-up"
               style={{ animationDelay: `${i * 0.12}s` }}
             >
-              <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-gold via-accent to-gold scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-500" />
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-gold/20 to-accent/20 text-primary transition-all duration-300 group-hover:from-gold group-hover:to-gold group-hover:text-gold-foreground group-hover:rotate-6">
+              <div className="absolute inset-x-0 top-0 h-1 bg-accent scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-500" />
+              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-bg-medium text-primary transition-all duration-300 group-hover:bg-accent group-hover:text-accent-foreground group-hover:rotate-6">
                 <b.icon size={20} />
               </div>
               <h3 className="mt-5 font-display text-xl font-semibold text-primary">{b.title}</h3>
               <ul className="mt-4 space-y-2.5">
                 {b.points.map((p) => (
                   <li key={p} className="flex items-start gap-2 text-sm text-foreground/80">
-                    <CheckCircle2 size={16} className="mt-0.5 text-gold shrink-0" />
+                    <CheckCircle2 size={16} className="mt-0.5 text-accent shrink-0" />
                     {p}
                   </li>
                 ))}
@@ -377,7 +370,7 @@ function HomePage() {
 
       {/* PARCEIROS */}
       {(settings.empresasParceiras.length + settings.bancosParceiros.length + settings.promotoresParceiros.length) > 0 && (
-        <Section className="bg-secondary/40">
+        <Section className="bg-white">
           <SectionHeader
             eyebrow="Ecossistema"
             title="Parceiros que confiam na HCB-BANDES"
@@ -389,8 +382,8 @@ function HomePage() {
               { label: "Bancos", items: settings.bancosParceiros },
               { label: "Promotores", items: settings.promotoresParceiros },
             ].map((group) => (
-              <div key={group.label} className="rounded-xl border border-border bg-card p-6 hover-lift">
-                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-gold">{group.label}</div>
+              <div key={group.label} className="rounded-xl border border-border bg-white p-6 hover-lift">
+                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">{group.label}</div>
                 <ul className="mt-4 flex flex-wrap gap-2">
                   {group.items.length === 0 ? (
                     <li className="text-sm text-muted-foreground">—</li>
@@ -422,13 +415,12 @@ function HomePage() {
           height={960}
           className="absolute inset-0 -z-10 h-full w-full object-cover scale-105"
         />
-        <div className="absolute inset-0 -z-10 bg-gradient-to-br from-primary/95 via-primary/85 to-accent/70 animate-gradient" />
-        <div className="absolute inset-0 -z-10 bg-grid-primary opacity-25" />
+        <div className="absolute inset-0 -z-10 bg-primary/90" />
+        <div className="absolute inset-0 -z-10 bg-grid-primary opacity-20" />
         <div className="container-page py-24 text-primary-foreground">
           <div className="max-w-2xl animate-slide-up">
-            <TrendingUp className="text-gold animate-float-slow" />
             <h2 className="mt-4 font-display text-3xl md:text-5xl font-bold leading-tight">
-              Pronto para transformar habitação num <span className="text-gradient-gold">benefício real</span>?
+              Pronto para transformar habitação num benefício real?
             </h2>
             <p className="mt-4 text-primary-foreground/85">
               Marque uma reunião com a nossa equipa e descubra como integrar a HCB-BANDES no pacote
@@ -436,7 +428,7 @@ function HomePage() {
             </p>
             <Link
               to="/contactos"
-              className="group mt-8 inline-flex items-center gap-2 rounded-md bg-gold px-7 py-3.5 text-sm font-semibold text-gold-foreground shadow-gold hover:brightness-95 hover:-translate-y-0.5 hover:shadow-elegant transition-all duration-300 animate-glow-pulse"
+              className="group mt-8 inline-flex items-center gap-2 rounded-md bg-accent px-7 py-3.5 text-sm font-semibold text-accent-foreground hover:bg-white hover:text-primary transition-all duration-300"
             >
               Falar com a equipa
               <ArrowRight size={16} className="transition-transform duration-300 group-hover:translate-x-1" />
