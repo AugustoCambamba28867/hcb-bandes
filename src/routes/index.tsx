@@ -120,13 +120,14 @@ function HomePage() {
         <div className="absolute inset-0 -z-10">
           <img
             src={heroImg}
-            alt="Edifício residencial moderno em Luanda"
+            alt="Família a receber as chaves"
             width={1920}
             height={1280}
             className="h-full w-full object-cover scale-105"
           />
-          <div className="absolute inset-0 bg-primary/25 mix-blend-multiply" />
-          <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent" />
+          <div className="absolute inset-0 bg-primary/10 mix-blend-multiply" />
+          <div className="absolute inset-0 bg-gradient-to-r from-white/95 via-white/85 to-transparent md:via-white/60" />
+          <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent" />
         </div>
 
         <div className="container-page relative py-24 md:py-32">
