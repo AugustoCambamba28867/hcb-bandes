@@ -16,8 +16,8 @@ import {
   FileText,
 } from "lucide-react";
 import { useState } from "react";
-import heroImg from "@/assets/hero-building.jpg";
-import familyImg from "@/assets/hero-family.jpg";
+import heroImg from "@/assets/hero-family.jpg";
+import familyImg from "@/assets/hero-building.jpg";
 import partnershipImg from "@/assets/partnership.jpg";
 import { cn } from "@/lib/utils";
 import { Section, SectionHeader } from "@/components/section";
