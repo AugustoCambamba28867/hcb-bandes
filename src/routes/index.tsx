@@ -116,26 +116,18 @@ function HomePage() {
   return (
     <>
       {/* HERO */}
-      <section className="relative isolate overflow-hidden">
-        <div className="absolute inset-0 -z-10">
-          <img
-            src={heroImg}
-            alt="Família a receber as chaves"
-            width={1920}
-            height={1280}
-            className="h-full w-full object-cover scale-105"
-          />
-          <div className="absolute inset-0 bg-primary/10 mix-blend-multiply" />
-          <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-transparent" />
-        </div>
-
-        <div className="container-page relative py-20 md:py-32">
-          <div className="grid gap-12">
-            <div className="max-w-2xl animate-slide-in-left rounded-[2rem] bg-white/70 p-8 md:p-12 backdrop-blur-md border border-white/60 shadow-2xl">
+      <section className="relative overflow-hidden bg-white">
+        <div className="absolute inset-0 bg-grid-primary opacity-30 pointer-events-none" />
+        {/* animated blobs */}
+        <div className="absolute top-0 right-0 h-[40rem] w-[40rem] rounded-full bg-bg-medium blur-3xl opacity-50 -z-10" />
+        
+        <div className="container-page relative py-16 md:py-24 lg:py-32">
+          <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
+            <div className="max-w-2xl text-foreground animate-slide-in-left">
               <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-white/80 px-4 py-1.5 text-xs font-medium uppercase tracking-[0.2em] text-primary backdrop-blur">
                 <Sparkles size={12} /> {settings.empresa}
               </div>
-              <h1 className="mt-6 font-display text-4xl md:text-6xl font-bold leading-[1.05] animate-slide-up delay-100 text-primary">
+              <h1 className="mt-6 font-display text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.05] animate-slide-up delay-100 text-primary">
                 {home.title}
               </h1>
               <p className="mt-6 max-w-xl text-lg text-foreground/80 leading-relaxed animate-slide-up delay-200">
@@ -156,6 +148,15 @@ function HomePage() {
                   Ver serviços
                 </Link>
               </div>
+            </div>
+
+            <div className="relative animate-slide-in-right w-full">
+              <div className="absolute -inset-4 rounded-3xl bg-gradient-to-tr from-accent/20 to-primary/10 blur-2xl opacity-60 -z-10" />
+              <img
+                src={heroImg}
+                alt="Família a receber as chaves"
+                className="relative w-full rounded-2xl object-cover shadow-elegant border border-white/60 aspect-[4/3] lg:aspect-auto lg:h-[600px]"
+              />
             </div>
           </div>
         </div>
