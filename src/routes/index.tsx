@@ -49,19 +49,24 @@ export const Route = createFileRoute("/")({
 
 const SERVICOS = [
   {
-    icon: Home,
-    title: "Real Estate",
-    desc: "Engloba a compra, venda, arrendamento de imóveis e gestão de condomínios.",
-  },
-  {
     icon: Building2,
     title: "Habitação Corporativa",
-    desc: "Alojamento temporário ou de longa duração para colaboradores, executivos e consultores.",
+    desc: "Programas habitacionais desenhados para colaboradores de empresas parceiras.",
   },
   {
     icon: Landmark,
     title: "Crédito Imobiliário",
-    desc: "Intermediação de financiamento bancário, análise de perfil e acompanhamento até à escritura.",
+    desc: "Ligação directa a bancos comerciais para financiamento ágil e transparente.",
+  },
+  {
+    icon: Home,
+    title: "Imobiliário",
+    desc: "Carteira de imóveis e condomínios seleccionados em todo o território angolano.",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Gestão Condominial",
+    desc: "Administração profissional de condomínios com foco em qualidade de vida.",
   },
 ];
 
@@ -185,10 +190,10 @@ function HomePage() {
       <Section>
         <SectionHeader
           eyebrow="Os nossos serviços"
-          title="HCB – BANDES – Comércio e Prestação de Serviços"
-          description="Três pilares fundamentais para uma solução habitacional completa e integrada."
+          title="Quatro pilares para uma solução habitacional completa"
+          description="Integramos toda a cadeia de valor habitacional num ecossistema único."
         />
-        <div className="mt-12 grid gap-6 md:grid-cols-3">
+        <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           {SERVICOS.map((s, i) => (
             <div
               key={s.title}
