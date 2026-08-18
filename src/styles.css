@@ -66,7 +66,7 @@
   --accent: #176B52; /* Botão principal */
   --accent-foreground: #FFFFFF;
 
-  --bg-medium: #DDF3EA; /* Ecossistema bg, bordas serviços */
+  --bg-medium: #EBF7F2; /* Ecossistema bg, bordas serviços */
 
   --destructive: oklch(0.58 0.22 27);
   --destructive-foreground: oklch(0.985 0.005 100);
