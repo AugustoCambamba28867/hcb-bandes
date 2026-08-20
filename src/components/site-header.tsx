@@ -48,7 +48,7 @@ export function SiteHeader() {
         <div className="flex items-center gap-2">
           <Link
             to="/contactos"
-            className="hidden sm:inline-flex items-center rounded-md bg-accent px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-primary transition"
+            className="hidden sm:inline-flex items-center rounded-md bg-accent px-4 py-2.5 text-sm font-semibold text-accent-foreground shadow-sm hover:bg-primary transition"
           >
             Contactar
           </Link>
@@ -81,7 +81,7 @@ export function SiteHeader() {
             <Link
               to="/contactos"
               onClick={() => setOpen(false)}
-              className="mt-2 inline-flex items-center justify-center rounded-md bg-accent px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary transition"
+              className="mt-2 inline-flex items-center justify-center rounded-md bg-accent px-4 py-2.5 text-sm font-semibold text-accent-foreground hover:bg-primary transition"
             >
               Contactar
             </Link>

@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
-import { Mail, Phone, MapPin, MessageCircle, Send, AlertCircle } from "lucide-react";
+import { Mail, Phone, MapPin, MessageCircle, Send, AlertCircle, Check } from "lucide-react";
 import { toast } from "sonner";
 import { PageHero, Section } from "@/components/section";
 import { contactSchema } from "@/lib/validation";
@@ -139,11 +139,19 @@ function ContactosPage() {
                 Guardamos o seu pedido no sistema de leads e abrimos automaticamente o chat com a
                 mensagem preparada.
               </p>
-              <div className="mt-6 space-y-3 text-sm text-foreground/90">
-                <p>✔ Formulário simples com validação em tempo real.</p>
-                <p>✔ Mensagem automática disponível no painel admin.</p>
-                <p>✔ Conversa direta com o número da empresa.</p>
-              </div>
+              <ul className="mt-6 space-y-3 text-sm text-foreground/90">
+                {[
+                  "Formulário simples com validação em tempo real.",
+                  "Mensagem automática disponível no painel admin.",
+                  "Conversa direta com o número da empresa.",
+                ].map((item) => (
+                  <li key={item} className="flex items-start gap-2.5">
+                    <Check size={16} className="mt-0.5 shrink-0 text-accent" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+
               <a
                 href={quickWhatsAppLink}
                 target="_blank"

@@ -10,7 +10,7 @@ export function PageHero({
   subtitle?: string;
 }) {
   return (
-    <section className="border-b border-border bg-gradient-to-br from-primary to-[oklch(0.22_0.05_142)] text-primary-foreground">
+    <section className="border-b border-border bg-gradient-to-br from-primary to-primary-dark text-primary-foreground">
       <div className="container-page py-20 md:py-28">
         {eyebrow && (
           <div className="mb-4 text-xs font-semibold uppercase tracking-[0.22em] text-gold">
