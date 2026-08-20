@@ -132,27 +132,27 @@ function HomePage() {
         </div>
 
         <div className="container-page relative py-20 md:py-32">
-          <div className="max-w-2xl text-white animate-slide-in-left">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-4 py-1.5 text-xs font-medium uppercase tracking-[0.2em] backdrop-blur">
+          <div className="max-w-2xl text-primary-foreground animate-slide-in-left">
+            <div className="inline-flex items-center gap-2 rounded-full border border-primary-foreground/30 bg-primary-foreground/10 px-4 py-1.5 text-xs font-medium uppercase tracking-[0.2em] backdrop-blur">
               <Sparkles size={12} /> {settings.empresa}
             </div>
             <h1 className="mt-6 font-display text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.05] animate-slide-up delay-100">
               {home.title}
             </h1>
-            <p className="mt-6 max-w-xl text-lg text-white/90 leading-relaxed animate-slide-up delay-200">
+            <p className="mt-6 max-w-xl text-lg text-primary-foreground/85 leading-relaxed animate-slide-up delay-200">
               {home.hero || settings.tagline}
             </p>
             <div className="mt-8 flex flex-wrap gap-3 animate-slide-up delay-300">
               <Link
                 to="/contactos"
-                className="group inline-flex items-center gap-2 rounded-md bg-accent px-6 py-3 text-sm font-semibold text-accent-foreground hover:bg-white hover:text-primary transition-all duration-300"
+                className="group inline-flex items-center gap-2 rounded-md bg-accent px-6 py-3 text-sm font-semibold text-accent-foreground hover:bg-card hover:text-primary transition-all duration-300"
               >
                 Solicitar orçamento
                 <ArrowRight size={16} className="transition-transform duration-300 group-hover:translate-x-1" />
               </Link>
               <Link
                 to="/servicos"
-                className="inline-flex items-center gap-2 rounded-md border border-white/30 bg-white/10 px-6 py-3 text-sm font-semibold text-accent-foreground hover:bg-white/20 transition-all duration-300 backdrop-blur"
+                className="inline-flex items-center gap-2 rounded-md border border-primary-foreground/30 bg-primary-foreground/10 px-6 py-3 text-sm font-semibold text-primary-foreground hover:bg-primary-foreground/20 transition-all duration-300 backdrop-blur"
               >
                 Ver serviços
               </Link>
@@ -289,14 +289,14 @@ function HomePage() {
             </ul>
           </div>
           <div className="relative animate-slide-in-right">
-            <div className="absolute -inset-4 rounded-2xl bg-white/40 blur-2xl opacity-70" />
+            <div className="absolute -inset-4 rounded-2xl bg-card/40 blur-2xl opacity-70" />
             <img
               src={partnershipImg}
               alt="Parceria corporativa"
               loading="lazy"
               width={1280}
               height={960}
-              className="relative rounded-xl shadow-elegant border border-white/50 transition-transform duration-700 hover:scale-[1.02]"
+              className="relative rounded-xl shadow-elegant border border-primary-foreground/50 transition-transform duration-700 hover:scale-[1.02]"
             />
             <div className="absolute -bottom-6 -left-6 hidden md:block rounded-lg bg-accent p-5 text-accent-foreground shadow-lg max-w-[220px] animate-float-slow">
               <div className="font-display text-2xl font-bold">+250</div>
@@ -428,7 +428,7 @@ function HomePage() {
             </p>
             <Link
               to="/contactos"
-              className="group mt-8 inline-flex items-center gap-2 rounded-md bg-accent px-7 py-3.5 text-sm font-semibold text-accent-foreground hover:bg-white hover:text-primary transition-all duration-300"
+              className="group mt-8 inline-flex items-center gap-2 rounded-md bg-accent px-7 py-3.5 text-sm font-semibold text-accent-foreground hover:bg-card hover:text-primary transition-all duration-300"
             >
               Falar com a equipa
               <ArrowRight size={16} className="transition-transform duration-300 group-hover:translate-x-1" />
