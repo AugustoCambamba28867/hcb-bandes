@@ -47,39 +47,47 @@
 
 :root {
   --radius: 0.75rem;
-  /* HCB-BANDES brand (from apresentação corporativa): deep forest green, vivid brand green, lime accent, white */
-  --background: #F0F7F4;
-  --foreground: #0D4535;
+  /* HCB-BANDES brand: verde institucional, branco, superfícies quase brancas */
+  --background: #FFFFFF;
+  --foreground: #10241C; /* verde/cinza muito escuro */
 
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.16 0.04 145);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.16 0.04 145);
+  --card: #FFFFFF;
+  --card-foreground: #10241C;
+  --popover: #FFFFFF;
+  --popover-foreground: #10241C;
 
-  --primary: #0D4535; /* Título, Footer, CTA, Números */
+  --primary: #12684E; /* verde institucional */
   --primary-foreground: #FFFFFF;
+  --primary-dark: #0B3F30; /* verde escuro */
+  --primary-light: #3FA07F; /* verde claro */
 
-  --gold: oklch(0.86 0.19 120); /* use sparingly */
-  --gold-foreground: #0D4535;
+  --surface: #F4FAF7; /* verde quase branco */
 
-  --secondary: #F4FAF7; /* Como funciona bg */
-  --secondary-foreground: #0D4535;
+  --gold: #E0A32E; /* pequeno destaque */
+  --gold-foreground: #10241C;
+
+  --secondary: #F4FAF7;
+  --secondary-foreground: #10241C;
 
   --muted: #F4FAF7;
-  --muted-foreground: oklch(0.46 0.02 145);
+  --muted-foreground: #6B7B75; /* cinza */
 
-  --accent: #176B52; /* Botão principal */
+  --accent: #12684E;
   --accent-foreground: #FFFFFF;
 
-  --bg-medium: #EBF7F2; /* Ecossistema bg, bordas serviços */
+  --success: #1E9E63;
+  --success-foreground: #FFFFFF;
+
+  --bg-medium: #EEF7F3;
 
   --destructive: oklch(0.58 0.22 27);
   --destructive-foreground: oklch(0.985 0.005 100);
 
-  --border: oklch(0.9 0.012 130);
-  --input: oklch(0.9 0.012 130);
-  --ring: oklch(0.86 0.19 120);
+  --border: #E1EBE6; /* verde/cinza muito suave */
+  --input: #E1EBE6;
+  --ring: #12684E;
 }
+
 
 
 .dark {
