@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Home, Building2, Banknote, CheckCircle2, Search, FileText, ClipboardCheck, Scale } from "lucide-react";
+import { Home, Building2, Banknote, CheckCircle2, Search, FileText, ClipboardCheck, Scale, Briefcase, Globe2, Users } from "lucide-react";
 import { PageHero, Section } from "@/components/section";
 
 export const Route = createFileRoute("/servicos")({
@@ -159,21 +159,24 @@ function ServicosPage() {
           {/* Card visual */}
           <div className="flex flex-col gap-3 order-2 lg:order-1">
             {[
-              { emoji: "🏢", text: "Alojamento temporário ou de longa duração" },
-              { emoji: "🚀", text: "Trabalhadores em mobilidade profissional" },
-              { emoji: "🌍", text: "Executivos, expatriados e consultores" },
-              { emoji: "👥", text: "Equipas em projetos ou em transição" },
-              { emoji: "🏠", text: "Programas de acesso à habitação própria" },
+              { icon: Building2, text: "Alojamento temporário ou de longa duração" },
+              { icon: Briefcase, text: "Trabalhadores em mobilidade profissional" },
+              { icon: Globe2, text: "Executivos, expatriados e consultores" },
+              { icon: Users, text: "Equipas em projetos ou em transição" },
+              { icon: Home, text: "Programas de acesso à habitação própria" },
             ].map((item) => (
               <div
                 key={item.text}
-                className="flex items-center gap-4 rounded-xl border border-border bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                className="group flex items-center gap-4 rounded-xl border border-border bg-card p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-accent/40 hover:shadow-md"
               >
-                <span className="text-2xl">{item.emoji}</span>
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-bg-medium text-accent ring-1 ring-primary/10 transition-colors group-hover:bg-accent group-hover:text-accent-foreground">
+                  <item.icon size={18} />
+                </span>
                 <span className="text-sm font-medium text-foreground/90">{item.text}</span>
               </div>
             ))}
           </div>
+
 
           {/* Texto */}
           <div className="order-1 lg:order-2">
