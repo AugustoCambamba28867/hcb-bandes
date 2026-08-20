@@ -93,7 +93,7 @@ const CREDITO_ETAPAS = [
 function ServiceBadge({ number, label }: { number: string; label: string }) {
   return (
     <div className="inline-flex items-center gap-2 rounded-full bg-bg-medium px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-primary">
-      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-accent text-white text-[10px] font-bold">{number}</span>
+      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-accent text-accent-foreground text-[10px] font-bold">{number}</span>
       {label}
     </div>
   );
@@ -141,9 +141,9 @@ function ServicosPage() {
             ].map((item) => (
               <div
                 key={item.label}
-                className="group flex flex-col items-center gap-3 rounded-2xl border border-border bg-white p-6 text-center shadow-sm transition hover:-translate-y-1 hover:border-accent/40 hover:shadow-xl"
+                className="group flex flex-col items-center gap-3 rounded-2xl border border-border bg-card p-6 text-center shadow-sm transition hover:-translate-y-1 hover:border-accent/40 hover:shadow-xl"
               >
-                <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-bg-medium text-primary ring-1 ring-primary/10 transition-all group-hover:bg-accent group-hover:text-white group-hover:ring-accent/30">
+                <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-bg-medium text-primary ring-1 ring-primary/10 transition-all group-hover:bg-accent group-hover:text-accent-foreground group-hover:ring-accent/30">
                   <item.icon size={24} />
                 </div>
                 <span className="text-sm font-semibold text-primary">{item.label}</span>
@@ -217,13 +217,13 @@ function ServicosPage() {
           {CREDITO_ETAPAS.map((etapa) => (
             <article
               key={etapa.title}
-              className="group relative overflow-hidden rounded-2xl border border-border bg-white p-7 shadow-sm transition hover:-translate-y-1 hover:border-accent/40 hover:shadow-2xl"
+              className="group relative overflow-hidden rounded-2xl border border-border bg-card p-7 shadow-sm transition hover:-translate-y-1 hover:border-accent/40 hover:shadow-2xl"
             >
               {/* Top accent bar on hover */}
               <div className="absolute inset-x-0 top-0 h-1 bg-accent scale-x-0 origin-left transition-transform duration-500 group-hover:scale-x-100 rounded-t-2xl" />
 
               <div className="flex items-start gap-5">
-                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-bg-medium text-primary ring-1 ring-primary/10 transition-all duration-300 group-hover:bg-accent group-hover:text-white group-hover:ring-accent/30">
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-bg-medium text-primary ring-1 ring-primary/10 transition-all duration-300 group-hover:bg-accent group-hover:text-accent-foreground group-hover:ring-accent/30">
                   <etapa.icon size={24} />
                 </div>
                 <div className="flex-1">
