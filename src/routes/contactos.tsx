@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
-import { Mail, Phone, MapPin, MessageCircle, Send, AlertCircle } from "lucide-react";
+import { Mail, Phone, MapPin, MessageCircle, Send, AlertCircle, Check } from "lucide-react";
 import { toast } from "sonner";
 import { PageHero, Section } from "@/components/section";
 import { contactSchema } from "@/lib/validation";
