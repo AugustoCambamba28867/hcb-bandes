@@ -10,7 +10,6 @@ import {
   Eye,
   ShoppingCart,
   Loader2,
-  RefreshCw,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -53,29 +52,8 @@ function PedidosPage() {
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<Order | null>(null);
   const [confirm, setConfirm] = useState<{ order: Order; next: OrderStatus } | null>(null);
-  const [syncing, setSyncing] = useState(false);
   const canView = canAccessAdminModule(undefined, "Pedidos", "View");
   const canApprove = canAccessAdminModule(undefined, "Pedidos", "Approve");
-
-  async function handleSync() {
-    setSyncing(true);
-    try {
-      if (await isSupabaseConfigured()) {
-        const remote = await fetchOrdersRemote();
-        if (remote !== null) {
-          setOrders(remote);
-          toast.success("Pedidos sincronizados com Supabase");
-          return;
-        }
-      }
-      setOrders(listOrders());
-      toast.success("Pedidos actualizados");
-    } catch {
-      toast.error("Erro ao sincronizar pedidos");
-    } finally {
-      setSyncing(false);
-    }
-  }
 
   useEffect(() => {
     async function load() {
@@ -202,23 +180,11 @@ function PedidosPage() {
 
   return (
     <div className="space-y-6">
-      <header className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-4 sm:flex sm:flex-wrap sm:items-center sm:justify-between">
-        <div>
-          <h1 className="font-display text-2xl sm:text-3xl font-bold text-primary">Pedidos</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Gestão de pedidos e orçamentos recebidos pelo site.
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={handleSync}
-            disabled={syncing}
-            className="inline-flex items-center gap-2 rounded-md border border-border bg-card px-3.5 py-2.5 text-sm font-medium text-foreground hover:bg-secondary disabled:opacity-60 transition"
-          >
-            <RefreshCw size={14} className={syncing ? "animate-spin text-primary" : "text-muted-foreground"} />
-            <span className="hidden sm:inline">{syncing ? "A sincronizar..." : "Sincronizar"}</span>
-          </button>
-        </div>
+      <header>
+        <h1 className="font-display text-2xl sm:text-3xl font-bold text-primary">Pedidos</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Gestão de pedidos com pesquisa, filtros e aprovação. Dados simulados.
+        </p>
       </header>
 
       <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">

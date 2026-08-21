@@ -46,19 +46,14 @@ function getReportsSeed(): ReportItem[] {
   return MOCK_REPORTS.map((report) => ({ ...report }));
 }
 
-function mergeOrders(local: Order[], remote: Order[]): Order[] {
-  const map = new Map<string, Order>();
-  if (Array.isArray(local)) {
-    for (const item of local) {
-      if (item && item.id) map.set(item.id, item);
-    }
-  }
-  if (Array.isArray(remote)) {
-    for (const item of remote) {
-      if (item && item.id) map.set(item.id, item);
-    }
-  }
-  return Array.from(map.values()).sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+function mergeAuditEvents(local: AuditEvent[], remote: AuditEvent[]): AuditEvent[] {
+  const baseEvents = supabaseEnabled ? [] : MOCK_AUDIT_EVENTS;
+  const filteredLocal = supabaseEnabled
+    ? local.filter((event) => !event.id.startsWith("aud-") && !/^a\d+$/.test(event.id))
+    : local;
+  return [...remote, ...filteredLocal, ...baseEvents]
+    .filter((event, index, array) => array.findIndex((candidate) => candidate.id === event.id) === index)
+    .sort((a, b) => (a.at < b.at ? 1 : -1));
 }
 
 async function syncOrdersFromSupabase() {
@@ -66,10 +61,8 @@ async function syncOrdersFromSupabase() {
   try {
     await ensureSupabaseSchema();
     const remote = await listOrdersFromSupabase();
-    const local = readStorage<Order[]>(ORDERS_KEY, []);
-    const merged = mergeOrders(local, remote);
-    if (merged.length > 0) {
-      writeStorage(ORDERS_KEY, merged);
+    if (remote.length > 0) {
+      writeStorage(ORDERS_KEY, remote);
     }
   } catch (error) {
     console.warn("Failed to sync orders from Supabase", error);
@@ -150,48 +143,6 @@ export function listUsers(): User[] {
   writeStorage(USERS_KEY, fallback);
   void syncUsersFromSupabase();
   return fallback;
-}
-
-export function addOrder(data: {
-  client: string;
-  email: string;
-  service: string;
-  amount?: number;
-  status?: OrderStatus;
-}): Order {
-  const current = listOrders();
-  const now = new Date().toISOString();
-  const randomRef = `PED-${Math.floor(1000 + Math.random() * 9000)}`;
-  const order: Order = {
-    id: typeof crypto !== "undefined" && typeof crypto.randomUUID === "function" ? crypto.randomUUID() : `ord-${Date.now()}`,
-    reference: randomRef,
-    client: data.client,
-    email: data.email,
-    service: data.service,
-    amount: data.amount ?? 0,
-    status: data.status ?? "pendente",
-    createdAt: now,
-    updatedAt: now,
-  };
-
-  const next = [order, ...current];
-  writeStorage(ORDERS_KEY, next);
-
-  void (async () => {
-    if (await isSupabaseConfigured()) {
-      await saveOrderToSupabase(order);
-    }
-  })();
-
-  addAuditEvent({
-    actor: data.client,
-    action: "novo pedido recebido",
-    target: order.reference,
-    details: `${order.service} solicitado por ${order.client} (${order.email}).`,
-    type: "info",
-  });
-
-  return order;
 }
 
 export function updateOrderStatus(id: string, status: OrderStatus): Order[] {
@@ -306,12 +257,7 @@ export async function fetchOrdersRemote(): Promise<Order[] | null> {
   try {
     await ensureSupabaseSchema();
     const remote = await listOrdersFromSupabase();
-    const local = readStorage<Order[]>(ORDERS_KEY, []);
-    const merged = mergeOrders(local, remote);
-    if (merged.length > 0) {
-      writeStorage(ORDERS_KEY, merged);
-      return merged;
-    }
+    writeStorage(ORDERS_KEY, remote);
     return remote;
   } catch (error) {
     console.warn("Failed to fetch remote orders", error);
@@ -359,3 +305,34 @@ export async function fetchAuditEventsRemote(): Promise<AuditEvent[] | null> {
   }
   return null;
 }
+
+export async function upsertReport(report: ReportItem): Promise<ReportItem> {
+  const current = readStorage<ReportItem[]>(REPORTS_KEY, []);
+  const idx = current.findIndex((r) => r.id === report.id);
+  const next = [...current];
+  if (idx >= 0) {
+    next[idx] = report;
+  } else {
+    next.unshift(report);
+  }
+  writeStorage(REPORTS_KEY, next);
+
+  if (await isSupabaseConfigured()) {
+    try {
+      await saveReportToSupabase(report);
+    } catch (err) {
+      console.warn("Failed to save report to Supabase", err);
+    }
+  }
+
+  addAuditEvent({
+    actor: "Administrador",
+    action: idx >= 0 ? "actualizou relatorio" : "gerou relatorio",
+    target: report.title,
+    details: `Relatorio "${report.title}" (${report.category}) para o periodo ${report.period}.`,
+    type: "info",
+  });
+
+  return report;
+}
+

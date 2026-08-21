@@ -507,24 +507,26 @@ function isUuid(str: string): boolean {
   return uuidRegex.test(str);
 }
 
-export async function saveLeadToSupabase(lead: Omit<Lead, "createdAt" | "status"> & { id?: string; status?: Lead["status"] }) {
+export async function saveLeadToSupabase(lead: Omit<Lead, "createdAt" | "status"> & { id?: string; status?: Lead["status"]; createdAt?: string }) {
   if (!supabase) return false;
-  const payload: any = {
+  const payload: Record<string, unknown> = {
     nome: lead.nome,
     email: lead.email,
-    telefone: lead.telefone,
-    empresa: lead.empresa,
+    telefone: lead.telefone ?? null,
+    empresa: lead.empresa ?? null,
     perfil: lead.perfil,
     mensagem: lead.mensagem,
     canal: lead.canal ?? "site",
     status: lead.status ?? "novo",
+    created_at: lead.createdAt ?? new Date().toISOString(),
   };
 
-  if (lead.id && isUuid(lead.id)) {
+  // Always include the id if provided (UUID or not — Supabase uses text primary key)
+  if (lead.id) {
     payload.id = lead.id;
   }
 
-  const { error } = await supabase.from(TABLES.leads).insert(payload);
+  const { error } = await supabase.from(TABLES.leads).upsert(payload, { onConflict: "id" });
   if (error) {
     console.warn("Supabase lead save warning:", await getSupabaseErrorMessage(error));
     return false;
@@ -543,7 +545,7 @@ export async function listLeadsFromSupabase(): Promise<Lead[]> {
 }
 
 export async function updateLeadStatusInSupabase(id: string, status: Lead["status"]): Promise<boolean> {
-  if (!supabase || !isUuid(id)) return false;
+  if (!supabase) return false;
   const { error } = await supabase
     .from(TABLES.leads)
     .update({ status, updated_at: new Date().toISOString() })
@@ -556,7 +558,7 @@ export async function updateLeadStatusInSupabase(id: string, status: Lead["statu
 }
 
 export async function deleteLeadFromSupabase(id: string): Promise<boolean> {
-  if (!supabase || !isUuid(id)) return false;
+  if (!supabase) return false;
   const { error } = await supabase.from(TABLES.leads).delete().eq("id", id);
   if (error) {
     console.warn("Supabase lead delete warning:", error.message);

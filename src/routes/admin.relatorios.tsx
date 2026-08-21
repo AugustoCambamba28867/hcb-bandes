@@ -1,18 +1,19 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Search, Download, FileBarChart, Calendar, Loader2 } from "lucide-react";
+import { Search, Download, FileBarChart, Calendar, Loader2, Plus, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import {
   REPORT_CATEGORY_LABELS,
   type ReportCategory,
   type ReportItem,
 } from "@/lib/mock-data";
-import { listReports, fetchReportsRemote } from "@/lib/admin-dynamic-store";
+import { listReports, fetchReportsRemote, upsertReport } from "@/lib/admin-dynamic-store";
 import { isSupabaseConfigured } from "@/lib/supabase-client";
 import { Badge, EmptyState, StatCard } from "@/components/ui-kit";
 import { canAccessAdminModule, getAdminAccessMessage } from "@/lib/admin-permissions";
 import { addAuditEvent } from "@/lib/audit-store";
 import { downloadCsv } from "@/lib/export-utils";
+import { listLeadsDynamic } from "@/lib/leads-store";
 
 export const Route = createFileRoute("/admin/relatorios")({
   head: () => ({ meta: [{ title: "Relatórios — Admin HCB-BANDES" }] }),
@@ -34,27 +35,28 @@ const STATUS_LABEL: Record<ReportItem["status"], string> = {
 function RelatoriosPage() {
   const [reports, setReports] = useState<ReportItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [generating, setGenerating] = useState(false);
   const [q, setQ] = useState("");
   const [cat, setCat] = useState<ReportCategory | "todas">("todas");
   const [status, setStatus] = useState<ReportItem["status"] | "todos">("todos");
   const [period, setPeriod] = useState("");
   const canView = canAccessAdminModule(undefined, "Relatórios", "View");
 
-  useEffect(() => {
-    async function load() {
-      setLoading(true);
-      if (await isSupabaseConfigured()) {
-        const remote = await fetchReportsRemote();
-        if (remote !== null) {
-          setReports(remote);
-          setLoading(false);
-          return;
-        }
+  async function load() {
+    setLoading(true);
+    if (await isSupabaseConfigured()) {
+      const remote = await fetchReportsRemote();
+      if (remote !== null) {
+        setReports(remote);
+        setLoading(false);
+        return;
       }
-      setReports(listReports());
-      setLoading(false);
     }
+    setReports(listReports());
+    setLoading(false);
+  }
 
+  useEffect(() => {
     load();
     const sync = () => setReports(listReports());
     window.addEventListener("hcb_admin_data_changed", sync);
@@ -74,7 +76,7 @@ function RelatoriosPage() {
         r.id.toLowerCase().includes(term)
       );
     });
-  }, [q, cat, status, period]);
+  }, [q, cat, status, period, reports]);
 
   const kpis = useMemo(() => {
     return {
@@ -84,6 +86,42 @@ function RelatoriosPage() {
       registos: reports.reduce((s, r) => s + r.records, 0),
     };
   }, [reports]);
+
+  async function generateReport() {
+    setGenerating(true);
+    try {
+      const now = new Date();
+      const mes = String(now.getMonth() + 1).padStart(2, "0");
+      const ano = now.getFullYear();
+      const periodoLabel = `${mes}/${ano}`;
+
+      const leads = await listLeadsDynamic();
+      const leadsThisMonth = leads.filter((l) => {
+        const d = new Date(l.createdAt);
+        return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+      });
+
+      const report: ReportItem = {
+        id: `RPT-${Date.now().toString(36).toUpperCase()}`,
+        title: `Relatorio Mensal — ${periodoLabel}`,
+        category: "comercial",
+        period: periodoLabel,
+        author: "Administrador",
+        records: leadsThisMonth.length,
+        generatedAt: now.toISOString(),
+        status: "publicado",
+      };
+
+      await upsertReport(report);
+      toast.success(`Relatorio gerado: ${report.title} (${leadsThisMonth.length} leads)`);
+      await load();
+    } catch (err) {
+      toast.error("Erro ao gerar relatorio");
+      console.error(err);
+    } finally {
+      setGenerating(false);
+    }
+  }
 
   function exportSingle(r: ReportItem) {
     const rows: (string | number)[][] = [
@@ -159,11 +197,22 @@ function RelatoriosPage() {
 
   return (
     <div className="space-y-6">
-      <header>
-        <h1 className="font-display text-2xl sm:text-3xl font-bold text-primary">Relatórios</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Consulte, filtre e exporte relatórios institucionais. Dados simulados.
-        </p>
+      <header className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-4 sm:flex sm:flex-wrap sm:items-center sm:justify-between">
+        <div className="min-w-0">
+          <h1 className="font-display text-2xl sm:text-3xl font-bold text-primary">Relatórios</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Consulte, filtre, gere e exporte relatórios institucionais com dados reais.
+          </p>
+        </div>
+        <button
+          onClick={generateReport}
+          disabled={generating}
+          className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
+        >
+          {generating ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}
+          <span className="hidden sm:inline">{generating ? "A gerar..." : "Gerar Relatório"}</span>
+          <span className="sm:hidden">Gerar</span>
+        </button>
       </header>
 
       <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">

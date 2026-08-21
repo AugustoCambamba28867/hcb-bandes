@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Download, Search, Trash2, Mail, Phone, X, MessageSquare, MessageCircle, RefreshCw } from "lucide-react";
+import { Download, Search, Trash2, Mail, Phone, X, MessageSquare, MessageCircle, Loader2, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/ui-kit";
 import {
@@ -38,37 +38,24 @@ const STATUS_STYLES: Record<LeadStatus, string> = {
 
 function LeadsPage() {
   const [leads, setLeads] = useState<Lead[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [syncing, setSyncing] = useState(false);
   const [q, setQ] = useState("");
   const [statusFilter, setStatusFilter] = useState<LeadStatus | "todos">("todos");
   const [perfilFilter, setPerfilFilter] = useState<string>("todos");
   const [selected, setSelected] = useState<Lead | null>(null);
   const [confirmDelLead, setConfirmDelLead] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
-  async function handleSync() {
-    setSyncing(true);
-    try {
-      const dynamicLeads = await listLeadsDynamic();
-      setLeads(dynamicLeads);
-      toast.success("Leads sincronizados com Supabase");
-    } catch {
-      toast.error("Erro ao sincronizar leads");
-    } finally {
-      setSyncing(false);
-    }
+  async function loadLeads() {
+    const dynamicLeads = await listLeadsDynamic();
+    setLeads(dynamicLeads);
   }
 
   useEffect(() => {
-    const load = async () => {
-      setLoading(true);
-      const dynamicLeads = await listLeadsDynamic();
-      setLeads(dynamicLeads);
-      setLoading(false);
-    };
-    load();
-    window.addEventListener("hcb_leads_changed", load);
-    return () => window.removeEventListener("hcb_leads_changed", load);
+    setLoading(true);
+    loadLeads().finally(() => setLoading(false));
+    window.addEventListener("hcb_leads_changed", loadLeads);
+    return () => window.removeEventListener("hcb_leads_changed", loadLeads);
   }, []);
 
   const filtered = useMemo(() => {
@@ -124,18 +111,17 @@ function LeadsPage() {
         <div className="min-w-0">
           <h1 className="font-display text-2xl sm:text-3xl font-bold text-primary">Leads</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            {filtered.length} {filtered.length === 1 ? "resultado" : "resultados"} de {leads.length}
-            .
+            {loading ? "A carregar..." : `${filtered.length} ${filtered.length === 1 ? "resultado" : "resultados"} de ${leads.length}`}
           </p>
         </div>
         <div className="flex items-center gap-2">
           <button
-            onClick={handleSync}
-            disabled={syncing}
-            className="inline-flex shrink-0 items-center gap-2 rounded-md border border-border bg-card px-3.5 py-2.5 text-sm font-medium text-foreground hover:bg-secondary disabled:opacity-60 transition"
+            onClick={async () => { setRefreshing(true); await loadLeads(); setRefreshing(false); toast.success("Leads actualizados"); }}
+            disabled={refreshing}
+            className="inline-flex items-center gap-2 rounded-md border border-border bg-card px-3.5 py-2.5 text-sm font-medium text-foreground hover:bg-secondary disabled:opacity-60"
           >
-            <RefreshCw size={14} className={syncing ? "animate-spin text-primary" : "text-muted-foreground"} />
-            <span className="hidden sm:inline">{syncing ? "A sincronizar..." : "Sincronizar"}</span>
+            <Download size={14} className={refreshing ? "animate-spin text-primary" : "text-muted-foreground"} />
+            <span className="hidden sm:inline">{refreshing ? "A carregar..." : "Actualizar"}</span>
           </button>
           <button
             onClick={exportarCSV}
@@ -146,6 +132,12 @@ function LeadsPage() {
           </button>
         </div>
       </header>
+
+      {loading ? (
+        <div className="flex items-center gap-3 py-10 text-muted-foreground">
+          <Loader2 size={20} className="animate-spin text-primary" /> A carregar leads do Supabase...
+        </div>
+      ) : null}
 
       {/* filtros */}
       <div className="grid gap-3 sm:grid-cols-[1fr_auto_auto]">
