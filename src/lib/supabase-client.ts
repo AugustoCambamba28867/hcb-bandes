@@ -9,8 +9,16 @@ function normalizeSupabaseUrl(url: string | undefined) {
 
 const isTest = typeof process !== "undefined" && process.env.NODE_ENV === "test";
 
-const supabaseUrl = isTest ? undefined : normalizeSupabaseUrl(import.meta.env.VITE_SUPABASE_URL);
-const supabaseAnonKey = isTest ? undefined : import.meta.env.VITE_SUPABASE_ANON_KEY?.trim();
+const DEFAULT_SUPABASE_URL = "https://kxmkysvwyboddkrstfwk.supabase.co";
+const DEFAULT_SUPABASE_ANON_KEY = "sb_publishable_2YUzrH6y7C3Z9QLSM9Fdjw_jKA3SOqh";
+
+const supabaseUrl = isTest
+  ? undefined
+  : normalizeSupabaseUrl(import.meta.env.VITE_SUPABASE_URL || DEFAULT_SUPABASE_URL);
+
+const supabaseAnonKey = isTest
+  ? undefined
+  : (import.meta.env.VITE_SUPABASE_ANON_KEY?.trim() || DEFAULT_SUPABASE_ANON_KEY);
 
 export const supabase = supabaseUrl && supabaseAnonKey
   ? createClient(supabaseUrl, supabaseAnonKey, {
