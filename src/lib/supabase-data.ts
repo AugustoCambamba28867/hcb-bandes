@@ -1,7 +1,7 @@
 import { isSupabaseConfigured, supabase, getSupabaseErrorMessage } from "@/lib/supabase-client";
 import type { SiteSettings } from "@/lib/site-settings";
 import type { Lead } from "@/lib/leads-store";
-import type { AuditEvent, Order, ReportItem, User } from "@/lib/mock-data";
+import type { AuditEvent, Order, ReportItem, User, PermissionModule } from "@/lib/mock-data";
 import type { Property } from "@/lib/properties-store";
 
 const TABLES = {
@@ -16,6 +16,7 @@ const TABLES = {
   auditEvents: "admin_audit_events",
   properties: "properties",
   partners: "partners",
+  rolePermissions: "admin_role_permissions",
 };
 
 export interface DbService {
@@ -923,5 +924,64 @@ export async function deletePartnerFromSupabase(id: string): Promise<boolean> {
   }
   return true;
 }
+
+// ─── Role Permissions ────────────────────────────────────────────────────────
+
+export async function listRolePermissionsFromSupabase(): Promise<Record<string, Partial<Record<PermissionModule, string[]>>> | null> {
+  if (!supabase) return null;
+  const { data, error } = await supabase.from(TABLES.rolePermissions).select("*");
+  if (error) {
+    console.warn("Supabase role permissions read warning:", error.message);
+    return null;
+  }
+  if (!data || data.length === 0) return null;
+  const result: Record<string, Partial<Record<PermissionModule, string[]>>> = {};
+  for (const row of data) {
+    if (row.role && row.permissions) {
+      result[row.role] = row.permissions as Partial<Record<PermissionModule, string[]>>;
+    }
+  }
+  return result;
+}
+
+export async function saveRolePermissionsToSupabase(
+  role: string,
+  permissions: Partial<Record<PermissionModule, string[]>>
+): Promise<boolean> {
+  if (!supabase) return false;
+  const payload = {
+    role,
+    permissions,
+    updated_at: new Date().toISOString(),
+  };
+  const { error } = await supabase
+    .from(TABLES.rolePermissions)
+    .upsert(payload, { onConflict: "role" });
+  if (error) {
+    console.warn("Supabase role permissions save warning:", error.message);
+    return false;
+  }
+  return true;
+}
+
+export async function saveAllRolePermissionsToSupabase(
+  matrix: Record<string, Partial<Record<PermissionModule, string[]>>>
+): Promise<boolean> {
+  if (!supabase) return false;
+  const rows = Object.entries(matrix).map(([role, permissions]) => ({
+    role,
+    permissions,
+    updated_at: new Date().toISOString(),
+  }));
+  const { error } = await supabase
+    .from(TABLES.rolePermissions)
+    .upsert(rows, { onConflict: "role" });
+  if (error) {
+    console.warn("Supabase all role permissions save warning:", error.message);
+    return false;
+  }
+  return true;
+}
+
 
 

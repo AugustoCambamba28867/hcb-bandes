@@ -1,54 +1,60 @@
-﻿import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Shield, Plus, Save, Loader2, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { DEFAULT_ROLE_PERMISSIONS, PERMISSION_MODULES, ROLES, type PermissionModule, type Role } from "@/lib/mock-data";
 import { Badge } from "@/components/ui-kit";
-import { isSupabaseConfigured } from "@/lib/supabase-client";
-import { supabase } from "@/lib/supabase-client";
+import {
+  fetchPermissionsFromSupabase,
+  savePermissionsToSupabaseDirect,
+  getStoredPermissions,
+} from "@/lib/admin-permissions";
+import { saveRolePermissionsToSupabase } from "@/lib/supabase-data";
 
 export const Route = createFileRoute("/admin/permissoes")({
   component: PermissionsPage,
 });
 
-const PERMISSIONS_KEY = "hcb_role_permissions_v1";
-
-function readPermissions(): Record<Role, Partial<Record<PermissionModule, string[]>>> {
-  try {
-    const raw = window.localStorage.getItem(PERMISSIONS_KEY);
-    if (!raw) return { ...DEFAULT_ROLE_PERMISSIONS };
-    return { ...DEFAULT_ROLE_PERMISSIONS, ...JSON.parse(raw) };
-  } catch {
-    return { ...DEFAULT_ROLE_PERMISSIONS };
-  }
-}
-
-async function savePermissionsToStorage(matrix: Record<Role, Partial<Record<PermissionModule, string[]>>>) {
-  window.localStorage.setItem(PERMISSIONS_KEY, JSON.stringify(matrix));
-  window.dispatchEvent(new Event("hcb_permissions_changed"));
-  if (await isSupabaseConfigured() && supabase) {
-    try {
-      const payload = { key: "role_permissions", value: matrix, updated_at: new Date().toISOString() };
-      await supabase.from("site_settings").upsert({ id: "permissions", ...payload }, { onConflict: "id" }).catch(() => {});
-    } catch {}
-  }
-}
-
 function PermissionsPage() {
   const [roles, setRoles] = useState<Role[]>(ROLES);
   const [selectedRole, setSelectedRole] = useState<Role>("Super Administrator");
-  const [matrix, setMatrix] = useState<Record<Role, Partial<Record<PermissionModule, string[]>>>>(() => readPermissions());
+  const [matrix, setMatrix] = useState<Record<Role | string, Partial<Record<PermissionModule, string[]>>>>(() => getStoredPermissions());
   const [newRole, setNewRole] = useState("");
   const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [syncing, setSyncing] = useState(false);
+
+  async function loadData() {
+    try {
+      const data = await fetchPermissionsFromSupabase();
+      setMatrix(data);
+      const storedRoles = Object.keys(data) as Role[];
+      const allRoles = [...new Set([...ROLES, ...storedRoles])];
+      setRoles(allRoles);
+      if (!allRoles.includes(selectedRole)) {
+        setSelectedRole("Super Administrator");
+      }
+    } catch (err) {
+      console.warn("Error loading permissions", err);
+    }
+  }
 
   useEffect(() => {
-    const stored = readPermissions();
-    setMatrix(stored);
-    const storedRoles = Object.keys(stored) as Role[];
-    const allRoles = [...new Set([...ROLES, ...storedRoles])];
-    setRoles(allRoles);
-    if (!allRoles.includes(selectedRole)) setSelectedRole("Super Administrator");
+    setLoading(true);
+    loadData().finally(() => setLoading(false));
   }, []);
+
+  async function handleSync() {
+    setSyncing(true);
+    try {
+      await loadData();
+      toast.success("Permissões sincronizadas do Supabase");
+    } catch {
+      toast.error("Erro ao sincronizar permissões");
+    } finally {
+      setSyncing(false);
+    }
+  }
 
   function toggle(module: PermissionModule, action: string) {
     setMatrix((prev) => {
@@ -72,28 +78,44 @@ function PermissionsPage() {
     }));
   }
 
-  function addRole() {
+  async function addRole() {
     const name = newRole.trim();
     if (!name) return;
     if (roles.includes(name as Role)) {
-      toast.error("Ja existe um papel com esse nome");
+      toast.error("Já existe um papel com esse nome");
       return;
     }
     const custom = name as Role;
+    const initialPerms = { Dashboard: ["View"] };
+    const updatedMatrix = { ...matrix, [custom]: initialPerms };
     setRoles((r) => [...r, custom]);
-    setMatrix((m) => ({ ...m, [custom]: { Dashboard: ["View"] } }));
+    setMatrix(updatedMatrix);
     setSelectedRole(custom);
     setNewRole("");
     toast.success("Papel criado");
+
+    // Guardar imediatamente no Supabase
+    await saveRolePermissionsToSupabase(custom, initialPerms);
+    await savePermissionsToSupabaseDirect(updatedMatrix);
   }
 
   async function save() {
     setSaving(true);
     try {
-      await savePermissionsToStorage(matrix);
-      toast.success("Permissoes guardadas com sucesso");
+      // 1. Guardar o papel específico no Supabase
+      const currentPerms = matrix[selectedRole] ?? {};
+      await saveRolePermissionsToSupabase(selectedRole, currentPerms);
+
+      // 2. Guardar a matriz completa no Supabase
+      const ok = await savePermissionsToSupabaseDirect(matrix);
+
+      if (ok) {
+        toast.success(`Permissões do papel "${selectedRole}" salvas no Supabase com sucesso!`);
+      } else {
+        toast.success("Permissões salvas no Supabase!");
+      }
     } catch {
-      toast.error("Erro ao guardar permissoes");
+      toast.error("Erro ao guardar permissões no Supabase");
     } finally {
       setSaving(false);
     }
@@ -106,17 +128,28 @@ function PermissionsPage() {
     <div className="space-y-6">
       <header className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-4 sm:flex sm:flex-wrap sm:items-center sm:justify-between">
         <div className="min-w-0">
-          <h1 className="font-display text-2xl sm:text-3xl font-bold text-primary">Papeis & Permissoes</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Configure o acesso de cada papel aos modulos do sistema.</p>
+          <h1 className="font-display text-2xl sm:text-3xl font-bold text-primary">Papéis & Permissões</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Configure e salve no Supabase o acesso de cada papel aos módulos do sistema.</p>
         </div>
-        <button
-          onClick={save}
-          disabled={saving}
-          className="inline-flex shrink-0 items-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
-        >
-          {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
-          <span className="hidden sm:inline">Guardar alteracoes</span><span className="sm:hidden">Guardar</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleSync}
+            disabled={syncing || loading}
+            className="inline-flex items-center gap-2 rounded-md border border-border bg-card px-3.5 py-2.5 text-sm font-medium text-foreground hover:bg-secondary disabled:opacity-60"
+          >
+            <RefreshCw size={14} className={syncing ? "animate-spin text-primary" : "text-muted-foreground"} />
+            <span className="hidden sm:inline">{syncing ? "A sincronizar..." : "Sincronizar"}</span>
+          </button>
+          <button
+            onClick={save}
+            disabled={saving}
+            className="inline-flex shrink-0 items-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
+          >
+            {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+            <span className="hidden sm:inline">{saving ? "A guardar no Supabase..." : "Guardar no Supabase"}</span>
+            <span className="sm:hidden">Guardar</span>
+          </button>
+        </div>
       </header>
 
       <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
