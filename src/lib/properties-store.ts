@@ -100,13 +100,30 @@ function getPropertiesSeed(): Property[] {
   return [];
 }
 
+function mergeProperties(local: Property[], remote: Property[]): Property[] {
+  const map = new Map<string, Property>();
+  if (Array.isArray(local)) {
+    for (const item of local) {
+      if (item && item.id) map.set(item.id, item);
+    }
+  }
+  if (Array.isArray(remote)) {
+    for (const item of remote) {
+      if (item && item.id) map.set(item.id, item);
+    }
+  }
+  return Array.from(map.values());
+}
+
 async function syncPropertiesFromSupabase(): Promise<void> {
   if (!(await isSupabaseConfigured())) return;
   try {
     await ensureSupabaseSchema();
     const remote = await listPropertiesFromSupabase();
     if (Array.isArray(remote) && remote.length > 0) {
-      writeStorage(PROPERTIES_KEY, remote);
+      const local = readStorage<Property[]>(PROPERTIES_KEY, []);
+      const merged = mergeProperties(local, remote);
+      writeStorage(PROPERTIES_KEY, merged);
     }
   } catch (error) {
     console.warn("Failed to sync properties from Supabase", error);
@@ -126,7 +143,7 @@ export function listProperties(): Property[] {
 }
 
 export function listPropertiesPublic(): Property[] {
-  return listProperties().filter((property) => property.is_active && property.status !== "vendido");
+  return listProperties().filter((property) => property.is_active !== false && property.status !== "vendido");
 }
 
 export function upsertProperty(property: Property): Property {
@@ -136,6 +153,7 @@ export function upsertProperty(property: Property): Property {
   const now = new Date().toISOString();
   const saved: Property = {
     ...property,
+    is_active: property.is_active !== false,
     updated_at: property.updated_at || now,
     created_at: property.created_at || now,
   };
@@ -151,9 +169,12 @@ export function upsertProperty(property: Property): Property {
 
   void (async () => {
     if (await isSupabaseConfigured()) {
-      await savePropertyToSupabase(saved).catch((err) => {
+      try {
+        await ensureSupabaseSchema();
+        await savePropertyToSupabase(saved);
+      } catch (err) {
         console.warn("Failed to save property to Supabase", err);
-      });
+      }
     }
   })();
 
@@ -201,9 +222,11 @@ export async function fetchPropertiesRemote(): Promise<Property[] | null> {
   try {
     await ensureSupabaseSchema();
     const remote = await listPropertiesFromSupabase();
-    if (Array.isArray(remote)) {
-      writeStorage(PROPERTIES_KEY, remote);
-      return remote;
+    if (Array.isArray(remote) && remote.length > 0) {
+      const local = readStorage<Property[]>(PROPERTIES_KEY, []);
+      const merged = mergeProperties(local, remote);
+      writeStorage(PROPERTIES_KEY, merged);
+      return merged;
     }
   } catch (error) {
     console.warn("Failed to fetch remote properties", error);
@@ -212,18 +235,19 @@ export async function fetchPropertiesRemote(): Promise<Property[] | null> {
 }
 
 export async function listPropertiesDynamic(): Promise<Property[]> {
+  const local = listProperties();
   if (await isSupabaseConfigured()) {
     const remote = await fetchPropertiesRemote();
-    if (remote !== null) {
+    if (remote !== null && remote.length > 0) {
       return remote;
     }
   }
-  return listProperties();
+  return local;
 }
 
 export async function listPropertiesPublicDynamic(): Promise<Property[]> {
   const all = await listPropertiesDynamic();
-  return all.filter((property) => property.is_active && property.status !== "vendido");
+  return all.filter((property) => property.is_active !== false && property.status !== "vendido");
 }
 
 export function useProperties() {
@@ -233,7 +257,7 @@ export function useProperties() {
   useEffect(() => {
     setLoading(true);
     fetchPropertiesRemote().then((data) => {
-      if (data !== null) {
+      if (data !== null && data.length > 0) {
         setProperties(data);
       } else {
         setProperties(listProperties());
@@ -246,7 +270,11 @@ export function useProperties() {
     }
 
     window.addEventListener(PROPERTIES_EVENT, handleChange);
-    return () => window.removeEventListener(PROPERTIES_EVENT, handleChange);
+    window.addEventListener("storage", handleChange);
+    return () => {
+      window.removeEventListener(PROPERTIES_EVENT, handleChange);
+      window.removeEventListener("storage", handleChange);
+    };
   }, []);
 
   return { properties, setProperties, loading };
@@ -259,7 +287,11 @@ export function usePublicProperties() {
   useEffect(() => {
     setLoading(true);
     listPropertiesPublicDynamic().then((data) => {
-      setProperties(data);
+      if (Array.isArray(data) && data.length > 0) {
+        setProperties(data);
+      } else {
+        setProperties(listPropertiesPublic());
+      }
       setLoading(false);
     });
 
@@ -268,7 +300,11 @@ export function usePublicProperties() {
     }
 
     window.addEventListener(PROPERTIES_EVENT, handleChange);
-    return () => window.removeEventListener(PROPERTIES_EVENT, handleChange);
+    window.addEventListener("storage", handleChange);
+    return () => {
+      window.removeEventListener(PROPERTIES_EVENT, handleChange);
+      window.removeEventListener("storage", handleChange);
+    };
   }, []);
 
   return { properties, loading };

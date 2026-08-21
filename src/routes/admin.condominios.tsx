@@ -44,23 +44,25 @@ function CondominiosAdminPage() {
   useEffect(() => {
     async function load() {
       setLoading(true);
+      const local = listProperties();
+      setProperties(local);
       if (await isSupabaseConfigured()) {
         const remote = await fetchPropertiesRemote();
-        if (remote !== null) {
-          // Cast here due to type mismatch in mock vs real
-          setProperties(remote as unknown as Property[]);
-          setLoading(false);
-          return;
+        if (remote !== null && remote.length > 0) {
+          setProperties(remote);
         }
       }
-      setProperties(listProperties() as unknown as Property[]);
       setLoading(false);
     }
 
     load();
-    const sync = () => setProperties(listProperties() as unknown as Property[]);
+    const sync = () => setProperties(listProperties());
     window.addEventListener("hcb_properties_changed", sync);
-    return () => window.removeEventListener("hcb_properties_changed", sync);
+    window.addEventListener("storage", sync);
+    return () => {
+      window.removeEventListener("hcb_properties_changed", sync);
+      window.removeEventListener("storage", sync);
+    };
   }, []);
 
   const filtered = useMemo(() => {

@@ -15,7 +15,7 @@ import {
   ChevronLeft,
   ChevronRight
 } from 'lucide-react';
-import { Property, PROPERTY_TYPES, PROPERTY_STATUSES, PROVINCES } from '@/lib/properties-store';
+import { Property, PROPERTY_TYPES, PROPERTY_STATUSES, PROVINCES, usePublicProperties } from '@/lib/properties-store';
 import { PageHero, Section } from '@/components/section';
 
 export const Route = createFileRoute('/condominios-residencias')({
@@ -27,35 +27,6 @@ export const Route = createFileRoute('/condominios-residencias')({
     ],
   }),
 });
-
-function usePublicProperties(): Property[] {
-  const [properties, setProperties] = useState<Property[]>([]);
-  
-  useEffect(() => {
-    const KEY = 'hcb_properties_v1';
-    function load() {
-      try {
-        const raw = window.localStorage.getItem(KEY);
-        if (!raw) { setProperties([]); return; }
-        const all: Property[] = JSON.parse(raw);
-        setProperties(all.filter(p => p.is_active && p.status !== 'vendido'));
-      } catch { 
-        setProperties([]); 
-      }
-    }
-    
-    load();
-    window.addEventListener('hcb_properties_changed', load);
-    window.addEventListener('storage', load);
-    
-    return () => {
-      window.removeEventListener('hcb_properties_changed', load);
-      window.removeEventListener('storage', load);
-    };
-  }, []);
-  
-  return properties;
-}
 
 const formatPrice = (price: number) => {
   return new Intl.NumberFormat('pt-AO', { style: 'decimal' }).format(price) + ' AOA';
@@ -302,7 +273,7 @@ function PropertyModal({ property, onClose }: { property: Property; onClose: () 
 }
 
 function CondominiosPage() {
-  const allProperties = usePublicProperties();
+  const { properties: allProperties, loading } = usePublicProperties();
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   
   // Filters
