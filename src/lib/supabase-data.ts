@@ -15,6 +15,7 @@ const TABLES = {
   users: "admin_users",
   auditEvents: "admin_audit_events",
   properties: "properties",
+  partners: "partners",
 };
 
 export interface DbService {
@@ -841,4 +842,84 @@ export async function saveUserPasswordToSupabase(userId: string, passwordPlain: 
   }
   return true;
 }
+
+// ─── Partners ───────────────────────────────────────────────────────────────
+
+export interface DbPartner {
+  id: string;
+  name: string;
+  category: "empresa" | "banco" | "promotor";
+  logo_url?: string;
+  website?: string;
+  description?: string;
+  is_active: boolean;
+  order_index: number;
+  created_at: string;
+  updated_at: string;
+}
+
+function normalizePartner(row: Record<string, unknown>): DbPartner {
+  return {
+    id: String(row.id ?? crypto.randomUUID()),
+    name: typeof row.name === "string" ? row.name : "",
+    category: (typeof row.category === "string" ? row.category : "empresa") as DbPartner["category"],
+    logo_url: typeof row.logo_url === "string" ? row.logo_url : undefined,
+    website: typeof row.website === "string" ? row.website : undefined,
+    description: typeof row.description === "string" ? row.description : undefined,
+    is_active: typeof row.is_active === "boolean" ? row.is_active : true,
+    order_index: typeof row.order_index === "number" ? row.order_index : 0,
+    created_at: typeof row.created_at === "string" ? row.created_at : new Date().toISOString(),
+    updated_at: typeof row.updated_at === "string" ? row.updated_at : new Date().toISOString(),
+  };
+}
+
+export async function listPartnersFromSupabase(): Promise<DbPartner[]> {
+  if (!supabase) return [];
+  const { data, error } = await supabase
+    .from(TABLES.partners)
+    .select("*")
+    .order("order_index", { ascending: true });
+  if (error) {
+    console.warn("Supabase partners read warning:", error.message);
+    return [];
+  }
+  return (data ?? []).map((row) => normalizePartner(row as Record<string, unknown>));
+}
+
+export async function savePartnerToSupabase(partner: DbPartner): Promise<DbPartner | null> {
+  if (!supabase) return null;
+  const payload = {
+    id: partner.id,
+    name: partner.name,
+    category: partner.category,
+    logo_url: partner.logo_url ?? null,
+    website: partner.website ?? null,
+    description: partner.description ?? null,
+    is_active: partner.is_active,
+    order_index: partner.order_index,
+    created_at: partner.created_at,
+    updated_at: new Date().toISOString(),
+  };
+  const { data, error } = await supabase
+    .from(TABLES.partners)
+    .upsert(payload, { onConflict: "id" })
+    .select()
+    .single();
+  if (error) {
+    console.warn("Supabase partner save warning:", error.message);
+    return null;
+  }
+  return normalizePartner(data as Record<string, unknown>);
+}
+
+export async function deletePartnerFromSupabase(id: string): Promise<boolean> {
+  if (!supabase) return false;
+  const { error } = await supabase.from(TABLES.partners).delete().eq("id", id);
+  if (error) {
+    console.warn("Supabase partner delete warning:", error.message);
+    return false;
+  }
+  return true;
+}
+
 
