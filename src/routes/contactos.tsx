@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { PageHero, Section } from "@/components/section";
 import { contactSchema } from "@/lib/validation";
 import { addLead, buildWhatsAppUrl, formatLeadWhatsAppText, type LeadCanal } from "@/lib/leads-store";
+import { addOrder } from "@/lib/admin-dynamic-store";
 import { useSiteSettings } from "@/lib/site-settings";
 
 export const Route = createFileRoute("/contactos")({
@@ -96,6 +97,14 @@ function ContactosPage() {
       perfil: result.data.perfil,
       mensagem: result.data.mensagem,
       canal: selectedCanal,
+    });
+
+    addOrder({
+      client: result.data.nome + (result.data.empresa ? ` (${result.data.empresa})` : ""),
+      email: result.data.email,
+      service: result.data.perfil ? `Pedido: ${result.data.perfil}` : "Contacto pelo Site",
+      amount: 0,
+      status: "pendente",
     });
 
     const whatsappText = formatLeadWhatsAppText(lead);

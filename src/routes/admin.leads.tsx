@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Download, Search, Trash2, Mail, Phone, X, MessageSquare, MessageCircle } from "lucide-react";
+import { Download, Search, Trash2, Mail, Phone, X, MessageSquare, MessageCircle, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/ui-kit";
 import {
@@ -38,16 +38,33 @@ const STATUS_STYLES: Record<LeadStatus, string> = {
 
 function LeadsPage() {
   const [leads, setLeads] = useState<Lead[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [syncing, setSyncing] = useState(false);
   const [q, setQ] = useState("");
   const [statusFilter, setStatusFilter] = useState<LeadStatus | "todos">("todos");
   const [perfilFilter, setPerfilFilter] = useState<string>("todos");
   const [selected, setSelected] = useState<Lead | null>(null);
   const [confirmDelLead, setConfirmDelLead] = useState<string | null>(null);
 
-  useEffect(() => {
-    const load = async () => {
+  async function handleSync() {
+    setSyncing(true);
+    try {
       const dynamicLeads = await listLeadsDynamic();
       setLeads(dynamicLeads);
+      toast.success("Leads sincronizados com Supabase");
+    } catch {
+      toast.error("Erro ao sincronizar leads");
+    } finally {
+      setSyncing(false);
+    }
+  }
+
+  useEffect(() => {
+    const load = async () => {
+      setLoading(true);
+      const dynamicLeads = await listLeadsDynamic();
+      setLeads(dynamicLeads);
+      setLoading(false);
     };
     load();
     window.addEventListener("hcb_leads_changed", load);
@@ -111,13 +128,23 @@ function LeadsPage() {
             .
           </p>
         </div>
-        <button
-          onClick={exportarCSV}
-          className="inline-flex shrink-0 items-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition"
-        >
-          <Download size={14} /> <span className="hidden sm:inline">Exportar CSV</span>
-          <span className="sm:hidden">CSV</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleSync}
+            disabled={syncing}
+            className="inline-flex shrink-0 items-center gap-2 rounded-md border border-border bg-card px-3.5 py-2.5 text-sm font-medium text-foreground hover:bg-secondary disabled:opacity-60 transition"
+          >
+            <RefreshCw size={14} className={syncing ? "animate-spin text-primary" : "text-muted-foreground"} />
+            <span className="hidden sm:inline">{syncing ? "A sincronizar..." : "Sincronizar"}</span>
+          </button>
+          <button
+            onClick={exportarCSV}
+            className="inline-flex shrink-0 items-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition"
+          >
+            <Download size={14} /> <span className="hidden sm:inline">Exportar CSV</span>
+            <span className="sm:hidden">CSV</span>
+          </button>
+        </div>
       </header>
 
       {/* filtros */}

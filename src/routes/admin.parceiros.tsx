@@ -1,6 +1,6 @@
-﻿import { createFileRoute } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
-import { Plus, Trash2, Pencil, X, Loader2, Building2, Landmark, Briefcase, RefreshCw, Globe, Image } from "lucide-react";
+import { createFileRoute } from "@tanstack/react-router";
+import { useState, useEffect, type ChangeEvent } from "react";
+import { Plus, Trash2, Pencil, X, Loader2, Building2, Landmark, Briefcase, RefreshCw, Globe, Image, UploadCloud } from "lucide-react";
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/ui-kit";
 import {
@@ -50,13 +50,43 @@ function PartnerDrawer({
 }) {
   const [form, setForm] = useState<Partner>(partner);
   const [saving, setSaving] = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
 
   function set<K extends keyof Partner>(key: K, value: Partner[K]) {
     setForm((f) => ({ ...f, [key]: value }));
   }
 
+  function handleLogoUpload(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Por favor, selecione um ficheiro de imagem válido (PNG, JPG, SVG, WebP)");
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("A imagem deve ter no máximo 5MB");
+      return;
+    }
+
+    setUploadingLogo(true);
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const result = event.target?.result as string;
+      set("logo_url", result);
+      setUploadingLogo(false);
+      toast.success("Logotipo carregado com sucesso");
+    };
+    reader.onerror = () => {
+      toast.error("Erro ao carregar o logotipo");
+      setUploadingLogo(false);
+    };
+    reader.readAsDataURL(file);
+  }
+
   async function handleSave() {
-    if (!form.name.trim()) { toast.error("O nome do parceiro e obrigatorio"); return; }
+    if (!form.name.trim()) { toast.error("O nome do parceiro é obrigatório"); return; }
     setSaving(true);
     try {
       const saved = await upsertPartner(form);
@@ -91,7 +121,7 @@ function PartnerDrawer({
                 autoFocus
                 value={form.name}
                 onChange={(e) => set("name", e.target.value)}
-                placeholder="Ex: Banco BIC, Soft, Vida Imobiliaria..."
+                placeholder="Ex: Banco BIC, Soft, Vida Imobiliária..."
                 className="w-full rounded-md border border-input bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
               />
             </div>
@@ -110,33 +140,66 @@ function PartnerDrawer({
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-foreground">Descricao</label>
+              <label className="mb-1.5 block text-sm font-medium text-foreground">Descrição</label>
               <textarea
                 rows={3}
                 value={form.description ?? ""}
                 onChange={(e) => set("description", e.target.value || undefined)}
-                placeholder="Breve descricao do parceiro..."
+                placeholder="Breve descrição do parceiro..."
                 className="w-full rounded-md border border-input bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring resize-none"
               />
             </div>
 
+            {/* UPLOAD DE LOGOTIPO */}
             <div>
               <label className="mb-1.5 block text-sm font-medium text-foreground">
-                <span className="flex items-center gap-1.5"><Image size={13} /> URL do Logotipo</span>
+                <span className="flex items-center gap-1.5"><Image size={14} /> Logotipo</span>
               </label>
-              <input
-                value={form.logo_url ?? ""}
-                onChange={(e) => set("logo_url", e.target.value || undefined)}
-                placeholder="https://exemplo.com/logo.png"
-                className="w-full rounded-md border border-input bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-              />
-              {form.logo_url && (
-                <img
-                  src={form.logo_url}
-                  alt="Preview logotipo"
-                  className="mt-2 h-12 w-auto rounded border border-border object-contain"
-                  onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
-                />
+
+              {form.logo_url ? (
+                <div className="relative flex items-center gap-3 rounded-xl border border-border bg-secondary/30 p-3">
+                  <img
+                    src={form.logo_url}
+                    alt="Preview logotipo"
+                    className="h-16 w-16 rounded-lg border border-border object-contain bg-white p-1"
+                    onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                  />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-semibold text-foreground">Logotipo anexado</p>
+                    <p className="text-[11px] text-muted-foreground truncate">Pronto para guardar</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => set("logo_url", undefined)}
+                    className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition"
+                    title="Remover logotipo"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              ) : (
+                <label
+                  htmlFor="partner-logo-upload"
+                  className="flex flex-col items-center justify-center p-5 border-2 border-dashed border-border hover:border-primary/50 bg-secondary/30 hover:bg-secondary/60 rounded-xl cursor-pointer transition text-center group"
+                >
+                  <input
+                    id="partner-logo-upload"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleLogoUpload}
+                    className="hidden"
+                    disabled={uploadingLogo}
+                  />
+                  <div className="p-3 bg-primary/10 text-primary rounded-full mb-2 group-hover:scale-110 transition-transform">
+                    {uploadingLogo ? <Loader2 size={20} className="animate-spin" /> : <UploadCloud size={20} />}
+                  </div>
+                  <span className="text-sm font-semibold text-foreground">
+                    {uploadingLogo ? "A processar ficheiro..." : "Clique para carregar o logotipo"}
+                  </span>
+                  <span className="text-xs text-muted-foreground mt-0.5">
+                    PNG, JPG, SVG, WebP até 5MB
+                  </span>
+                </label>
               )}
             </div>
 
