@@ -322,9 +322,18 @@
                 border-color 0.35s ease;
   }
   .hover-lift:hover {
-    transform: translateY(-6px);
-    box-shadow: var(--shadow-elegant);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-raised);
   }
+
+  /* Cartão institucional — raio e elevação padronizados */
+  .card-surface {
+    border-radius: var(--radius-card);
+    border: 1px solid var(--color-border);
+    background-color: var(--color-card);
+    box-shadow: var(--shadow-card);
+  }
+
 
   .text-gradient-gold {
     background: linear-gradient(90deg,
