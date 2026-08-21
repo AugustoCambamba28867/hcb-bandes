@@ -146,7 +146,7 @@ export function listPropertiesPublic(): Property[] {
   return listProperties().filter((property) => property.is_active !== false && property.status !== "vendido");
 }
 
-export function upsertProperty(property: Property): Property {
+export async function upsertProperty(property: Property): Promise<Property> {
   const current = listProperties();
   const next = [...current];
   const index = next.findIndex((entry) => entry.id === property.id);
@@ -158,8 +158,7 @@ export function upsertProperty(property: Property): Property {
     created_at: property.created_at || now,
   };
 
-  const isNew = index < 0;
-  if (isNew) {
+  if (index < 0) {
     next.unshift(saved);
   } else {
     next[index] = saved;
@@ -167,20 +166,21 @@ export function upsertProperty(property: Property): Property {
 
   writeStorage(PROPERTIES_KEY, next);
 
-  void (async () => {
-    if (await isSupabaseConfigured()) {
-      try {
-        await ensureSupabaseSchema();
-        await savePropertyToSupabase(saved);
-      } catch (err) {
-        console.warn("Failed to save property to Supabase", err);
+  if (await isSupabaseConfigured()) {
+    try {
+      await ensureSupabaseSchema();
+      const remoteSaved = await savePropertyToSupabase(saved);
+      if (remoteSaved) {
+        return remoteSaved;
       }
+    } catch (err) {
+      console.warn("Failed to save property to Supabase", err);
     }
-  })();
+  }
 
   addAuditEvent({
     actor: "Administrador",
-    action: isNew ? "criou imóvel" : "actualizou imóvel",
+    action: index < 0 ? "criou imóvel" : "actualizou imóvel",
     target: saved.name,
     details: `${PROPERTY_TYPES[saved.type] || saved.type} em ${saved.zone || saved.province} (${PROPERTY_STATUSES[saved.status] || saved.status}).`,
     type: "info",
