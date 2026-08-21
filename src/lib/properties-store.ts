@@ -162,14 +162,10 @@ export async function forcePushLocalToSupabase(): Promise<number> {
 
 export function listProperties(): Property[] {
   const stored = readStorage<Property[]>(PROPERTIES_KEY, []);
-  if (stored.length > 0) {
+  if (Array.isArray(stored) && stored.length > 0) {
     return stored.map((property) => ({ ...property }));
   }
-
-  const fallback = getPropertiesSeed();
-  writeStorage(PROPERTIES_KEY, fallback);
-  void syncPropertiesFromSupabase();
-  return fallback;
+  return getPropertiesSeed();
 }
 
 export function listPropertiesPublic(): Property[] {
@@ -285,23 +281,30 @@ export function useProperties() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let mounted = true;
     setLoading(true);
+
     fetchPropertiesRemote().then((data) => {
-      if (data !== null && data.length > 0) {
-        setProperties(data);
-      } else {
-        setProperties(listProperties());
+      if (mounted) {
+        if (data !== null && data.length > 0) {
+          setProperties(data);
+        } else {
+          setProperties(listProperties());
+        }
+        setLoading(false);
       }
-      setLoading(false);
     });
 
     function handleChange() {
-      setProperties(listProperties());
+      if (mounted) {
+        setProperties(listProperties());
+      }
     }
 
     window.addEventListener(PROPERTIES_EVENT, handleChange);
     window.addEventListener("storage", handleChange);
     return () => {
+      mounted = false;
       window.removeEventListener(PROPERTIES_EVENT, handleChange);
       window.removeEventListener("storage", handleChange);
     };
@@ -315,23 +318,30 @@ export function usePublicProperties() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let mounted = true;
     setLoading(true);
+
     listPropertiesPublicDynamic().then((data) => {
-      if (Array.isArray(data) && data.length > 0) {
-        setProperties(data);
-      } else {
-        setProperties(listPropertiesPublic());
+      if (mounted) {
+        if (Array.isArray(data) && data.length > 0) {
+          setProperties(data);
+        } else {
+          setProperties(listPropertiesPublic());
+        }
+        setLoading(false);
       }
-      setLoading(false);
     });
 
     function handleChange() {
-      setProperties(listPropertiesPublic());
+      if (mounted) {
+        setProperties(listPropertiesPublic());
+      }
     }
 
     window.addEventListener(PROPERTIES_EVENT, handleChange);
     window.addEventListener("storage", handleChange);
     return () => {
+      mounted = false;
       window.removeEventListener(PROPERTIES_EVENT, handleChange);
       window.removeEventListener("storage", handleChange);
     };
