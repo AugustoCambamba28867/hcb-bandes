@@ -1,12 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
-import { Plus, Search, Pencil, Trash2, X, Building, Loader2, UploadCloud, ImagePlus, Star, ImageIcon } from "lucide-react";
+import { Plus, Search, Pencil, Trash2, X, Building, Loader2, UploadCloud, ImagePlus, Star, ImageIcon, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import {
   listProperties,
   upsertProperty,
   deleteProperty,
   fetchPropertiesRemote,
+  forcePushLocalToSupabase,
   type Property,
   PROPERTY_TYPES,
   PROPERTY_STATUSES,
@@ -28,18 +29,19 @@ const STATUS_TONES: Record<Property["status"], "success" | "gold" | "primary" | 
 
 function CondominiosAdminPage() {
   const [properties, setProperties] = useState<Property[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [syncing, setSyncing] = useState(false);
   const [q, setQ] = useState("");
   const [typeFilter, setTypeFilter] = useState<Property["type"] | "todos">("todos");
   const [statusFilter, setStatusFilter] = useState<Property["status"] | "todos">("todos");
   const [provinceFilter, setProvinceFilter] = useState<string>("todos");
   const [page, setPage] = useState(1);
-  const [sort, setSort] = useState<{ key: keyof Property; dir: "asc" | "desc" }>({ key: "name", dir: "asc" });
+  const [sort, setSort] = useState<{ key: keyof Property; dir: "asc" | "desc" }>({ key: "created_at", dir: "desc" });
   const [editing, setEditing] = useState<Property | null>(null);
   const [creating, setCreating] = useState(false);
   const [confirmDel, setConfirmDel] = useState<Property | null>(null);
 
   const perPage = 10;
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function load() {
@@ -47,6 +49,8 @@ function CondominiosAdminPage() {
       const local = listProperties();
       setProperties(local);
       if (await isSupabaseConfigured()) {
+        // Enviar os imóveis locais para o Supabase automaticamente se ainda não estiverem lá
+        await forcePushLocalToSupabase().catch(() => {});
         const remote = await fetchPropertiesRemote();
         if (remote !== null && remote.length > 0) {
           setProperties(remote);
@@ -64,6 +68,22 @@ function CondominiosAdminPage() {
       window.removeEventListener("storage", sync);
     };
   }, []);
+
+  async function handleManualSync() {
+    setSyncing(true);
+    try {
+      const count = await forcePushLocalToSupabase();
+      const updated = await fetchPropertiesRemote();
+      if (updated && updated.length > 0) {
+        setProperties(updated);
+      }
+      toast.success(count > 0 ? `${count} propriedade(s) sincronizada(s) com o Supabase!` : "Base de dados sincronizada com sucesso!");
+    } catch (e) {
+      toast.error("Erro ao sincronizar com o Supabase");
+    } finally {
+      setSyncing(false);
+    }
+  }
 
   const filtered = useMemo(() => {
     const term = q.trim().toLowerCase();
@@ -131,12 +151,23 @@ function CondominiosAdminPage() {
             {filtered.length} {filtered.length === 1 ? "propriedade" : "propriedades"} cadastradas.
           </p>
         </div>
-        <button
-          onClick={() => setCreating(true)}
-          className="inline-flex shrink-0 items-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
-        >
-          <Plus size={14} /> <span className="hidden sm:inline">Nova propriedade</span><span className="sm:hidden">Nova</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleManualSync}
+            disabled={syncing}
+            className="inline-flex shrink-0 items-center gap-2 rounded-md border border-border bg-card px-3.5 py-2.5 text-sm font-semibold text-foreground hover:bg-secondary transition disabled:opacity-60"
+            title="Enviar imóveis locais para o Supabase e atualizar"
+          >
+            <RefreshCw size={14} className={syncing ? "animate-spin text-primary" : "text-muted-foreground"} />
+            <span className="hidden sm:inline">{syncing ? "A sincronizar..." : "Sincronizar com Supabase"}</span>
+          </button>
+          <button
+            onClick={() => setCreating(true)}
+            className="inline-flex shrink-0 items-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
+          >
+            <Plus size={14} /> <span className="hidden sm:inline">Nova propriedade</span><span className="sm:hidden">Nova</span>
+          </button>
+        </div>
       </header>
 
       {/* Filtros */}

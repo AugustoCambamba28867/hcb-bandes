@@ -119,14 +119,44 @@ async function syncPropertiesFromSupabase(): Promise<void> {
   if (!(await isSupabaseConfigured())) return;
   try {
     await ensureSupabaseSchema();
+    const local = readStorage<Property[]>(PROPERTIES_KEY, []);
     const remote = await listPropertiesFromSupabase();
-    if (Array.isArray(remote) && remote.length > 0) {
-      const local = readStorage<Property[]>(PROPERTIES_KEY, []);
-      const merged = mergeProperties(local, remote);
+
+    // Sincronizar automaticamente os imóveis locais que ainda não estão no Supabase
+    if (local.length > 0) {
+      const remoteIds = new Set((remote ?? []).map((r) => r.id));
+      for (const p of local) {
+        if (!remoteIds.has(p.id)) {
+          await savePropertyToSupabase(p).catch((e) => console.warn("Auto-sync property to Supabase failed", e));
+        }
+      }
+    }
+
+    const updatedRemote = await listPropertiesFromSupabase();
+    if (Array.isArray(updatedRemote) && updatedRemote.length > 0) {
+      const merged = mergeProperties(local, updatedRemote);
       writeStorage(PROPERTIES_KEY, merged);
     }
   } catch (error) {
     console.warn("Failed to sync properties from Supabase", error);
+  }
+}
+
+export async function forcePushLocalToSupabase(): Promise<number> {
+  if (!(await isSupabaseConfigured())) return 0;
+  try {
+    await ensureSupabaseSchema();
+    const local = readStorage<Property[]>(PROPERTIES_KEY, []);
+    let count = 0;
+    for (const p of local) {
+      const res = await savePropertyToSupabase(p);
+      if (res) count++;
+    }
+    await syncPropertiesFromSupabase();
+    return count;
+  } catch (e) {
+    console.warn("Force push to Supabase failed", e);
+    return 0;
   }
 }
 
