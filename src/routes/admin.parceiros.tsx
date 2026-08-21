@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
-import { Plus, Trash2, Pencil, X, Loader2, Building2, Landmark, Briefcase, RefreshCw, Globe, Image } from "lucide-react";
+import { Plus, Trash2, Pencil, X, Loader2, Building2, Landmark, Briefcase, RefreshCw, Globe, Image, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/ui-kit";
 import {
@@ -122,21 +122,58 @@ function PartnerDrawer({
 
             <div>
               <label className="mb-1.5 block text-sm font-medium text-foreground">
-                <span className="flex items-center gap-1.5"><Image size={13} /> URL do Logotipo</span>
+                <span className="flex items-center gap-1.5"><Upload size={14} /> Logotipo do Parceiro</span>
               </label>
-              <input
-                value={form.logo_url ?? ""}
-                onChange={(e) => set("logo_url", e.target.value || undefined)}
-                placeholder="https://exemplo.com/logo.png"
-                className="w-full rounded-md border border-input bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-              />
-              {form.logo_url && (
-                <img
-                  src={form.logo_url}
-                  alt="Preview logotipo"
-                  className="mt-2 h-12 w-auto rounded border border-border object-contain"
-                  onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
-                />
+
+              {form.logo_url ? (
+                <div className="relative mt-2 flex items-center gap-3 rounded-lg border border-border bg-secondary/40 p-3">
+                  <img
+                    src={form.logo_url}
+                    alt="Preview logotipo"
+                    className="h-14 w-14 rounded-md border border-border object-contain bg-white p-1 shrink-0"
+                    onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                  />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-semibold text-foreground">Logotipo carregado</p>
+                    <p className="text-[11px] text-muted-foreground truncate">Pronto para guardar</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => set("logo_url", undefined)}
+                    className="rounded p-1.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition"
+                    title="Remover logotipo"
+                  >
+                    <Trash2 size={15} />
+                  </button>
+                </div>
+              ) : (
+                <label className="mt-2 flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-border bg-background p-6 text-center hover:border-primary transition">
+                  <Upload size={24} className="text-muted-foreground mb-2" />
+                  <span className="text-sm font-medium text-foreground">Clique para fazer upload do logotipo</span>
+                  <span className="mt-1 text-xs text-muted-foreground">PNG, JPG, SVG ou WEBP (máx. 5MB)</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      if (file.size > 5 * 1024 * 1024) {
+                        toast.error("O ficheiro é muito pesado (máximo 5MB).");
+                        return;
+                      }
+                      const reader = new FileReader();
+                      reader.onload = (event) => {
+                        const res = event.target?.result;
+                        if (typeof res === "string") {
+                          set("logo_url", res);
+                          toast.success("Logotipo carregado com sucesso!");
+                        }
+                      };
+                      reader.readAsDataURL(file);
+                    }}
+                  />
+                </label>
               )}
             </div>
 

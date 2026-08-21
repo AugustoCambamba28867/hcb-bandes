@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { Plus, Search, Pencil, Trash2, Archive, Copy, ArchiveRestore, X, Users2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { ROLES, type Role, type User } from "@/lib/mock-data";
-import { listUsers, upsertUser, fetchUsersRemote } from "@/lib/admin-dynamic-store";
+import { listUsers, upsertUser, upsertUserAsync, fetchUsersRemote } from "@/lib/admin-dynamic-store";
 import { isSupabaseConfigured } from "@/lib/supabase-client";
 import { Badge, ConfirmDialog, EmptyState, PasswordStrength } from "@/components/ui-kit";
 import { maskPhoneAO } from "@/lib/masks";
@@ -86,8 +86,8 @@ function UsersPage() {
     setSort((s) => (s.key === key ? { key, dir: s.dir === "asc" ? "desc" : "asc" } : { key, dir: "asc" }));
   }
 
-  function save(user: User) {
-    const saved = upsertUser(user);
+  async function save(user: User) {
+    const saved = await upsertUserAsync(user);
     setUsers((prev) => {
       const idx = prev.findIndex((p) => p.id === user.id);
       if (idx === -1) return [saved, ...prev];
@@ -95,10 +95,10 @@ function UsersPage() {
       next[idx] = saved;
       return next;
     });
-    toast.success("Utilizador guardado");
+    toast.success("Utilizador guardado no Supabase!");
   }
 
-  function duplicate(u: User) {
+  async function duplicate(u: User) {
     const copy: User = {
       ...u,
       id: `usr-${Math.random().toString(36).slice(2, 8)}`,
@@ -106,16 +106,27 @@ function UsersPage() {
       firstName: `${u.firstName} (cópia)`,
       createdAt: new Date().toISOString(),
     };
+    await upsertUserAsync(copy);
     setUsers((p) => [copy, ...p]);
-    toast.success("Utilizador duplicado");
+    toast.success("Utilizador duplicado no Supabase");
   }
 
-  function archive(id: string) {
+  async function archive(id: string) {
+    const target = users.find((u) => u.id === id);
+    if (target) {
+      const updated = { ...target, archived: true };
+      await upsertUserAsync(updated);
+    }
     setUsers((p) => p.map((u) => (u.id === id ? { ...u, archived: true } : u)));
     toast.success("Utilizador arquivado");
   }
 
-  function restore(id: string) {
+  async function restore(id: string) {
+    const target = users.find((u) => u.id === id);
+    if (target) {
+      const updated = { ...target, archived: false };
+      await upsertUserAsync(updated);
+    }
     setUsers((p) => p.map((u) => (u.id === id ? { ...u, archived: false } : u)));
     toast.success("Utilizador restaurado");
   }

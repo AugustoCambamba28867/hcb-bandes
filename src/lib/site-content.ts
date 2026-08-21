@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { isSupabaseConfigured } from "@/lib/supabase-client";
+import { listPageContentFromSupabase, savePageContentToSupabase } from "@/lib/supabase-data";
 
 export interface PageContent {
   title: string;
@@ -52,24 +54,78 @@ export function getContent(): Record<string, PageContent> {
   }
 }
 
-export function saveContent(data: Record<string, PageContent>) {
-  if (!isBrowser()) return;
+export async function getContentAsync(): Promise<Record<string, PageContent>> {
+  if (!isBrowser()) return DEFAULT_CONTENT;
+  const local = getContent();
+  if (await isSupabaseConfigured()) {
+    try {
+      const rows = await listPageContentFromSupabase();
+      if (rows && rows.length > 0) {
+        const loaded: Record<string, PageContent> = { ...DEFAULT_CONTENT, ...local };
+        rows.forEach((row) => {
+          if (row.page_key) {
+            loaded[row.page_key] = {
+              title: row.title,
+              description: row.description,
+              hero: row.hero ?? undefined,
+            };
+          }
+        });
+        window.localStorage.setItem(CONTENT_KEY, JSON.stringify(loaded));
+        return loaded;
+      }
+    } catch (err) {
+      console.warn("Failed to fetch page content from Supabase", err);
+    }
+  }
+  return local;
+}
+
+export async function saveContent(data: Record<string, PageContent>): Promise<boolean> {
+  if (!isBrowser()) return false;
   window.localStorage.setItem(CONTENT_KEY, JSON.stringify(data));
   window.dispatchEvent(new Event(CONTENT_EVENT));
+
+  if (await isSupabaseConfigured()) {
+    try {
+      const rows = Object.entries(data).map(([page_key, value]) => ({
+        page_key,
+        title: value.title,
+        description: value.description,
+        hero: value.hero ?? null,
+      }));
+      await Promise.all(rows.map((row) => savePageContentToSupabase(row)));
+      return true;
+    } catch (err) {
+      console.warn("Failed to save content to Supabase", err);
+      return false;
+    }
+  }
+  return true;
 }
 
 export function usePageContent(key: string): PageContent {
   const [state, setState] = useState<PageContent>(() => getContent()[key] ?? DEFAULT_CONTENT[key] ?? { title: "", description: "" });
 
   useEffect(() => {
+    let mounted = true;
+    getContentAsync().then((all) => {
+      if (mounted && all[key]) {
+        setState(all[key]);
+      }
+    });
+
     function update() {
-      const all = getContent();
-      setState(all[key] ?? DEFAULT_CONTENT[key] ?? { title: "", description: "" });
+      if (mounted) {
+        const all = getContent();
+        setState(all[key] ?? DEFAULT_CONTENT[key] ?? { title: "", description: "" });
+      }
     }
-    update();
+
     window.addEventListener(CONTENT_EVENT, update);
     window.addEventListener("storage", update);
     return () => {
+      mounted = false;
       window.removeEventListener(CONTENT_EVENT, update);
       window.removeEventListener("storage", update);
     };
@@ -77,3 +133,4 @@ export function usePageContent(key: string): PageContent {
 
   return state;
 }
+

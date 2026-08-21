@@ -165,7 +165,7 @@ export function updateOrderStatus(id: string, status: OrderStatus): Order[] {
   return next;
 }
 
-export function upsertUser(user: User & { password?: string }): User {
+export async function upsertUserAsync(user: User & { password?: string }): Promise<User> {
   const current = listUsers();
   const next = [...current];
   const index = next.findIndex((entry) => entry.id === user.id);
@@ -187,14 +187,18 @@ export function upsertUser(user: User & { password?: string }): User {
     next.unshift(savedWithPasswordHash);
   }
   writeStorage(USERS_KEY, next);
-  void (async () => {
-    if (await isSupabaseConfigured()) {
+
+  if (await isSupabaseConfigured()) {
+    try {
       await saveUserToSupabase(saved);
       if (password) {
         await saveUserPasswordToSupabase(user.id, password);
       }
+    } catch (err) {
+      console.warn("Failed to save user to Supabase", err);
     }
-  })();
+  }
+
   addAuditEvent({
     actor: "Administrador",
     action: password ? "actualizou utilizador e senha" : "actualizou utilizador",
@@ -202,6 +206,23 @@ export function upsertUser(user: User & { password?: string }): User {
     details: `Dados guardados para ${saved.email}.`,
     type: "info",
   });
+  return savedWithPasswordHash;
+}
+
+export function upsertUser(user: User & { password?: string }): User {
+  void upsertUserAsync(user);
+  const current = listUsers();
+  const next = [...current];
+  const index = next.findIndex((entry) => entry.id === user.id);
+  const { password, ...userWithoutPassword } = user;
+  const saved = { ...userWithoutPassword };
+  const savedWithPasswordHash = { ...saved, ...(password ? { password_hash: password } : {}) } as any;
+  if (index >= 0) {
+    next[index] = savedWithPasswordHash;
+  } else {
+    next.unshift(savedWithPasswordHash);
+  }
+  writeStorage(USERS_KEY, next);
   return savedWithPasswordHash;
 }
 
@@ -283,8 +304,20 @@ export async function fetchUsersRemote(): Promise<User[] | null> {
   try {
     await ensureSupabaseSchema();
     const remote = await listUsersFromSupabase();
-    writeStorage(USERS_KEY, remote);
-    return remote;
+    const local = readStorage<User[]>(USERS_KEY, []);
+
+    // Merge: remote takes precedence over local by user id
+    const map = new Map<string, User>();
+    for (const u of local) {
+      if (u?.id) map.set(u.id, u);
+    }
+    for (const u of remote) {
+      if (u?.id) map.set(u.id, u);
+    }
+
+    const merged = Array.from(map.values()).sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || ""));
+    writeStorage(USERS_KEY, merged);
+    return merged;
   } catch (error) {
     console.warn("Failed to fetch remote users", error);
   }

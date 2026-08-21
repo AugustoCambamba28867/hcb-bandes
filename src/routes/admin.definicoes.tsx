@@ -13,6 +13,7 @@ export const Route = createFileRoute("/admin/definicoes")({
 function DefinicoesPage() {
   const [s, setS] = useState<SiteSettings | null>(null);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [confirmReset, setConfirmReset] = useState(false);
   const [confirmPurge, setConfirmPurge] = useState(false);
 
@@ -25,21 +26,9 @@ function DefinicoesPage() {
     load();
   }, []);
 
-  if (loading) {
-    return (
-      <div className="rounded-xl border border-border bg-card p-10 text-center text-sm text-muted-foreground">
-        A carregar definições...
-      </div>
-    );
-  }
-
-  if (!s) return null;
-
   function update<K extends keyof SiteSettings>(k: K, v: SiteSettings[K]) {
     setS((prev) => prev && { ...prev, [k]: v });
   }
-
-  const [saving, setSaving] = useState(false);
 
   async function save() {
     if (!s) return;
@@ -53,6 +42,16 @@ function DefinicoesPage() {
       setSaving(false);
     }
   }
+
+  if (loading) {
+    return (
+      <div className="rounded-xl border border-border bg-card p-10 text-center text-sm text-muted-foreground">
+        A carregar definições...
+      </div>
+    );
+  }
+
+  if (!s) return null;
 
   function doReset() {
     resetSettings();
