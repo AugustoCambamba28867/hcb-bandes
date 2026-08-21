@@ -142,11 +142,19 @@ function normalizeReport(row: Record<string, unknown>): ReportItem {
 }
 
 function normalizeUser(row: Record<string, unknown>): User {
+  const email = typeof row.email === "string" ? row.email : "";
+  const username = typeof row.username === "string" && row.username.trim()
+    ? row.username.trim()
+    : email
+      ? email.split("@")[0]
+      : undefined;
+
   return {
     id: String(row.id ?? crypto.randomUUID()),
+    username: username,
     firstName: typeof row.first_name === "string" ? row.first_name : "",
     lastName: typeof row.last_name === "string" ? row.last_name : "",
-    email: typeof row.email === "string" ? row.email : "",
+    email: email,
     phone: typeof row.phone === "string" ? row.phone : "",
     department: typeof row.department === "string" ? row.department : "",
     position: typeof row.position === "string" ? row.position : "",
@@ -641,8 +649,10 @@ export async function listUsersFromSupabase(): Promise<User[]> {
 
 export async function saveUserToSupabase(user: User): Promise<boolean> {
   if (!supabase) return false;
+  const username = user.username?.trim() || (user.email ? user.email.split("@")[0] : `${user.firstName.toLowerCase()}.${user.lastName.toLowerCase()}`);
   const payload = {
     id: user.id,
+    username: username,
     first_name: user.firstName,
     last_name: user.lastName,
     email: user.email,

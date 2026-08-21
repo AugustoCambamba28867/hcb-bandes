@@ -41,6 +41,7 @@ export type PermissionModule = keyof typeof PERMISSION_MODULES;
 
 export interface User {
   id: string;
+  username?: string;
   firstName: string;
   lastName: string;
   email: string;

@@ -228,7 +228,11 @@ function UsersPage() {
                           </div>
                           <div className="min-w-0">
                             <div className="truncate font-medium text-foreground">{u.firstName} {u.lastName}</div>
-                            <div className="truncate text-xs text-muted-foreground">{u.email}</div>
+                            <div className="flex items-center gap-1.5 text-xs text-muted-foreground truncate">
+                              <span className="font-mono text-primary font-medium">@{u.username || u.email.split("@")[0]}</span>
+                              <span>·</span>
+                              <span>{u.email}</span>
+                            </div>
                           </div>
                         </div>
                       </td>
@@ -268,7 +272,11 @@ function UsersPage() {
                     </div>
                     <div className="min-w-0">
                       <div className="truncate font-medium">{u.firstName} {u.lastName}</div>
-                      <div className="truncate text-xs text-muted-foreground">{u.email}</div>
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground truncate">
+                        <span className="font-mono text-primary font-medium">@{u.username || u.email.split("@")[0]}</span>
+                        <span>·</span>
+                        <span>{u.email}</span>
+                      </div>
                     </div>
                   </div>
                   <Badge tone={STATUS_TONES[u.status]}>{u.status}</Badge>
@@ -351,6 +359,7 @@ function UserFormDrawer({ user, onClose, onSave }: { user: User | null; onClose:
   const [form, setForm] = useState<User>(
     user ?? {
       id: `usr-${Math.random().toString(36).slice(2, 8)}`,
+      username: "",
       firstName: "",
       lastName: "",
       email: "",
@@ -369,6 +378,8 @@ function UserFormDrawer({ user, onClose, onSave }: { user: User | null; onClose:
 
   function validate(): boolean {
     const e: Record<string, string> = {};
+    const finalUsername = form.username?.trim() || form.email.split("@")[0] || `${form.firstName.toLowerCase()}.${form.lastName.toLowerCase()}`;
+    if (finalUsername.length < 3) e.username = "Nome de utilizador deve ter pelo menos 3 caracteres.";
     if (form.firstName.trim().length < 3) e.firstName = "Nome deve possuir pelo menos 3 caracteres.";
     if (form.lastName.trim().length < 2) e.lastName = "Apelido obrigatório.";
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = "Email inválido.";
@@ -390,7 +401,8 @@ function UserFormDrawer({ user, onClose, onSave }: { user: User | null; onClose:
       toast.error("Corrija os erros do formulário");
       return;
     }
-    onSave({ ...form, ...(password ? { password } : {}) });
+    const finalUsername = form.username?.trim() || form.email.split("@")[0] || `${form.firstName.toLowerCase()}.${form.lastName.toLowerCase()}`;
+    onSave({ ...form, username: finalUsername, ...(password ? { password } : {}) });
     if (!isNew && password && showPasswordChange) {
       toast.success("Palavra-passe alterada com sucesso");
     }
@@ -410,8 +422,16 @@ function UserFormDrawer({ user, onClose, onSave }: { user: User | null; onClose:
         </header>
         <form onSubmit={submit} className="flex-1 space-y-5 overflow-y-auto p-5">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <Field label="Nome de utilizador (Login)" error={errors.username} required>
+              <input
+                value={form.username ?? ""}
+                onChange={(e) => setForm({ ...form, username: e.target.value.toLowerCase().replace(/\s+/g, "_") })}
+                placeholder="ex: admin_hcb, joao.silva"
+                className={inputCls(errors.username)}
+              />
+            </Field>
             <Field label="Primeiro nome" error={errors.firstName} required>
-              <input value={form.firstName} onChange={(e) => setForm({ ...form, firstName: e.target.value })} className={inputCls(errors.firstName)} />
+              <input value={form.firstName} onChange={(e) => setForm({ ...form, firstName: e.target.value, username: form.username || (e.target.value ? e.target.value.toLowerCase() : "") })} className={inputCls(errors.firstName)} />
             </Field>
             <Field label="Apelido" error={errors.lastName} required>
               <input value={form.lastName} onChange={(e) => setForm({ ...form, lastName: e.target.value })} className={inputCls(errors.lastName)} />
