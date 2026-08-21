@@ -55,29 +55,11 @@ function ParceirosPage() {
       />
 
       <Section>
-        {/* Aviso institucional */}
-        <div className="mb-12 flex items-start gap-4 rounded-2xl border border-dashed border-gold/60 bg-gold/5 p-6">
-          <Info className="mt-0.5 shrink-0 text-gold" size={20} />
-          <div>
-            <h3 className="font-display font-semibold text-primary text-base">Acordos em fase de formalização</h3>
-            <p className="mt-1.5 text-sm text-foreground/80 leading-relaxed">
-              Os nomes dos nossos parceiros estratégicos serão publicados após a assinatura formal dos acordos de parceria. 
-              Estamos em processo de negociação com promotores imobiliários, bancos comerciais e empresas empregadoras de referência em Angola.
-            </p>
-            <Link
-              to="/contactos"
-              className="mt-3 inline-flex items-center gap-2 rounded-control bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition"
-            >
-              <Handshake size={14} /> Propor parceria
-            </Link>
-          </div>
-        </div>
-
         {/* Categorias de parceiros */}
         <SectionHeader
           eyebrow="Ecossistema de parceiros"
           title="Três pilares do nosso ecossistema"
-          description="O modelo HCB-BANDES assenta em três tipos de parceiros que trabalham em conjunto para tornar a habitação acessível."
+          description="O modelo HCB-BANDES assenta em três tipos de parceiros estratégicos que trabalham em conjunto para tornar a habitação acessível."
         />
         <div className="mt-10 grid gap-6 md:grid-cols-3">
           {CATEGORIAS.map((cat) => (
@@ -89,8 +71,8 @@ function ParceirosPage() {
                 <h3 className="font-display text-lg font-bold text-primary">{cat.title}</h3>
                 <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{cat.desc}</p>
               </div>
-              <div className="mt-auto pt-4 border-t border-border">
-                {cat.partners && cat.partners.length > 0 ? (
+              {cat.partners && cat.partners.length > 0 && (
+                <div className="mt-auto pt-4 border-t border-border">
                   <ul className="flex flex-wrap gap-2">
                     {cat.partners.map((p) => (
                       <li key={p} className="rounded bg-secondary px-2 py-1 text-xs font-medium text-foreground">
@@ -98,13 +80,8 @@ function ParceirosPage() {
                       </li>
                     ))}
                   </ul>
-                ) : (
-                  <p className="text-xs text-muted-foreground italic flex gap-2 items-start">
-                    <Info size={14} className="shrink-0 mt-0.5" />
-                    Os acordos de parceria estão em fase de formalização. Em breve, divulgaremos os nossos parceiros nesta categoria.
-                  </p>
-                )}
-              </div>
+                </div>
+              )}
             </div>
           ))}
         </div>

@@ -61,21 +61,31 @@ const formatPrice = (price: number) => {
   return new Intl.NumberFormat('pt-AO', { style: 'decimal' }).format(price) + ' AOA';
 };
 
-const getTypeColor = (type: Property['type']) => {
+const getTypeColor = (type: Property["type"]) => {
   switch (type) {
-    case 'condominio': return 'bg-blue-100 text-blue-800 border-blue-200';
-    case 'moradia': return 'bg-emerald-100 text-emerald-800 border-emerald-200';
-    case 'apartamento': return 'bg-amber-100 text-amber-800 border-amber-200';
-    default: return 'bg-gray-100 text-gray-800 border-gray-200';
+    case "condominio":
+      return "bg-primary/10 text-primary border-primary/20";
+    case "moradia":
+      return "bg-emerald-500/10 text-emerald-700 border-emerald-500/20";
+    case "apartamento":
+      return "bg-amber-500/10 text-amber-700 border-amber-500/20";
+    default:
+      return "bg-muted text-muted-foreground border-border";
   }
 };
 
-const getStatusColor = (status: Property['status']) => {
+const getStatusColor = (status: Property["status"]) => {
   switch (status) {
-    case 'disponível': return 'bg-green-100 text-green-800';
-    case 'em construção': return 'bg-orange-100 text-orange-800';
-    case 'pronto a habitar': return 'bg-teal-100 text-teal-800';
-    default: return 'bg-gray-100 text-gray-800';
+    case "disponivel":
+      return "bg-green-500/10 text-green-700 border-green-500/20";
+    case "em_construcao":
+      return "bg-amber-500/10 text-amber-700 border-amber-500/20";
+    case "pronto_habitar":
+      return "bg-primary/10 text-primary border-primary/20";
+    case "vendido":
+      return "bg-muted text-muted-foreground border-border";
+    default:
+      return "bg-muted text-muted-foreground border-border";
   }
 };
 
@@ -216,7 +226,7 @@ function PropertyModal({ property, onClose }: { property: Property; onClose: () 
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Área</p>
-                <p className="font-semibold">{property.area_sqm} m²</p>
+                <p className="font-semibold">{property.area} m²</p>
               </div>
             </div>
             
@@ -247,7 +257,7 @@ function PropertyModal({ property, onClose }: { property: Property; onClose: () 
             <div className="space-y-6">
               <div>
                 <h3 className="text-lg font-semibold mb-3">Características</h3>
-                {property.amenities.length > 0 ? (
+                {property.amenities && property.amenities.length > 0 ? (
                   <ul className="space-y-2">
                     {property.amenities.map((amenity, idx) => (
                       <li key={idx} className="flex items-start">
@@ -261,10 +271,10 @@ function PropertyModal({ property, onClose }: { property: Property; onClose: () 
                 )}
               </div>
               
-              {property.financing_conditions && (
+              {property.financing && (
                 <div>
                   <h3 className="text-lg font-semibold mb-3">Condições de Financiamento</h3>
-                  <p className="text-muted-foreground text-sm">{property.financing_conditions}</p>
+                  <p className="text-muted-foreground text-sm">{property.financing}</p>
                 </div>
               )}
             </div>
@@ -349,12 +359,14 @@ function CondominiosPage() {
               <div className="relative">
                 <select
                   value={typeFilter}
-                  onChange={e => setTypeFilter(e.target.value)}
+                  onChange={(e) => setTypeFilter(e.target.value)}
                   className="w-full sm:w-auto appearance-none pl-10 pr-10 py-2.5 rounded-xl border border-input bg-background focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                 >
-                  <option value="Todos">Tipologia</option>
-                  {PROPERTY_TYPES.map(t => (
-                    <option key={t} value={t} className="capitalize">{t}</option>
+                  <option value="Todos">Todas as tipologias</option>
+                  {Object.entries(PROPERTY_TYPES).map(([k, label]) => (
+                    <option key={k} value={k}>
+                      {label}
+                    </option>
                   ))}
                 </select>
                 <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -363,12 +375,14 @@ function CondominiosPage() {
               <div className="relative">
                 <select
                   value={provinceFilter}
-                  onChange={e => setProvinceFilter(e.target.value)}
+                  onChange={(e) => setProvinceFilter(e.target.value)}
                   className="w-full sm:w-auto appearance-none pl-10 pr-10 py-2.5 rounded-xl border border-input bg-background focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                 >
-                  <option value="Todas">Província</option>
-                  {PROVINCES.map(p => (
-                    <option key={p} value={p}>{p}</option>
+                  <option value="Todas">Todas as províncias</option>
+                  {PROVINCES.map((p) => (
+                    <option key={p} value={p}>
+                      {p}
+                    </option>
                   ))}
                 </select>
                 <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -377,12 +391,14 @@ function CondominiosPage() {
               <div className="relative">
                 <select
                   value={statusFilter}
-                  onChange={e => setStatusFilter(e.target.value)}
+                  onChange={(e) => setStatusFilter(e.target.value)}
                   className="w-full sm:w-auto appearance-none pl-10 pr-10 py-2.5 rounded-xl border border-input bg-background focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                 >
-                  <option value="Todos">Estado</option>
-                  {PROPERTY_STATUSES.map(s => (
-                    <option key={s} value={s} className="capitalize">{s}</option>
+                  <option value="Todos">Todos os estados</option>
+                  {Object.entries(PROPERTY_STATUSES).map(([k, label]) => (
+                    <option key={k} value={k}>
+                      {label}
+                    </option>
                   ))}
                 </select>
                 <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -393,14 +409,14 @@ function CondominiosPage() {
           {/* Results Header */}
           <div className="mb-8 flex items-center justify-between">
             <h2 className="text-2xl font-semibold text-foreground">
-              {filteredProperties.length} {filteredProperties.length === 1 ? 'Imóvel encontrado' : 'Imóveis encontrados'}
+              {filteredProperties.length} {filteredProperties.length === 1 ? "Imóvel encontrado" : "Imóveis encontrados"}
             </h2>
           </div>
 
           {/* Properties Grid */}
           {filteredProperties.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {filteredProperties.map(property => (
+              {filteredProperties.map((property) => (
                 <div 
                   key={property.id} 
                   className="group bg-card rounded-2xl border border-border overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col cursor-pointer"
@@ -421,7 +437,7 @@ function CondominiosPage() {
                     
                     <div className="absolute top-3 left-3 flex gap-2">
                       <span className={`px-2.5 py-1 rounded-full text-[10px] uppercase font-bold tracking-wider border backdrop-blur-sm bg-white/90 ${getTypeColor(property.type)}`}>
-                        {property.type}
+                        {PROPERTY_TYPES[property.type] || property.type}
                       </span>
                     </div>
                   </div>
@@ -441,15 +457,15 @@ function CondominiosPage() {
                     <div className="grid grid-cols-3 gap-2 py-4 border-y border-border mb-4 text-center">
                       <div className="flex flex-col items-center justify-center">
                         <BedDouble className="w-4 h-4 text-muted-foreground mb-1" />
-                        <span className="text-sm font-medium">{property.bedrooms}</span>
+                        <span className="text-sm font-medium">{property.bedrooms > 0 ? `${property.bedrooms} Quartos` : "—"}</span>
                       </div>
                       <div className="flex flex-col items-center justify-center border-x border-border">
                         <Bath className="w-4 h-4 text-muted-foreground mb-1" />
-                        <span className="text-sm font-medium">{property.bathrooms}</span>
+                        <span className="text-sm font-medium">{property.bathrooms > 0 ? `${property.bathrooms} WC` : "—"}</span>
                       </div>
                       <div className="flex flex-col items-center justify-center">
                         <Maximize2 className="w-4 h-4 text-muted-foreground mb-1" />
-                        <span className="text-sm font-medium">{property.area_sqm}m²</span>
+                        <span className="text-sm font-medium">{property.area > 0 ? `${property.area} m²` : "—"}</span>
                       </div>
                     </div>
                     

@@ -154,8 +154,8 @@ function CondominiosAdminPage() {
           className="rounded-md border border-input bg-card px-3 py-2.5 text-sm"
         >
           <option value="todos">Todos os tipos</option>
-          {PROPERTY_TYPES.map((t) => (
-            <option key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>
+          {Object.entries(PROPERTY_TYPES).map(([t, label]) => (
+            <option key={t} value={t}>{label}</option>
           ))}
         </select>
         <select
@@ -172,8 +172,8 @@ function CondominiosAdminPage() {
           className="rounded-md border border-input bg-card px-3 py-2.5 text-sm"
         >
           <option value="todos">Todos os estados</option>
-          {PROPERTY_STATUSES.map((s) => (
-            <option key={s} value={s}>{s.replace("_", " ").toUpperCase()}</option>
+          {Object.entries(PROPERTY_STATUSES).map(([s, label]) => (
+            <option key={s} value={s}>{label}</option>
           ))}
         </select>
       </div>
@@ -382,7 +382,7 @@ function PropertyFormDrawer({ property, onClose, onSave }: { property: Property 
             </Field>
             <Field label="Tipo">
               <select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value as Property["type"] })} className={inputCls()}>
-                {PROPERTY_TYPES.map((t) => <option key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>)}
+                {Object.entries(PROPERTY_TYPES).map(([t, label]) => <option key={t} value={t}>{label}</option>)}
               </select>
             </Field>
             <Field label="Província">
@@ -395,7 +395,7 @@ function PropertyFormDrawer({ property, onClose, onSave }: { property: Property 
             </Field>
             <Field label="Estado">
               <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value as Property["status"] })} className={inputCls()}>
-                {PROPERTY_STATUSES.map((s) => <option key={s} value={s}>{s.replace("_", " ")}</option>)}
+                {Object.entries(PROPERTY_STATUSES).map(([s, label]) => <option key={s} value={s}>{label}</option>)}
               </select>
             </Field>
             <Field label="Preço (AOA)" error={errors.price} required>
