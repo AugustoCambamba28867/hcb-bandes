@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
-import { Plus, Search, Pencil, Trash2, X, Building, Loader2 } from "lucide-react";
+import { Plus, Search, Pencil, Trash2, X, Building, Loader2, UploadCloud, ImagePlus, Star, ImageIcon } from "lucide-react";
 import { toast } from "sonner";
 import {
   listProperties,
@@ -336,7 +336,8 @@ function PropertyFormDrawer({ property, onClose, onSave }: { property: Property 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const [amenitiesStr, setAmenitiesStr] = useState(form.amenities.join(", "));
-  const [imagesStr, setImagesStr] = useState(form.images.join(", "));
+  const [images, setImages] = useState<string[]>(Array.isArray(form.images) ? form.images : []);
+  const [uploading, setUploading] = useState(false);
 
   function validate(): boolean {
     const e: Record<string, string> = {};
@@ -348,6 +349,61 @@ function PropertyFormDrawer({ property, onClose, onSave }: { property: Property 
     return Object.keys(e).length === 0;
   }
 
+  function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setUploading(true);
+    const newImages: string[] = [];
+    let processed = 0;
+    const fileList = Array.from(files);
+
+    fileList.forEach((file) => {
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error(`O ficheiro ${file.name} é muito pesado (máx. 5MB).`);
+        processed++;
+        if (processed === fileList.length) setUploading(false);
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const result = event.target?.result;
+        if (typeof result === "string") {
+          newImages.push(result);
+        }
+        processed++;
+        if (processed === fileList.length) {
+          setImages((prev) => [...prev, ...newImages]);
+          setUploading(false);
+          toast.success(`${newImages.length} imagem(ns) carregada(s) com sucesso`);
+        }
+      };
+      reader.onerror = () => {
+        processed++;
+        if (processed === fileList.length) setUploading(false);
+      };
+      reader.readAsDataURL(file);
+    });
+
+    e.target.value = "";
+  }
+
+  function removeImage(index: number) {
+    setImages((prev) => prev.filter((_, i) => i !== index));
+    toast.success("Imagem removida");
+  }
+
+  function setAsCover(index: number) {
+    if (index === 0) return;
+    setImages((prev) => {
+      const item = prev[index];
+      const rest = prev.filter((_, i) => i !== index);
+      return [item, ...rest];
+    });
+    toast.success("Definida como imagem principal");
+  }
+
   function submit(e: FormEvent) {
     e.preventDefault();
     if (!validate()) {
@@ -357,7 +413,7 @@ function PropertyFormDrawer({ property, onClose, onSave }: { property: Property 
     const finalForm = {
       ...form,
       amenities: amenitiesStr.split(",").map((s) => s.trim()).filter(Boolean),
-      images: imagesStr.split(",").map((s) => s.trim()).filter(Boolean),
+      images: images,
       updated_at: new Date().toISOString(),
     };
     onSave(finalForm);
@@ -417,18 +473,85 @@ function PropertyFormDrawer({ property, onClose, onSave }: { property: Property 
               <input value={form.contact_info} onChange={(e) => setForm({ ...form, contact_info: e.target.value })} className={inputCls()} />
             </Field>
           </div>
+
           <div className="grid gap-4">
             <Field label="Descrição">
               <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className={inputCls()} rows={3} />
             </Field>
             <Field label="Comodidades (separadas por vírgula)">
-              <input value={amenitiesStr} onChange={(e) => setAmenitiesStr(e.target.value)} placeholder="Piscina, Ginásio, Segurança 24h" className={inputCls()} />
+              <input value={amenitiesStr} onChange={(e) => setAmenitiesStr(e.target.value)} placeholder="Piscina, Ginásio, Segurança 24h, Gerador" className={inputCls()} />
             </Field>
-            <Field label="Imagens (URLs separadas por vírgula)">
-              <input value={imagesStr} onChange={(e) => setImagesStr(e.target.value)} placeholder="https://exemplo.com/img1.jpg, ..." className={inputCls()} />
+
+            {/* UPLOAD DE IMAGENS */}
+            <Field label="Imagens e Fotografias">
+              <div className="space-y-3">
+                <label
+                  htmlFor="prop-images-upload"
+                  className="flex flex-col items-center justify-center p-5 border-2 border-dashed border-border hover:border-primary/50 bg-secondary/30 hover:bg-secondary/60 rounded-xl cursor-pointer transition text-center group"
+                >
+                  <input
+                    id="prop-images-upload"
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                    disabled={uploading}
+                  />
+                  <div className="p-3 bg-primary/10 text-primary rounded-full mb-2 group-hover:scale-110 transition-transform">
+                    {uploading ? <Loader2 size={20} className="animate-spin" /> : <UploadCloud size={20} />}
+                  </div>
+                  <span className="text-sm font-semibold text-foreground">
+                    {uploading ? "A processar ficheiros..." : "Clique para carregar ou arraste fotos"}
+                  </span>
+                  <span className="text-xs text-muted-foreground mt-0.5">
+                    PNG, JPG, JPEG, WebP (Pode seleccionar várias imagens em simultâneo)
+                  </span>
+                </label>
+
+                {/* Galeria de Fotos */}
+                {images.length > 0 && (
+                  <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 pt-1">
+                    {images.map((img, idx) => (
+                      <div
+                        key={idx}
+                        className="group relative aspect-video rounded-lg overflow-hidden border border-border bg-muted shadow-sm"
+                      >
+                        <img src={img} alt={`Foto ${idx + 1}`} className="w-full h-full object-cover" />
+                        {idx === 0 && (
+                          <span className="absolute top-1 left-1 bg-primary text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded shadow">
+                            Capa
+                          </span>
+                        )}
+                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5 p-1">
+                          {idx !== 0 && (
+                            <button
+                              type="button"
+                              onClick={() => setAsCover(idx)}
+                              title="Definir como capa principal"
+                              className="p-1.5 bg-card text-foreground hover:bg-card/90 rounded-full text-xs shadow"
+                            >
+                              <Star size={12} className="text-amber-500 fill-amber-500" />
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => removeImage(idx)}
+                            title="Remover imagem"
+                            className="p-1.5 bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-full shadow"
+                          >
+                            <Trash2 size={12} />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </Field>
+
             <Field label="Condições de Financiamento">
-              <textarea value={form.financing} onChange={(e) => setForm({ ...form, financing: e.target.value })} className={inputCls()} rows={2} />
+              <textarea value={form.financing} onChange={(e) => setForm({ ...form, financing: e.target.value })} className={inputCls()} rows={2} placeholder="Ex.: Financiamento bancário até 25 anos com BAI/BFA." />
             </Field>
           </div>
           <div className="flex gap-6 border-t border-border pt-4">
