@@ -432,7 +432,7 @@ export async function readSettings() {
   return data ? normalizeSettings(data as Record<string, unknown>) : null;
 }
 
-export async function saveSettingsToSupabase(settings: SiteSettings) {
+export async function saveSettingsToSupabase(settings: SiteSettings): Promise<boolean> {
   if (!supabase) return false;
   const payload = {
     empresa: settings.empresa,
@@ -448,25 +448,25 @@ export async function saveSettingsToSupabase(settings: SiteSettings) {
   };
 
   try {
-    const { data: existing } = await supabase
+    const { data: listData } = await supabase
       .from(TABLES.settings)
       .select("id")
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
+      .limit(1);
 
-    if (existing?.id) {
-      const { error } = await supabase
+    if (listData && listData.length > 0) {
+      const { error: updateError } = await supabase
         .from(TABLES.settings)
         .update(payload)
-        .eq("id", existing.id);
-      if (!error) return true;
-      console.warn("Supabase settings update warning:", error.message);
+        .eq("id", listData[0].id);
+      if (!updateError) return true;
+      console.warn("Supabase settings update error:", updateError.message);
+    } else {
+      const { error: insertError } = await supabase
+        .from(TABLES.settings)
+        .insert(payload);
+      if (!insertError) return true;
+      console.warn("Supabase settings insert error:", insertError.message);
     }
-
-    const { error: insertError } = await supabase.from(TABLES.settings).insert(payload);
-    if (!insertError) return true;
-    console.warn("Supabase settings insert warning:", insertError.message);
   } catch (err) {
     console.warn("Supabase settings save exception:", err);
   }
@@ -508,7 +508,7 @@ function isUuid(str: string): boolean {
   return uuidRegex.test(str);
 }
 
-export async function saveLeadToSupabase(lead: Omit<Lead, "createdAt" | "status"> & { id?: string; status?: Lead["status"]; createdAt?: string }) {
+export async function saveLeadToSupabase(lead: Omit<Lead, "createdAt" | "status"> & { id?: string; status?: Lead["status"]; createdAt?: string }): Promise<boolean> {
   if (!supabase) return false;
   const payload: Record<string, unknown> = {
     nome: lead.nome,
@@ -522,12 +522,12 @@ export async function saveLeadToSupabase(lead: Omit<Lead, "createdAt" | "status"
     created_at: lead.createdAt ?? new Date().toISOString(),
   };
 
-  // Always include the id if provided (UUID or not — Supabase uses text primary key)
-  if (lead.id) {
+  // Only pass id if it is a valid UUID to avoid PostgreSQL "invalid input syntax for type uuid" error
+  if (lead.id && isUuid(lead.id)) {
     payload.id = lead.id;
   }
 
-  const { error } = await supabase.from(TABLES.leads).upsert(payload, { onConflict: "id" });
+  const { error } = await supabase.from(TABLES.leads).insert(payload);
   if (error) {
     console.warn("Supabase lead save warning:", await getSupabaseErrorMessage(error));
     return false;

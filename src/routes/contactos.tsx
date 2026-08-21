@@ -4,7 +4,7 @@ import { Mail, Phone, MapPin, MessageCircle, Send, AlertCircle, Check } from "lu
 import { toast } from "sonner";
 import { PageHero, Section } from "@/components/section";
 import { contactSchema } from "@/lib/validation";
-import { addLead, buildWhatsAppUrl, formatLeadWhatsAppText, type LeadCanal } from "@/lib/leads-store";
+import { addLead, addLeadAsync, buildWhatsAppUrl, formatLeadWhatsAppText, type LeadCanal } from "@/lib/leads-store";
 import { useSiteSettings } from "@/lib/site-settings";
 
 export const Route = createFileRoute("/contactos")({
@@ -61,7 +61,7 @@ function ContactosPage() {
     setErrors((prev) => ({ ...prev, [name]: fieldError?.message }));
   }
 
-  function onSubmit(e: FormEvent<HTMLFormElement>) {
+  async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = e.currentTarget;
     const fd = new FormData(form);
@@ -88,15 +88,28 @@ function ContactosPage() {
     const selectedCanal = (raw.canal as LeadCanal | undefined) ?? canal;
     setCanal(selectedCanal);
 
-    const lead = addLead({
-      nome: result.data.nome,
-      email: result.data.email,
-      telefone: result.data.telefone || undefined,
-      empresa: result.data.empresa || undefined,
-      perfil: result.data.perfil,
-      mensagem: result.data.mensagem,
-      canal: selectedCanal,
-    });
+    let lead;
+    try {
+      lead = await addLeadAsync({
+        nome: result.data.nome,
+        email: result.data.email,
+        telefone: result.data.telefone || undefined,
+        empresa: result.data.empresa || undefined,
+        perfil: result.data.perfil,
+        mensagem: result.data.mensagem,
+        canal: selectedCanal,
+      });
+    } catch {
+      lead = addLead({
+        nome: result.data.nome,
+        email: result.data.email,
+        telefone: result.data.telefone || undefined,
+        empresa: result.data.empresa || undefined,
+        perfil: result.data.perfil,
+        mensagem: result.data.mensagem,
+        canal: selectedCanal,
+      });
+    }
 
     const whatsappText = formatLeadWhatsAppText(lead);
     const whatsappUrl = buildWhatsAppUrl(whatsappText, settings.whatsapp);
