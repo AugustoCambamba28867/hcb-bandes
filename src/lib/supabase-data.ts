@@ -2,6 +2,7 @@ import { isSupabaseConfigured, supabase, getSupabaseErrorMessage } from "@/lib/s
 import type { SiteSettings } from "@/lib/site-settings";
 import type { Lead } from "@/lib/leads-store";
 import type { AuditEvent, Order, ReportItem, User } from "@/lib/mock-data";
+import type { Property } from "@/lib/properties-store";
 
 const TABLES = {
   settings: "site_settings",
@@ -13,6 +14,7 @@ const TABLES = {
   reports: "admin_reports",
   users: "admin_users",
   auditEvents: "admin_audit_events",
+  properties: "properties",
 };
 
 export interface DbService {
@@ -164,6 +166,35 @@ function normalizeAuditEvent(row: Record<string, unknown>): AuditEvent {
     details: typeof row.details === "string" ? row.details : "",
     at: typeof row.at === "string" ? row.at : new Date().toISOString(),
     type: (typeof row.type === "string" ? row.type : "info") as AuditEvent["type"],
+  };
+}
+
+function normalizeProperty(row: Record<string, unknown>): Property {
+  return {
+    id: String(row.id ?? crypto.randomUUID()),
+    name: typeof row.name === "string" ? row.name : "",
+    type: (typeof row.type === "string" ? row.type : "condominio") as Property["type"],
+    province: typeof row.province === "string" ? row.province : "Luanda",
+    zone: typeof row.zone === "string" ? row.zone : "",
+    status: (typeof row.status === "string" ? row.status : "disponivel") as Property["status"],
+    description: typeof row.description === "string" ? row.description : "",
+    bedrooms: typeof row.bedrooms === "number" ? row.bedrooms : Number(row.bedrooms ?? 0),
+    bathrooms: typeof row.bathrooms === "number" ? row.bathrooms : Number(row.bathrooms ?? 0),
+    area: typeof row.area === "number" ? row.area : Number(row.area ?? 0),
+    price: typeof row.price === "number" ? row.price : Number(row.price ?? 0),
+    amenities: Array.isArray(row.amenities)
+      ? row.amenities.filter((item): item is string => typeof item === "string")
+      : [],
+    images: Array.isArray(row.images)
+      ? row.images.filter((item): item is string => typeof item === "string")
+      : [],
+    financing: typeof row.financing === "string" ? row.financing : "",
+    promoter: typeof row.promoter === "string" ? row.promoter : "",
+    contact_info: typeof row.contact_info === "string" ? row.contact_info : "",
+    is_featured: typeof row.is_featured === "boolean" ? row.is_featured : false,
+    is_active: typeof row.is_active === "boolean" ? row.is_active : true,
+    created_at: typeof row.created_at === "string" ? row.created_at : new Date().toISOString(),
+    updated_at: typeof row.updated_at === "string" ? row.updated_at : new Date().toISOString(),
   };
 }
 
@@ -332,6 +363,29 @@ export const SUPABASE_MIGRATION_SQL = `
       details text not null,
       at timestamptz default now(),
       type text not null default 'info'
+    );
+
+    create table if not exists public.properties (
+      id text primary key,
+      name text not null,
+      type text not null default 'condominio',
+      province text not null default 'Luanda',
+      zone text not null default '',
+      status text not null default 'disponivel',
+      description text not null default '',
+      bedrooms integer default 0,
+      bathrooms integer default 0,
+      area numeric default 0,
+      price numeric default 0,
+      amenities jsonb default '[]'::jsonb,
+      images jsonb default '[]'::jsonb,
+      financing text default '',
+      promoter text default '',
+      contact_info text default '',
+      is_featured boolean default false,
+      is_active boolean default true,
+      created_at timestamptz default now(),
+      updated_at timestamptz default now()
     );
 
     insert into public.site_settings (empresa, tagline, email, telefone, whatsapp, endereco, banks_partners, companies_partners, promoters_partners)
@@ -715,3 +769,76 @@ export async function deleteServiceFromSupabase(id: string): Promise<boolean> {
   }
   return true;
 }
+
+export async function listPropertiesFromSupabase(): Promise<Property[]> {
+  if (!supabase) return [];
+  const { data, error } = await supabase
+    .from(TABLES.properties)
+    .select("*")
+    .order("created_at", { ascending: false });
+  if (error) {
+    console.warn("Supabase properties read warning:", error.message);
+    return [];
+  }
+  return (data ?? []).map((row) => normalizeProperty(row as Record<string, unknown>));
+}
+
+export async function savePropertyToSupabase(property: Property): Promise<Property | null> {
+  if (!supabase) return null;
+  const payload = {
+    id: property.id,
+    name: property.name,
+    type: property.type,
+    province: property.province,
+    zone: property.zone,
+    status: property.status,
+    description: property.description,
+    bedrooms: property.bedrooms,
+    bathrooms: property.bathrooms,
+    area: property.area,
+    price: property.price,
+    amenities: property.amenities,
+    images: property.images,
+    financing: property.financing,
+    promoter: property.promoter,
+    contact_info: property.contact_info,
+    is_featured: property.is_featured,
+    is_active: property.is_active,
+    created_at: property.created_at,
+    updated_at: property.updated_at,
+  };
+  const { data, error } = await supabase
+    .from(TABLES.properties)
+    .upsert(payload, { onConflict: "id" })
+    .select()
+    .single();
+  if (error) {
+    console.warn("Supabase property save warning:", error.message);
+    return null;
+  }
+  return normalizeProperty(data as Record<string, unknown>);
+}
+
+export async function deletePropertyFromSupabase(id: string): Promise<boolean> {
+  if (!supabase) return false;
+  const { error } = await supabase.from(TABLES.properties).delete().eq("id", id);
+  if (error) {
+    console.warn("Supabase property delete warning:", error.message);
+    return false;
+  }
+  return true;
+}
+
+export async function saveUserPasswordToSupabase(userId: string, passwordPlain: string): Promise<boolean> {
+  if (!supabase) return false;
+  const { error } = await supabase
+    .from(TABLES.users)
+    .update({ password_hash: passwordPlain })
+    .eq("id", userId);
+  if (error) {
+    console.warn("Supabase user password update warning:", error.message);
+    return false;
+  }
+  return true;
+}
+

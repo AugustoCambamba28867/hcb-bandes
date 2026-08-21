@@ -41,6 +41,11 @@ const DEFAULTS: Record<string, PageContent> = {
     title: "Vantagens concretas para cada parceiro do ecossistema.",
     description: "Empresas, bancos e trabalhadores.",
   },
+  condominios: {
+    title: "Condomínios e Residências Seleccionados.",
+    description: "Empreendimentos residenciais de referência com crédito corporativo facilitado.",
+    hero: "Explore a nossa carteira de condomínios fechados, moradias e apartamentos de qualidade com apoio bancário.",
+  },
 };
 
 const KEY = "hcb_content_v1";
@@ -162,6 +167,7 @@ function ConteudosPage() {
     { id: "quemSomos", label: "Quem Somos" },
     { id: "servicos", label: "Serviços" },
     { id: "beneficios", label: "Benefícios" },
+    { id: "condominios", label: "Condomínios & Residências" },
   ];
 
   const current = data[activeTab];

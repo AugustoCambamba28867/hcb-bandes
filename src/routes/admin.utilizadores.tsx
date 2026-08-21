@@ -353,6 +353,7 @@ function UserFormDrawer({ user, onClose, onSave }: { user: User | null; onClose:
   );
   const [password, setPassword] = useState("");
   const [confirmPw, setConfirmPw] = useState("");
+  const [showPasswordChange, setShowPasswordChange] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   function validate(): boolean {
@@ -363,7 +364,7 @@ function UserFormDrawer({ user, onClose, onSave }: { user: User | null; onClose:
     if (form.phone && form.phone.replace(/\D/g, "").length < 9) e.phone = "Telefone inválido.";
     if (!form.department.trim()) e.department = "Campo obrigatório.";
     if (!form.position.trim()) e.position = "Campo obrigatório.";
-    if (isNew) {
+    if (isNew || (showPasswordChange && password)) {
       const s = evaluatePassword(password);
       if (s.score < 2) e.password = "Senha muito fraca.";
       if (password !== confirmPw) e.confirmPw = "As senhas não coincidem.";
@@ -378,7 +379,10 @@ function UserFormDrawer({ user, onClose, onSave }: { user: User | null; onClose:
       toast.error("Corrija os erros do formulário");
       return;
     }
-    onSave(form);
+    onSave({ ...form, ...(password ? { password } : {}) });
+    if (!isNew && password && showPasswordChange) {
+      toast.success("Palavra-passe alterada com sucesso");
+    }
   }
 
   return (
@@ -427,17 +431,36 @@ function UserFormDrawer({ user, onClose, onSave }: { user: User | null; onClose:
             </Field>
           </div>
 
-          {isNew && (
-            <div className="grid gap-4 border-t border-border pt-5 sm:grid-cols-2">
-              <Field label="Senha" error={errors.password} required>
-                <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className={inputCls(errors.password)} />
-                {password && <div className="mt-2"><PasswordStrength value={password} /></div>}
-              </Field>
-              <Field label="Confirmar senha" error={errors.confirmPw} required>
-                <input type="password" value={confirmPw} onChange={(e) => setConfirmPw(e.target.value)} className={inputCls(errors.confirmPw)} />
-              </Field>
-            </div>
-          )}
+          <div className="border-t border-border pt-5">
+            {isNew ? (
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field label="Senha" error={errors.password} required>
+                  <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className={inputCls(errors.password)} />
+                  {password && <div className="mt-2"><PasswordStrength value={password} /></div>}
+                </Field>
+                <Field label="Confirmar senha" error={errors.confirmPw} required>
+                  <input type="password" value={confirmPw} onChange={(e) => setConfirmPw(e.target.value)} className={inputCls(errors.confirmPw)} />
+                </Field>
+              </div>
+            ) : (
+              <>
+                <button type="button" onClick={() => setShowPasswordChange(v => !v)} className="text-sm text-primary font-medium hover:underline">
+                  {showPasswordChange ? 'Cancelar alteração de senha' : 'Alterar senha'}
+                </button>
+                {showPasswordChange && (
+                  <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                    <Field label="Nova Senha" error={errors.password}>
+                      <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className={inputCls(errors.password)} />
+                      {password && <div className="mt-2"><PasswordStrength value={password} /></div>}
+                    </Field>
+                    <Field label="Confirmar nova senha" error={errors.confirmPw}>
+                      <input type="password" value={confirmPw} onChange={(e) => setConfirmPw(e.target.value)} className={inputCls(errors.confirmPw)} />
+                    </Field>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
         </form>
         <footer className="flex items-center justify-end gap-2 border-t border-border px-5 py-4">
           <button onClick={onClose} type="button" className="rounded-md border border-border bg-card px-4 py-2 text-sm font-medium hover:bg-secondary">Cancelar</button>

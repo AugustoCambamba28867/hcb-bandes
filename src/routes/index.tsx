@@ -378,6 +378,50 @@ function HomePage() {
         </div>
       </Section>
 
+      {/* CONDOMÍNIOS & RESIDÊNCIAS SHOWCASE */}
+      <Section className="bg-surface">
+        <div className="grid gap-8 lg:grid-cols-12 lg:items-center">
+          <div className="lg:col-span-7">
+            <div className="type-eyebrow text-accent">Habitação Corporativa</div>
+            <h2 className="mt-3 type-h2 text-primary">
+              Condomínios & Residências Seleccionados
+            </h2>
+            <p className="mt-4 type-lead text-foreground/75">
+              Disponibilizamos uma carteira curada de empreendimentos residenciais e condomínios fechados em Luanda e noutras províncias de Angola, com infraestrutura completa, segurança e condições facilitadas de aquisição via crédito bancário corporativo.
+            </p>
+            <div className="mt-6 flex flex-wrap items-center gap-3">
+              <Link
+                to="/condominios-residencias"
+                className="group inline-flex items-center gap-2 rounded-control bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-card transition-colors hover:bg-primary-dark"
+              >
+                Explorar Condomínios & Residências
+                <ArrowRight
+                  size={16}
+                  className="transition-transform duration-300 group-hover:translate-x-1"
+                />
+              </Link>
+            </div>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:col-span-5">
+            <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+              <div className="font-display text-2xl font-bold text-primary">100%</div>
+              <div className="mt-1 text-sm font-semibold text-foreground">Imóveis Verificados</div>
+              <p className="mt-1 text-xs text-muted-foreground">Documentação e titularidade previamente auditadas pela nossa equipa jurídica.</p>
+            </div>
+            <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+              <div className="font-display text-2xl font-bold text-primary">Até 25 Anos</div>
+              <div className="mt-1 text-sm font-semibold text-foreground">Financiamento Bancário</div>
+              <p className="mt-1 text-xs text-muted-foreground">Articulação directa com a banca comercial para aprovação ágil de crédito.</p>
+            </div>
+            <div className="rounded-xl border border-border bg-card p-5 shadow-sm sm:col-span-2">
+              <div className="font-display text-2xl font-bold text-primary">Gestão Integrada</div>
+              <div className="mt-1 text-sm font-semibold text-foreground">Acompanhamento Completo</div>
+              <p className="mt-1 text-xs text-muted-foreground">Desde a escolha da residência, vistoria e escritura até à entrega das chaves e apoio pós-venda.</p>
+            </div>
+          </div>
+        </div>
+      </Section>
+
       {/* PARCEIROS */}
       {settings.empresasParceiras.length +
         settings.bancosParceiros.length +

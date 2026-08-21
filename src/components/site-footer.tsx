@@ -4,10 +4,10 @@ import { useSiteSettings } from "@/lib/site-settings";
 
 const NAV = [
   { to: "/quem-somos", label: "Quem Somos" },
+  { to: "/condominios-residencias", label: "Condomínios & Residências" },
   { to: "/modelo", label: "O Nosso Modelo" },
   { to: "/servicos", label: "Serviços" },
   { to: "/beneficios", label: "Benefícios" },
-  { to: "/diferenciais", label: "Diferenciais" },
   { to: "/parceiros", label: "Parceiros" },
 ] as const;
 

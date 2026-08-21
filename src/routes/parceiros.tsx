@@ -1,5 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { Building2, Landmark, Briefcase } from "lucide-react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { Building2, Landmark, Briefcase, Handshake, Info } from "lucide-react";
 import { PageHero, Section, SectionHeader } from "@/components/section";
 import { useSiteSettings } from "@/lib/site-settings";
 
@@ -9,7 +9,7 @@ export const Route = createFileRoute("/parceiros")({
       { title: "Parceiros — HCB-BANDES" },
       {
         name: "description",
-        content: "Conheça os nossos parceiros estratégicos que tornam a nossa visão possível.",
+        content: "Conheça o nosso ecossistema de parceiros estratégicos. Acordos de parceria com promotores, bancos e empresas em fase de formalização.",
       },
       { property: "og:title", content: "Parceiros — HCB-BANDES" },
       { property: "og:url", content: "/parceiros" },
@@ -22,59 +22,107 @@ export const Route = createFileRoute("/parceiros")({
 function ParceirosPage() {
   const settings = useSiteSettings();
 
+  const CATEGORIAS = [
+    {
+      icon: Building2,
+      title: "Promotores Imobiliários",
+      desc: "Construtoras e promotores com carteira de imóveis integrada no nosso ecossistema habitacional.",
+      color: "bg-gold text-gold-foreground",
+      partners: settings.promotoresParceiros,
+    },
+    {
+      icon: Landmark,
+      title: "Bancos & Instituições Financeiras",
+      desc: "Instituições financeiras que disponibilizam crédito imobiliário em condições especiais para trabalhadores parceiros.",
+      color: "bg-primary text-primary-foreground",
+      partners: settings.bancosParceiros,
+    },
+    {
+      icon: Briefcase,
+      title: "Empresas Empregadoras",
+      desc: "Organizações públicas e privadas que oferecem habitação como benefício corporativo aos seus colaboradores.",
+      color: "bg-accent text-accent-foreground",
+      partners: settings.empresasParceiras,
+    },
+  ];
+
   return (
     <>
       <PageHero
         eyebrow="Os nossos Parceiros"
-        title="Juntos construímos o futuro da habitação corporativa"
-        subtitle="Uma rede de parceiros de excelência que garantem qualidade, segurança e eficiência em todo o processo."
+        title="Construímos parcerias estratégicas de confiança"
+        subtitle="A HCB-BANDES opera num ecossistema de parceiros cuidadosamente seleccionados. Os acordos de parceria garantem que cada relação se baseia em compromissos formais e benefícios mútuos."
       />
 
       <Section>
-        <div className="grid gap-12 md:grid-cols-3">
-          
-          <div className="rounded-xl border border-border bg-card p-8 shadow-sm">
-            <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-lg bg-gold text-gold-foreground">
-              <Building2 size={24} />
-            </div>
-            <h3 className="mb-4 font-display text-xl font-bold text-primary">Promotores Imobiliários</h3>
-            <ul className="space-y-3">
-              {settings.promotoresParceiros.map((p) => (
-                <li key={p} className="flex items-center gap-2 text-sm text-foreground/80 before:h-1.5 before:w-1.5 before:rounded-full before:bg-accent">
-                  {p}
-                </li>
-              ))}
-            </ul>
+        {/* Aviso institucional */}
+        <div className="mb-12 flex items-start gap-4 rounded-2xl border border-dashed border-gold/60 bg-gold/5 p-6">
+          <Info className="mt-0.5 shrink-0 text-gold" size={20} />
+          <div>
+            <h3 className="font-display font-semibold text-primary text-base">Acordos em fase de formalização</h3>
+            <p className="mt-1.5 text-sm text-foreground/80 leading-relaxed">
+              Os nomes dos nossos parceiros estratégicos serão publicados após a assinatura formal dos acordos de parceria. 
+              Estamos em processo de negociação com promotores imobiliários, bancos comerciais e empresas empregadoras de referência em Angola.
+            </p>
+            <Link
+              to="/contactos"
+              className="mt-3 inline-flex items-center gap-2 rounded-control bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition"
+            >
+              <Handshake size={14} /> Propor parceria
+            </Link>
           </div>
+        </div>
 
-          <div className="rounded-xl border border-border bg-card p-8 shadow-sm">
-            <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-lg bg-gold text-gold-foreground">
-              <Landmark size={24} />
+        {/* Categorias de parceiros */}
+        <SectionHeader
+          eyebrow="Ecossistema de parceiros"
+          title="Três pilares do nosso ecossistema"
+          description="O modelo HCB-BANDES assenta em três tipos de parceiros que trabalham em conjunto para tornar a habitação acessível."
+        />
+        <div className="mt-10 grid gap-6 md:grid-cols-3">
+          {CATEGORIAS.map((cat) => (
+            <div key={cat.title} className="rounded-2xl border border-border bg-card p-8 flex flex-col gap-5">
+              <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${cat.color}`}>
+                <cat.icon size={22} />
+              </div>
+              <div>
+                <h3 className="font-display text-lg font-bold text-primary">{cat.title}</h3>
+                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{cat.desc}</p>
+              </div>
+              <div className="mt-auto pt-4 border-t border-border">
+                {cat.partners && cat.partners.length > 0 ? (
+                  <ul className="flex flex-wrap gap-2">
+                    {cat.partners.map((p) => (
+                      <li key={p} className="rounded bg-secondary px-2 py-1 text-xs font-medium text-foreground">
+                        {p}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-xs text-muted-foreground italic flex gap-2 items-start">
+                    <Info size={14} className="shrink-0 mt-0.5" />
+                    Os acordos de parceria estão em fase de formalização. Em breve, divulgaremos os nossos parceiros nesta categoria.
+                  </p>
+                )}
+              </div>
             </div>
-            <h3 className="mb-4 font-display text-xl font-bold text-primary">Bancos</h3>
-            <ul className="space-y-3">
-              {settings.bancosParceiros.map((p) => (
-                <li key={p} className="flex items-center gap-2 text-sm text-foreground/80 before:h-1.5 before:w-1.5 before:rounded-full before:bg-accent">
-                  {p}
-                </li>
-              ))}
-            </ul>
-          </div>
+          ))}
+        </div>
 
-          <div className="rounded-xl border border-border bg-card p-8 shadow-sm">
-            <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-lg bg-gold text-gold-foreground">
-              <Briefcase size={24} />
-            </div>
-            <h3 className="mb-4 font-display text-xl font-bold text-primary">Empresas</h3>
-            <ul className="space-y-3">
-              {settings.empresasParceiras.map((p) => (
-                <li key={p} className="flex items-center gap-2 text-sm text-foreground/80 before:h-1.5 before:w-1.5 before:rounded-full before:bg-accent">
-                  {p}
-                </li>
-              ))}
-            </ul>
-          </div>
-
+        {/* CTA */}
+        <div className="mt-14 rounded-2xl bg-primary p-8 text-primary-foreground text-center">
+          <Handshake size={32} className="mx-auto text-gold mb-4" />
+          <h3 className="font-display text-xl font-bold">Quer ser nosso parceiro?</h3>
+          <p className="mt-2 text-primary-foreground/80 text-sm max-w-xl mx-auto">
+            Se a sua empresa, banco ou promotora imobiliária está interessada em integrar o ecossistema HCB-BANDES, 
+            contacte-nos para iniciar o processo de parceria.
+          </p>
+          <Link
+            to="/contactos"
+            className="mt-5 inline-flex items-center gap-2 rounded-control bg-primary-foreground px-6 py-3 text-sm font-semibold text-primary hover:bg-primary-foreground/90 transition"
+          >
+            Entrar em contacto
+          </Link>
         </div>
       </Section>
     </>

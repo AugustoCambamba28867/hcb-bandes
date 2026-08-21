@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { Download, Search, Trash2, Mail, Phone, X, MessageSquare, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
+import { ConfirmDialog } from "@/components/ui-kit";
 import {
   listLeadsDynamic,
   updateLeadStatus,
@@ -41,6 +42,7 @@ function LeadsPage() {
   const [statusFilter, setStatusFilter] = useState<LeadStatus | "todos">("todos");
   const [perfilFilter, setPerfilFilter] = useState<string>("todos");
   const [selected, setSelected] = useState<Lead | null>(null);
+  const [confirmDelLead, setConfirmDelLead] = useState<string | null>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -87,11 +89,16 @@ function LeadsPage() {
     toast.success("Estado actualizado");
   }
 
+  function doRemove() {
+    if (!confirmDelLead) return;
+    deleteLead(confirmDelLead);
+    if (selected?.id === confirmDelLead) setSelected(null);
+    toast.success("Lead eliminado com sucesso");
+    setConfirmDelLead(null);
+  }
+
   function remove(id: string) {
-    if (!confirm("Eliminar este lead? Esta acção não pode ser revertida.")) return;
-    deleteLead(id);
-    if (selected?.id === id) setSelected(null);
-    toast.success("Lead eliminado");
+    setConfirmDelLead(id);
   }
 
   return (
@@ -284,6 +291,16 @@ function LeadsPage() {
           onDelete={remove}
         />
       )}
+
+      <ConfirmDialog
+        open={!!confirmDelLead}
+        onOpenChange={(o) => !o && setConfirmDelLead(null)}
+        title="Eliminar lead?"
+        description="Esta acção não pode ser revertida."
+        tone="danger"
+        confirmLabel="Eliminar"
+        onConfirm={doRemove}
+      />
     </div>
   );
 }

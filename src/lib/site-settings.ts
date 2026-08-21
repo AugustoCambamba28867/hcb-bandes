@@ -22,9 +22,9 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   telefone: "+244 952 300 277",
   whatsapp: "+244 952 300 277",
   endereco: "Luanda, Angola",
-  bancosParceiros: ["BAI", "BFA", "BIC", "Banco Sol"],
-  empresasParceiras: ["Sonangol", "Endiama", "TAAG", "Unitel"],
-  promotoresParceiros: ["Imogestin", "Vida Imobiliária", "Casa Plus"],
+  bancosParceiros: [],
+  empresasParceiras: [],
+  promotoresParceiros: [],
 };
 
 function isBrowser() {

@@ -16,6 +16,7 @@ import {
   Database,
   ShoppingCart,
   FileBarChart,
+  Building2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { adminLogin, adminLoginAsync, adminLogout, isAdminAuthenticated, getAdminSession } from "@/lib/leads-store";
@@ -49,6 +50,7 @@ const ADMIN_ROUTE_LABELS: Record<string, string> = {
   "permissoes": "Permissões",
   "database": "Base de Dados",
   "conteudos": "Conteúdos",
+  "condominios": "Condomínios & Residências",
   "parceiros": "Parceiros",
   "definicoes": "Definições",
 };
@@ -63,6 +65,7 @@ const ADMIN_ROUTE_ICONS: Record<string, typeof LayoutDashboard> = {
   permissoes: ShieldCheck,
   database: Database,
   conteudos: FileText,
+  condominios: Building2,
   parceiros: Users2,
   definicoes: Settings,
 };
@@ -71,6 +74,7 @@ const ADMIN_ROUTE_ORDER = [
   "/admin",
   "/admin/leads",
   "/admin/pedidos",
+  "/admin/condominios",
   "/admin/relatorios",
   "/admin/auditoria",
   "/admin/utilizadores",
@@ -100,6 +104,7 @@ function getAdminRoutes() {
     { to: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
     { to: "/admin/leads", label: "Leads", icon: Inbox },
     { to: "/admin/pedidos", label: "Pedidos", icon: ShoppingCart },
+    { to: "/admin/condominios", label: "Condomínios & Residências", icon: Building2 },
     { to: "/admin/relatorios", label: "Relatórios", icon: FileBarChart },
     { to: "/admin/auditoria", label: "Auditoria", icon: ShieldCheck },
     { to: "/admin/utilizadores", label: "Utilizadores", icon: UserCog },

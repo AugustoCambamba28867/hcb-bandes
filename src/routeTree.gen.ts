@@ -17,6 +17,7 @@ import { Route as ModeloRouteImport } from './routes/modelo'
 import { Route as MissaoVisaoRouteImport } from './routes/missao-visao'
 import { Route as DiferenciaisRouteImport } from './routes/diferenciais'
 import { Route as ContactosRouteImport } from './routes/contactos'
+import { Route as CondominiosResidenciasRouteImport } from './routes/condominios-residencias'
 import { Route as BeneficiosRouteImport } from './routes/beneficios'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
@@ -31,6 +32,7 @@ import { Route as AdminLeadsRouteImport } from './routes/admin.leads'
 import { Route as AdminDefinicoesRouteImport } from './routes/admin.definicoes'
 import { Route as AdminDatabaseRouteImport } from './routes/admin.database'
 import { Route as AdminConteudosRouteImport } from './routes/admin.conteudos'
+import { Route as AdminCondominiosRouteImport } from './routes/admin.condominios'
 import { Route as AdminAuditoriaRouteImport } from './routes/admin.auditoria'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -71,6 +73,11 @@ const DiferenciaisRoute = DiferenciaisRouteImport.update({
 const ContactosRoute = ContactosRouteImport.update({
   id: '/contactos',
   path: '/contactos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CondominiosResidenciasRoute = CondominiosResidenciasRouteImport.update({
+  id: '/condominios-residencias',
+  path: '/condominios-residencias',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BeneficiosRoute = BeneficiosRouteImport.update({
@@ -143,6 +150,11 @@ const AdminConteudosRoute = AdminConteudosRouteImport.update({
   path: '/conteudos',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminCondominiosRoute = AdminCondominiosRouteImport.update({
+  id: '/condominios',
+  path: '/condominios',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminAuditoriaRoute = AdminAuditoriaRouteImport.update({
   id: '/auditoria',
   path: '/auditoria',
@@ -153,6 +165,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/beneficios': typeof BeneficiosRoute
+  '/condominios-residencias': typeof CondominiosResidenciasRoute
   '/contactos': typeof ContactosRoute
   '/diferenciais': typeof DiferenciaisRoute
   '/missao-visao': typeof MissaoVisaoRoute
@@ -162,6 +175,7 @@ export interface FileRoutesByFullPath {
   '/servicos': typeof ServicosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin/auditoria': typeof AdminAuditoriaRoute
+  '/admin/condominios': typeof AdminCondominiosRoute
   '/admin/conteudos': typeof AdminConteudosRoute
   '/admin/database': typeof AdminDatabaseRoute
   '/admin/definicoes': typeof AdminDefinicoesRoute
@@ -177,6 +191,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/beneficios': typeof BeneficiosRoute
+  '/condominios-residencias': typeof CondominiosResidenciasRoute
   '/contactos': typeof ContactosRoute
   '/diferenciais': typeof DiferenciaisRoute
   '/missao-visao': typeof MissaoVisaoRoute
@@ -186,6 +201,7 @@ export interface FileRoutesByTo {
   '/servicos': typeof ServicosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin/auditoria': typeof AdminAuditoriaRoute
+  '/admin/condominios': typeof AdminCondominiosRoute
   '/admin/conteudos': typeof AdminConteudosRoute
   '/admin/database': typeof AdminDatabaseRoute
   '/admin/definicoes': typeof AdminDefinicoesRoute
@@ -203,6 +219,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/beneficios': typeof BeneficiosRoute
+  '/condominios-residencias': typeof CondominiosResidenciasRoute
   '/contactos': typeof ContactosRoute
   '/diferenciais': typeof DiferenciaisRoute
   '/missao-visao': typeof MissaoVisaoRoute
@@ -212,6 +229,7 @@ export interface FileRoutesById {
   '/servicos': typeof ServicosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin/auditoria': typeof AdminAuditoriaRoute
+  '/admin/condominios': typeof AdminCondominiosRoute
   '/admin/conteudos': typeof AdminConteudosRoute
   '/admin/database': typeof AdminDatabaseRoute
   '/admin/definicoes': typeof AdminDefinicoesRoute
@@ -230,6 +248,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/beneficios'
+    | '/condominios-residencias'
     | '/contactos'
     | '/diferenciais'
     | '/missao-visao'
@@ -239,6 +258,7 @@ export interface FileRouteTypes {
     | '/servicos'
     | '/sitemap.xml'
     | '/admin/auditoria'
+    | '/admin/condominios'
     | '/admin/conteudos'
     | '/admin/database'
     | '/admin/definicoes'
@@ -254,6 +274,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/beneficios'
+    | '/condominios-residencias'
     | '/contactos'
     | '/diferenciais'
     | '/missao-visao'
@@ -263,6 +284,7 @@ export interface FileRouteTypes {
     | '/servicos'
     | '/sitemap.xml'
     | '/admin/auditoria'
+    | '/admin/condominios'
     | '/admin/conteudos'
     | '/admin/database'
     | '/admin/definicoes'
@@ -279,6 +301,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/beneficios'
+    | '/condominios-residencias'
     | '/contactos'
     | '/diferenciais'
     | '/missao-visao'
@@ -288,6 +311,7 @@ export interface FileRouteTypes {
     | '/servicos'
     | '/sitemap.xml'
     | '/admin/auditoria'
+    | '/admin/condominios'
     | '/admin/conteudos'
     | '/admin/database'
     | '/admin/definicoes'
@@ -305,6 +329,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
   BeneficiosRoute: typeof BeneficiosRoute
+  CondominiosResidenciasRoute: typeof CondominiosResidenciasRoute
   ContactosRoute: typeof ContactosRoute
   DiferenciaisRoute: typeof DiferenciaisRoute
   MissaoVisaoRoute: typeof MissaoVisaoRoute
@@ -371,6 +396,13 @@ declare module '@tanstack/react-router' {
       path: '/contactos'
       fullPath: '/contactos'
       preLoaderRoute: typeof ContactosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/condominios-residencias': {
+      id: '/condominios-residencias'
+      path: '/condominios-residencias'
+      fullPath: '/condominios-residencias'
+      preLoaderRoute: typeof CondominiosResidenciasRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/beneficios': {
@@ -471,6 +503,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminConteudosRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/condominios': {
+      id: '/admin/condominios'
+      path: '/condominios'
+      fullPath: '/admin/condominios'
+      preLoaderRoute: typeof AdminCondominiosRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/auditoria': {
       id: '/admin/auditoria'
       path: '/auditoria'
@@ -483,6 +522,7 @@ declare module '@tanstack/react-router' {
 
 interface AdminRouteChildren {
   AdminAuditoriaRoute: typeof AdminAuditoriaRoute
+  AdminCondominiosRoute: typeof AdminCondominiosRoute
   AdminConteudosRoute: typeof AdminConteudosRoute
   AdminDatabaseRoute: typeof AdminDatabaseRoute
   AdminDefinicoesRoute: typeof AdminDefinicoesRoute
@@ -498,6 +538,7 @@ interface AdminRouteChildren {
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminAuditoriaRoute: AdminAuditoriaRoute,
+  AdminCondominiosRoute: AdminCondominiosRoute,
   AdminConteudosRoute: AdminConteudosRoute,
   AdminDatabaseRoute: AdminDatabaseRoute,
   AdminDefinicoesRoute: AdminDefinicoesRoute,
@@ -517,6 +558,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
   BeneficiosRoute: BeneficiosRoute,
+  CondominiosResidenciasRoute: CondominiosResidenciasRoute,
   ContactosRoute: ContactosRoute,
   DiferenciaisRoute: DiferenciaisRoute,
   MissaoVisaoRoute: MissaoVisaoRoute,

@@ -1,7 +1,7 @@
 import { addAuditEvent } from "./audit-store";
 import { MOCK_AUDIT_EVENTS, MOCK_ORDERS, MOCK_REPORTS, MOCK_USERS, type AuditEvent, type Order, type OrderStatus, type ReportItem, type User } from "./mock-data";
 import { isSupabaseConfigured, supabaseEnabled } from "./supabase-client";
-import { ensureSupabaseSchema, listAuditEventsFromSupabase, listOrdersFromSupabase, listReportsFromSupabase, listUsersFromSupabase, saveAuditEventToSupabase, saveOrderToSupabase, saveReportToSupabase, saveUserToSupabase } from "./supabase-data";
+import { ensureSupabaseSchema, listAuditEventsFromSupabase, listOrdersFromSupabase, listReportsFromSupabase, listUsersFromSupabase, saveAuditEventToSupabase, saveOrderToSupabase, saveReportToSupabase, saveUserToSupabase, saveUserPasswordToSupabase } from "./supabase-data";
 
 const ORDERS_KEY = "hcb_orders_v1";
 const USERS_KEY = "hcb_users_v1";
@@ -165,30 +165,44 @@ export function updateOrderStatus(id: string, status: OrderStatus): Order[] {
   return next;
 }
 
-export function upsertUser(user: User): User {
+export function upsertUser(user: User & { password?: string }): User {
   const current = listUsers();
   const next = [...current];
   const index = next.findIndex((entry) => entry.id === user.id);
-  const saved = { ...user };
+  const { password, ...userWithoutPassword } = user;
+  const saved = { ...userWithoutPassword };
+
+  const savedWithPasswordHash = {
+    ...saved,
+    ...(password ? { password_hash: password } : {}),
+  } as any;
+
   if (index >= 0) {
-    next[index] = saved;
+    const existing = next[index] as any;
+    if (!password && existing.password_hash) {
+      savedWithPasswordHash.password_hash = existing.password_hash;
+    }
+    next[index] = savedWithPasswordHash;
   } else {
-    next.unshift(saved);
+    next.unshift(savedWithPasswordHash);
   }
   writeStorage(USERS_KEY, next);
   void (async () => {
     if (await isSupabaseConfigured()) {
       await saveUserToSupabase(saved);
+      if (password) {
+        await saveUserPasswordToSupabase(user.id, password);
+      }
     }
   })();
   addAuditEvent({
     actor: "Administrador",
-    action: "actualizou utilizador",
+    action: password ? "actualizou utilizador e senha" : "actualizou utilizador",
     target: `${saved.firstName} ${saved.lastName}`,
     details: `Dados guardados para ${saved.email}.`,
     type: "info",
   });
-  return saved;
+  return savedWithPasswordHash;
 }
 
 export function listAuditEventsDynamic(): AuditEvent[] {

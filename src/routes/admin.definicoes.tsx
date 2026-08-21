@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Save, RotateCcw, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
+import { ConfirmDialog } from "@/components/ui-kit";
 import { getSettingsAsync, saveSettings, resetSettings, type SiteSettings, DEFAULT_SETTINGS } from "@/lib/site-settings";
 import { clearLeads } from "@/lib/leads-store";
 
@@ -12,6 +13,8 @@ export const Route = createFileRoute("/admin/definicoes")({
 function DefinicoesPage() {
   const [s, setS] = useState<SiteSettings | null>(null);
   const [loading, setLoading] = useState(true);
+  const [confirmReset, setConfirmReset] = useState(false);
+  const [confirmPurge, setConfirmPurge] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -42,17 +45,25 @@ function DefinicoesPage() {
     toast.success("Definições guardadas");
   }
 
-  function reset() {
-    if (!confirm("Repor todas as definições para os valores predefinidos?")) return;
+  function doReset() {
     resetSettings();
     setS(DEFAULT_SETTINGS);
-    toast.success("Definições repostas");
+    toast.success("Definições repostas com sucesso");
+    setConfirmReset(false);
+  }
+
+  function reset() {
+    setConfirmReset(true);
+  }
+
+  function doPurgeLeads() {
+    clearLeads();
+    toast.success("Leads eliminados com sucesso");
+    setConfirmPurge(false);
   }
 
   function purgeLeads() {
-    if (!confirm("Eliminar TODOS os leads? Esta acção não pode ser revertida.")) return;
-    clearLeads();
-    toast.success("Leads eliminados");
+    setConfirmPurge(true);
   }
 
   return (
@@ -112,6 +123,25 @@ function DefinicoesPage() {
           Eliminar todos os leads
         </button>
       </section>
+
+      <ConfirmDialog
+        open={confirmReset}
+        onOpenChange={setConfirmReset}
+        title="Repor definições?"
+        description="Repor todas as definições para os valores predefinidos?"
+        tone="danger"
+        confirmLabel="Repor"
+        onConfirm={doReset}
+      />
+      <ConfirmDialog
+        open={confirmPurge}
+        onOpenChange={setConfirmPurge}
+        title="Eliminar todos os leads?"
+        description="Esta acção não pode ser revertida."
+        tone="danger"
+        confirmLabel="Eliminar"
+        onConfirm={doPurgeLeads}
+      />
     </div>
   );
 }

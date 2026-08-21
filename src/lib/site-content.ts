@@ -30,6 +30,11 @@ export const DEFAULT_CONTENT: Record<string, PageContent> = {
     description: "Empresas, bancos e trabalhadores.",
     hero: "A nossa estrutura foi pensada para gerar ganhos reais e mensuráveis para empresas, bancos e clientes finais.",
   },
+  condominios: {
+    title: "Condomínios e Residências Seleccionados.",
+    description: "Empreendimentos residenciais de referência com crédito corporativo facilitado.",
+    hero: "Explore a nossa carteira de condomínios fechados, moradias e apartamentos de qualidade com apoio bancário.",
+  },
 };
 
 function isBrowser() {
