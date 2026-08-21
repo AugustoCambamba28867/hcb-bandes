@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Save, RotateCcw, AlertTriangle } from "lucide-react";
+import { Save, RotateCcw, AlertTriangle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/ui-kit";
 import { getSettingsAsync, saveSettings, resetSettings, type SiteSettings, DEFAULT_SETTINGS } from "@/lib/site-settings";
@@ -39,10 +39,19 @@ function DefinicoesPage() {
     setS((prev) => prev && { ...prev, [k]: v });
   }
 
-  function save() {
+  const [saving, setSaving] = useState(false);
+
+  async function save() {
     if (!s) return;
-    saveSettings(s);
-    toast.success("Definições guardadas");
+    setSaving(true);
+    try {
+      await saveSettings(s);
+      toast.success("Definições guardadas com sucesso no Supabase!");
+    } catch {
+      toast.error("Erro ao guardar definições no Supabase");
+    } finally {
+      setSaving(false);
+    }
   }
 
   function doReset() {
@@ -72,7 +81,7 @@ function DefinicoesPage() {
         <div className="min-w-0">
           <h1 className="font-display text-2xl sm:text-3xl font-bold text-primary">Definições</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Dados institucionais, contactos e gestão de dados.
+            Dados institucionais, contactos e gestão de dados salvos no Supabase.
           </p>
         </div>
         <div className="flex shrink-0 gap-2">
@@ -84,9 +93,11 @@ function DefinicoesPage() {
           </button>
           <button
             onClick={save}
-            className="inline-flex items-center gap-2 rounded-md bg-gold px-4 py-2.5 text-sm font-semibold text-gold-foreground shadow-gold hover:brightness-95"
+            disabled={saving}
+            className="inline-flex items-center gap-2 rounded-md bg-gold px-4 py-2.5 text-sm font-semibold text-gold-foreground shadow-gold hover:brightness-95 disabled:opacity-60"
           >
-            <Save size={14} /> Guardar
+            {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+            {saving ? "A guardar..." : "Guardar"}
           </button>
         </div>
       </header>

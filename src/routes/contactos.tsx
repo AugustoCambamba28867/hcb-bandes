@@ -173,20 +173,19 @@ function ContactosPage() {
                   },
                   {
                     icon: Phone,
-                    label: "Telefone 1",
-                    value: "+244 952 300 277",
+                    label: "Telefone",
+                    value: settings.telefone || "+244 952 300 277",
                   },
-                  {
-                    icon: Phone,
-                    label: "Telefone 2",
-                    value: "+244 927 213 722",
-                  },
+                  ...(settings.whatsapp && settings.whatsapp !== settings.telefone
+                    ? [
+                        {
+                          icon: MessageCircle,
+                          label: "WhatsApp",
+                          value: settings.whatsapp,
+                        },
+                      ]
+                    : []),
                   { icon: Mail, label: "E-mail", value: settings.email || "hcb.bandes@gmail.com" },
-                  {
-                    icon: MessageCircle,
-                    label: "WhatsApp",
-                    value: settings.whatsapp || "+244 952 300 277",
-                  },
                 ].map((c) => (
                   <div key={c.label} className="flex items-start gap-4">
                     <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-gold/15 text-gold">
