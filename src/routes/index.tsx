@@ -8,19 +8,16 @@ import {
   CheckCircle2,
   Users,
   Sparkles,
-  TrendingUp,
   Target,
   Handshake,
   Search,
   Banknote,
   FileText,
 } from "lucide-react";
-import { useState } from "react";
 import heroImg from "@/assets/hero-family.jpg";
 import familyImg from "@/assets/hero-building.jpg";
 import partnershipImg from "@/assets/partnership.jpg";
-import { cn } from "@/lib/utils";
-import { Section, SectionHeader } from "@/components/section";
+import { Section, SectionHeader, Reveal, StatNumber } from "@/components/section";
 import { useSiteSettings } from "@/lib/site-settings";
 import { usePageContent } from "@/lib/site-content";
 
@@ -74,17 +71,20 @@ const PROCESSO = [
   {
     icon: Target,
     title: "Identificação de Empresas",
-    description: "Mapeamos empresas públicas e privadas com potencial para oferecer habitação como benefício corporativo.",
+    description:
+      "Mapeamos empresas públicas e privadas com potencial para oferecer habitação como benefício corporativo.",
   },
   {
     icon: Handshake,
     title: "Parceria Corporativa",
-    description: "Formalizamos protocolos de parceria que definem condições especiais para os colaboradores.",
+    description:
+      "Formalizamos protocolos de parceria que definem condições especiais para os colaboradores.",
   },
   {
     icon: Search,
     title: "Levantamento de Necessidades",
-    description: "Avaliamos o perfil habitacional dos trabalhadores: tipologia, localização e capacidade financeira.",
+    description:
+      "Avaliamos o perfil habitacional dos trabalhadores: tipologia, localização e capacidade financeira.",
   },
   {
     icon: Home,
@@ -94,7 +94,8 @@ const PROCESSO = [
   {
     icon: Banknote,
     title: "Articulação com Bancos",
-    description: "Conectamos o trabalhador às instituições financeiras parceiras para análise de crédito.",
+    description:
+      "Conectamos o trabalhador às instituições financeiras parceiras para análise de crédito.",
   },
   {
     icon: FileText,
@@ -104,14 +105,27 @@ const PROCESSO = [
   {
     icon: ShieldCheck,
     title: "Pós‑Venda",
-    description: "Continuamos presentes com suporte, gestão condominial e atendimento permanente.",
+    description:
+      "Continuamos presentes com suporte, gestão condominial e atendimento permanente.",
   },
+];
+
+const STATS = [
+  { k: "4", v: "Actores conectados" },
+  { k: "7", v: "Etapas do nosso modelo" },
+  { k: "100%", v: "Transparência no processo" },
+  { k: "AO", v: "Cobertura nacional" },
 ];
 
 function HomePage() {
   const settings = useSiteSettings();
   const home = usePageContent("home");
 
+  const credibilidade = [
+    ...settings.empresasParceiras,
+    ...settings.bancosParceiros,
+    ...settings.promotoresParceiros,
+  ].slice(0, 8);
 
   return (
     <>
@@ -120,39 +134,39 @@ function HomePage() {
         <div className="absolute inset-0 -z-10">
           <img
             src={heroImg}
-            alt="Família a receber as chaves"
+            alt="Família a receber as chaves da nova casa"
             width={1920}
             height={1280}
             className="h-full w-full object-cover scale-105"
           />
-          {/* Overlay escuro/verde para permitir leitura do texto branco sem tapar a imagem */}
           <div className="absolute inset-0 bg-primary/60 mix-blend-multiply" />
-          <div className="absolute inset-0 bg-gradient-to-r from-primary/80 md:from-primary/50 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-primary-dark/85 via-primary/60 md:via-primary/45 to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
         </div>
 
-        <div className="container-page relative py-20 md:py-32">
-          <div className="max-w-2xl text-primary-foreground animate-slide-in-left">
-            <div className="inline-flex items-center gap-2 rounded-full border border-primary-foreground/30 bg-primary-foreground/10 px-4 py-1.5 text-xs font-medium uppercase tracking-[0.2em] backdrop-blur">
+        <div className="container-page relative py-20 md:py-32 lg:py-36">
+          <div className="max-w-2xl text-primary-foreground animate-slide-up">
+            <div className="inline-flex items-center gap-2 rounded-pill border border-primary-foreground/25 bg-primary-foreground/10 px-4 py-1.5 type-eyebrow backdrop-blur">
               <Sparkles size={12} /> {settings.empresa}
             </div>
-            <h1 className="mt-6 font-display text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.05] animate-slide-up delay-100">
-              {home.title}
-            </h1>
-            <p className="mt-6 max-w-xl text-lg text-primary-foreground/85 leading-relaxed animate-slide-up delay-200">
+            <h1 className="mt-6 type-display animate-slide-up delay-100">{home.title}</h1>
+            <p className="mt-6 max-w-xl type-lead text-primary-foreground/85 animate-slide-up delay-200">
               {home.hero || settings.tagline}
             </p>
-            <div className="mt-8 flex flex-wrap gap-3 animate-slide-up delay-300">
+            <div className="mt-9 flex flex-wrap items-center gap-3 animate-slide-up delay-300">
               <Link
                 to="/contactos"
-                className="group inline-flex items-center gap-2 rounded-md bg-accent px-6 py-3 text-sm font-semibold text-accent-foreground hover:bg-card hover:text-primary transition-all duration-300"
+                className="group inline-flex items-center gap-2 rounded-control bg-primary-foreground px-6 py-3.5 text-sm font-semibold text-primary shadow-raised transition-all duration-300 hover:bg-primary-foreground/90"
               >
-                Solicitar orçamento
-                <ArrowRight size={16} className="transition-transform duration-300 group-hover:translate-x-1" />
+                Solicitar proposta
+                <ArrowRight
+                  size={16}
+                  className="transition-transform duration-300 group-hover:translate-x-1"
+                />
               </Link>
               <Link
                 to="/servicos"
-                className="inline-flex items-center gap-2 rounded-md border border-primary-foreground/30 bg-primary-foreground/10 px-6 py-3 text-sm font-semibold text-primary-foreground hover:bg-primary-foreground/20 transition-all duration-300 backdrop-blur"
+                className="inline-flex items-center gap-2 rounded-control border border-primary-foreground/35 px-6 py-3.5 text-sm font-semibold text-primary-foreground transition-all duration-300 hover:bg-primary-foreground/10"
               >
                 Ver serviços
               </Link>
@@ -161,30 +175,43 @@ function HomePage() {
         </div>
       </section>
 
+      {/* FAIXA DE CREDIBILIDADE */}
+      {credibilidade.length > 0 && (
+        <section className="border-b border-border bg-surface">
+          <div className="container-page py-8">
+            <Reveal className="flex flex-col gap-5 md:flex-row md:items-center md:gap-10">
+              <span className="type-eyebrow shrink-0 text-muted-foreground">
+                Ecossistema de parceiros
+              </span>
+              <ul className="flex flex-wrap items-center gap-x-8 gap-y-3">
+                {credibilidade.map((name) => (
+                  <li
+                    key={name}
+                    className="font-display text-base font-semibold text-primary/45 transition-colors duration-300 hover:text-primary"
+                  >
+                    {name}
+                  </li>
+                ))}
+              </ul>
+            </Reveal>
+          </div>
+        </section>
+      )}
 
       {/* STATS */}
-      <section className="border-b border-border bg-gradient-to-r from-secondary/60 via-background to-secondary/60">
-        <div className="container-page grid gap-8 py-14 md:grid-cols-4">
-          {[
-            { k: "4", v: "Actores conectados" },
-            { k: "7", v: "Etapas do nosso modelo" },
-            { k: "100%", v: "Transparência no processo" },
-            { k: "AO", v: "Cobertura nacional" },
-          ].map((s, i) => (
-            <div
-              key={s.v}
-              className="text-center md:text-left animate-slide-up hover-lift rounded-xl px-2 py-1"
-              style={{ animationDelay: `${i * 0.1}s` }}
-            >
-              <div className="font-display text-4xl md:text-5xl font-bold text-primary tabular-nums">
-                {s.k}
-              </div>
-              <div className="mt-1 text-sm text-muted-foreground">{s.v}</div>
-            </div>
+      <section className="border-b border-border bg-background">
+        <div className="container-page grid gap-8 py-14 sm:grid-cols-2 md:grid-cols-4">
+          {STATS.map((s, i) => (
+            <Reveal key={s.v} delay={i * 90} className="text-center md:text-left">
+              <StatNumber
+                value={s.k}
+                className="font-display text-4xl md:text-5xl font-bold text-primary"
+              />
+              <div className="mt-1 type-body text-muted-foreground">{s.v}</div>
+            </Reveal>
           ))}
         </div>
       </section>
-
 
       {/* SERVIÇOS */}
       <Section>
@@ -193,83 +220,73 @@ function HomePage() {
           title="Quatro pilares para uma solução habitacional completa"
           description="Integramos toda a cadeia de valor habitacional num ecossistema único."
         />
-        <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {SERVICOS.map((s, i) => (
-            <div
-              key={s.title}
-              className="group relative overflow-hidden rounded-xl border border-bg-medium bg-card p-6 hover-lift animate-slide-up"
-              style={{ animationDelay: `${i * 0.1}s` }}
-            >
-              <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-accent/5 blur-2xl transition-all duration-500 group-hover:bg-accent/10" />
-              <div className="relative flex h-12 w-12 items-center justify-center rounded-lg bg-bg-medium text-primary transition-all duration-300 group-hover:bg-accent group-hover:text-accent-foreground group-hover:rotate-6 group-hover:scale-110">
-                <s.icon size={22} />
-              </div>
-              <h3 className="relative mt-5 font-display text-lg font-semibold text-primary">{s.title}</h3>
-              <p className="relative mt-2 text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
-            </div>
+            <Reveal key={s.title} delay={i * 90}>
+              <article className="group card-surface relative h-full overflow-hidden p-6 hover-lift">
+                <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-accent/5 blur-2xl transition-all duration-500 group-hover:bg-accent/10" />
+                <div className="relative flex h-12 w-12 items-center justify-center rounded-control bg-surface text-primary ring-1 ring-primary/10 transition-all duration-300 group-hover:bg-primary group-hover:text-primary-foreground">
+                  <s.icon size={22} />
+                </div>
+                <h3 className="relative mt-5 type-h3 text-primary">{s.title}</h3>
+                <p className="relative mt-2 type-body text-muted-foreground">{s.desc}</p>
+              </article>
+            </Reveal>
           ))}
         </div>
 
-        <div className="mt-10">
+        <Reveal delay={200} className="mt-10">
           <Link
             to="/servicos"
-            className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-gold"
+            className="group inline-flex items-center gap-1.5 text-sm font-semibold text-primary"
           >
-            Ver todos os serviços <ArrowRight size={14} />
+            Ver todos os serviços
+            <ArrowRight
+              size={14}
+              className="transition-transform duration-300 group-hover:translate-x-1"
+            />
           </Link>
-        </div>
+        </Reveal>
       </Section>
 
       {/* PROCESSO */}
-      <Section className="relative overflow-hidden bg-secondary">
-        <div className="relative">
-          <SectionHeader title="Como funciona" />
-          <div className="mt-12 overflow-hidden rounded-[2rem] border border-border bg-card/90 p-6 shadow-elegant">
-            <div className="relative">
-              <div className="hidden md:block absolute left-12 top-10 bottom-10 w-px bg-muted-foreground/15" />
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {PROCESSO.map((item, index) => (
-                  <div
-                    key={item.title}
-                    className="group relative overflow-hidden rounded-[1.8rem] border border-border bg-card p-6 shadow-sm transition hover:-translate-y-1 hover:border-accent/40 hover:shadow-2xl"
-                  >
-                    <div className="absolute left-6 top-6 flex h-14 w-14 items-center justify-center rounded-full bg-bg-medium text-primary ring-1 ring-primary/10">
-                      <item.icon size={20} />
-                    </div>
-                    <div className="ml-20">
-                      <div className="flex items-center justify-between gap-3">
-                        <span className="text-xs font-semibold uppercase tracking-[0.25em] text-muted-foreground">
-                          Etapa {index + 1}
-                        </span>
-                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-bg-medium text-primary font-semibold ring-1 ring-primary/10">
-                          {index + 1}
-                        </div>
-                      </div>
-                      <h3 className="mt-4 font-display text-xl font-semibold text-primary">{item.title}</h3>
-                      <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{item.description}</p>
-                    </div>
+      <Section className="bg-surface">
+        <SectionHeader
+          eyebrow="O nosso modelo"
+          title="Como funciona"
+          description="Sete etapas que ligam a empresa, o banco, o promotor e o trabalhador."
+        />
+        <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {PROCESSO.map((item, index) => (
+            <Reveal key={item.title} delay={(index % 3) * 90}>
+              <article className="group card-surface relative h-full p-6 transition duration-300 hover:-translate-y-1 hover:border-primary/25 hover:shadow-raised">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-control bg-surface text-primary ring-1 ring-primary/10 transition-colors duration-300 group-hover:bg-primary group-hover:text-primary-foreground">
+                    <item.icon size={20} />
                   </div>
-                ))}
-              </div>
-            </div>
-          </div>
+                  <span className="type-eyebrow text-muted-foreground">
+                    Etapa {String(index + 1).padStart(2, "0")}
+                  </span>
+                </div>
+                <h3 className="mt-5 type-h3 text-primary">{item.title}</h3>
+                <p className="mt-3 type-body text-muted-foreground">{item.description}</p>
+              </article>
+            </Reveal>
+          ))}
         </div>
       </Section>
 
-
       {/* ECOSSISTEMA */}
-      <section className="relative overflow-hidden bg-bg-medium text-primary">
-        <div className="container-page relative grid gap-12 py-20 md:py-28 lg:grid-cols-2 lg:items-center">
-          <div className="animate-slide-in-left">
-            <div className="text-xs font-semibold uppercase tracking-[0.22em] text-accent">
-              O Ecossistema
-            </div>
-            <h2 className="mt-3 font-display text-3xl md:text-4xl font-bold leading-tight text-primary">
+      <section className="bg-bg-medium">
+        <div className="container-page grid gap-12 py-16 md:py-24 lg:grid-cols-2 lg:items-center">
+          <Reveal>
+            <div className="type-eyebrow text-accent">O Ecossistema</div>
+            <h2 className="mt-3 type-h2 text-primary">
               Um modelo que une quatro actores num só propósito.
             </h2>
-            <p className="mt-4 text-primary/80 leading-relaxed">
-              Promotores, empresas empregadoras, bancos e trabalhadores: cada peça encaixa para que
-              a habitação deixe de ser um sonho distante e se torne uma realidade sustentável.
+            <p className="mt-4 type-lead text-foreground/75">
+              Promotores, empresas empregadoras, bancos e trabalhadores: cada peça encaixa para que a
+              habitação deixe de ser um sonho distante e se torne uma realidade sustentável.
             </p>
             <ul className="mt-8 space-y-3">
               {[
@@ -277,35 +294,31 @@ function HomePage() {
                 "Empresas empregadoras — oferecem o benefício habitacional",
                 "Bancos comerciais — financiam o crédito imobiliário",
                 "Trabalhadores — beneficiários finais da solução",
-              ].map((t, i) => (
-                <li
-                  key={t}
-                  className="flex items-start gap-3 text-sm text-primary/90 animate-slide-up"
-                  style={{ animationDelay: `${0.2 + i * 0.1}s` }}
-                >
-                  <CheckCircle2 size={18} className="mt-0.5 text-accent shrink-0" /> {t}
+              ].map((t) => (
+                <li key={t} className="flex items-start gap-3 type-body text-foreground/85">
+                  <CheckCircle2 size={18} className="mt-1 shrink-0 text-accent" /> {t}
                 </li>
               ))}
             </ul>
-          </div>
-          <div className="relative animate-slide-in-right">
-            <div className="absolute -inset-4 rounded-2xl bg-card/40 blur-2xl opacity-70" />
+          </Reveal>
+          <Reveal delay={120} className="relative">
             <img
               src={partnershipImg}
-              alt="Parceria corporativa"
+              alt="Reunião de parceria corporativa"
               loading="lazy"
               width={1280}
               height={960}
-              className="relative rounded-xl shadow-elegant border border-primary-foreground/50 transition-transform duration-700 hover:scale-[1.02]"
+              className="relative rounded-card border border-border shadow-overlay transition-transform duration-700 hover:scale-[1.01]"
             />
-            <div className="absolute -bottom-6 -left-6 hidden md:block rounded-lg bg-accent p-5 text-accent-foreground shadow-lg max-w-[220px] animate-float-slow">
+            <div className="absolute -bottom-6 -left-6 hidden md:block max-w-[220px] rounded-card bg-primary p-5 text-primary-foreground shadow-overlay">
               <div className="font-display text-2xl font-bold">+250</div>
-              <div className="text-xs">trabalhadores impactados anualmente</div>
+              <div className="mt-1 text-xs text-primary-foreground/80">
+                trabalhadores impactados anualmente
+              </div>
             </div>
-          </div>
+          </Reveal>
         </div>
       </section>
-
 
       {/* BENEFÍCIOS PARA */}
       <Section>
@@ -344,99 +357,103 @@ function HomePage() {
               ],
             },
           ].map((b, i) => (
-            <div
-              key={b.title}
-              className="group relative overflow-hidden rounded-xl border border-bg-medium bg-card p-7 hover-lift animate-slide-up"
-              style={{ animationDelay: `${i * 0.12}s` }}
-            >
-              <div className="absolute inset-x-0 top-0 h-1 bg-accent scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-500" />
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-bg-medium text-primary transition-all duration-300 group-hover:bg-accent group-hover:text-accent-foreground group-hover:rotate-6">
-                <b.icon size={20} />
-              </div>
-              <h3 className="mt-5 font-display text-xl font-semibold text-primary">{b.title}</h3>
-              <ul className="mt-4 space-y-2.5">
-                {b.points.map((p) => (
-                  <li key={p} className="flex items-start gap-2 text-sm text-foreground/80">
-                    <CheckCircle2 size={16} className="mt-0.5 text-accent shrink-0" />
-                    {p}
-                  </li>
-                ))}
-              </ul>
-            </div>
+            <Reveal key={b.title} delay={i * 100}>
+              <article className="group card-surface relative h-full overflow-hidden p-7 hover-lift">
+                <div className="absolute inset-x-0 top-0 h-1 origin-left scale-x-0 bg-accent transition-transform duration-500 group-hover:scale-x-100" />
+                <div className="flex h-12 w-12 items-center justify-center rounded-control bg-surface text-primary ring-1 ring-primary/10 transition-colors duration-300 group-hover:bg-primary group-hover:text-primary-foreground">
+                  <b.icon size={20} />
+                </div>
+                <h3 className="mt-5 type-h3 text-primary">{b.title}</h3>
+                <ul className="mt-4 space-y-2.5">
+                  {b.points.map((p) => (
+                    <li key={p} className="flex items-start gap-2 type-body text-foreground/80">
+                      <CheckCircle2 size={16} className="mt-1 shrink-0 text-accent" />
+                      {p}
+                    </li>
+                  ))}
+                </ul>
+              </article>
+            </Reveal>
           ))}
-
         </div>
       </Section>
 
       {/* PARCEIROS */}
-      {(settings.empresasParceiras.length + settings.bancosParceiros.length + settings.promotoresParceiros.length) > 0 && (
-        <Section className="bg-card">
+      {settings.empresasParceiras.length +
+        settings.bancosParceiros.length +
+        settings.promotoresParceiros.length >
+        0 && (
+        <Section className="bg-surface">
           <SectionHeader
             eyebrow="Ecossistema"
             title="Parceiros que confiam na HCB-BANDES"
             description="Empresas, bancos e promotores que integram o nosso ecossistema habitacional."
           />
-          <div className="mt-10 grid gap-8 md:grid-cols-3">
+          <div className="mt-10 grid gap-6 md:grid-cols-3">
             {[
               { label: "Empresas", items: settings.empresasParceiras },
               { label: "Bancos", items: settings.bancosParceiros },
               { label: "Promotores", items: settings.promotoresParceiros },
-            ].map((group) => (
-              <div key={group.label} className="rounded-xl border border-border bg-card p-6 hover-lift">
-                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">{group.label}</div>
-                <ul className="mt-4 flex flex-wrap gap-2">
-                  {group.items.length === 0 ? (
-                    <li className="text-sm text-muted-foreground">—</li>
-                  ) : (
-                    group.items.map((name) => (
-                      <li
-                        key={name}
-                        className="rounded-full border border-border bg-background px-3 py-1.5 text-xs font-medium text-foreground"
-                      >
-                        {name}
-                      </li>
-                    ))
-                  )}
-                </ul>
-              </div>
+            ].map((group, i) => (
+              <Reveal key={group.label} delay={i * 90}>
+                <div className="card-surface h-full p-6 hover-lift">
+                  <div className="type-eyebrow text-muted-foreground">{group.label}</div>
+                  <ul className="mt-4 flex flex-wrap gap-2">
+                    {group.items.length === 0 ? (
+                      <li className="type-body text-muted-foreground">—</li>
+                    ) : (
+                      group.items.map((name) => (
+                        <li
+                          key={name}
+                          className="rounded-pill border border-border bg-background px-3 py-1.5 text-xs font-medium text-foreground"
+                        >
+                          {name}
+                        </li>
+                      ))
+                    )}
+                  </ul>
+                </div>
+              </Reveal>
             ))}
           </div>
         </Section>
       )}
 
-
       {/* CTA */}
       <section className="relative isolate overflow-hidden">
         <img
           src={familyImg}
-          alt="Família com chaves de casa nova"
+          alt="Família com as chaves da casa nova"
           loading="lazy"
           width={1280}
           height={960}
           className="absolute inset-0 -z-10 h-full w-full object-cover scale-105"
         />
-        <div className="absolute inset-0 -z-10 bg-primary/90" />
-        <div className="absolute inset-0 -z-10 bg-grid-primary opacity-20" />
-        <div className="container-page py-24 text-primary-foreground">
-          <div className="max-w-2xl animate-slide-up">
-            <h2 className="mt-4 font-display text-3xl md:text-5xl font-bold leading-tight">
+        <div className="absolute inset-0 -z-10 bg-primary-dark/90" />
+        <div className="absolute inset-0 -z-10 bg-grid-primary opacity-15" />
+        <div className="container-page py-20 md:py-28 text-primary-foreground">
+          <Reveal className="max-w-2xl">
+            <div className="type-eyebrow text-primary-foreground/60">Vamos falar</div>
+            <h2 className="mt-4 type-h2">
               Pronto para transformar habitação num benefício real?
             </h2>
-            <p className="mt-4 text-primary-foreground/85">
+            <p className="mt-4 type-lead text-primary-foreground/80">
               Marque uma reunião com a nossa equipa e descubra como integrar a HCB-BANDES no pacote
               de benefícios da sua empresa.
             </p>
             <Link
               to="/contactos"
-              className="group mt-8 inline-flex items-center gap-2 rounded-md bg-accent px-7 py-3.5 text-sm font-semibold text-accent-foreground hover:bg-card hover:text-primary transition-all duration-300"
+              className="group mt-8 inline-flex items-center gap-2 rounded-control bg-primary-foreground px-7 py-3.5 text-sm font-semibold text-primary shadow-raised transition-all duration-300 hover:bg-primary-foreground/90"
             >
               Falar com a equipa
-              <ArrowRight size={16} className="transition-transform duration-300 group-hover:translate-x-1" />
+              <ArrowRight
+                size={16}
+                className="transition-transform duration-300 group-hover:translate-x-1"
+              />
             </Link>
-          </div>
+          </Reveal>
         </div>
       </section>
-
     </>
   );
 }

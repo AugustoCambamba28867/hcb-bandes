@@ -1,4 +1,53 @@
 import type { ReactNode } from "react";
+import { useReveal, useCountUp } from "@/hooks/use-reveal";
+import { cn } from "@/lib/utils";
+
+/** Envolve conteúdo e revela-o suavemente quando entra no viewport. */
+export function Reveal({
+  children,
+  delay = 0,
+  className = "",
+  as: Tag = "div",
+}: {
+  children: ReactNode;
+  /** atraso em ms */
+  delay?: number;
+  className?: string;
+  as?: "div" | "section" | "li" | "article" | "header";
+}) {
+  const { ref, visible } = useReveal<HTMLDivElement>();
+  return (
+    <Tag
+      ref={ref as never}
+      className={cn("reveal", visible && "reveal-visible", className)}
+      style={{ ["--reveal-delay" as string]: `${delay}ms` }}
+    >
+      {children}
+    </Tag>
+  );
+}
+
+/** Número-chave com contagem animada ao entrar em vista. */
+export function StatNumber({
+  value,
+  className = "",
+}: {
+  value: string;
+  className?: string;
+}) {
+  const { ref, visible } = useReveal<HTMLDivElement>();
+  const numeric = Number(value.replace(/[^\d]/g, ""));
+  const isNumeric = /\d/.test(value) && !Number.isNaN(numeric);
+  const counted = useCountUp(isNumeric ? numeric : 0, visible);
+  const prefix = value.match(/^\D+/)?.[0] ?? "";
+  const suffix = value.match(/\D+$/)?.[0] ?? "";
+
+  return (
+    <div ref={ref} className={cn("tabular-nums", className)}>
+      {isNumeric ? `${prefix}${counted}${suffix}` : value}
+    </div>
+  );
+}
 
 export function PageHero({
   eyebrow,
@@ -10,20 +59,19 @@ export function PageHero({
   subtitle?: string;
 }) {
   return (
-    <section className="border-b border-border bg-gradient-to-br from-primary to-primary-dark text-primary-foreground">
-      <div className="container-page py-20 md:py-28">
+    <section className="relative isolate overflow-hidden border-b border-border bg-gradient-to-br from-primary via-primary to-primary-dark text-primary-foreground">
+      <div className="absolute inset-0 -z-10 bg-grid-primary opacity-[0.12]" />
+      <div className="container-page py-16 md:py-24 lg:py-28">
         {eyebrow && (
-          <div className="mb-4 text-xs font-semibold uppercase tracking-[0.22em] text-gold">
-            {eyebrow}
-          </div>
+          <Reveal className="mb-4 type-eyebrow text-primary-foreground/70">{eyebrow}</Reveal>
         )}
-        <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.05] max-w-3xl">
-          {title}
-        </h1>
+        <Reveal delay={80}>
+          <h1 className="type-display max-w-3xl">{title}</h1>
+        </Reveal>
         {subtitle && (
-          <p className="mt-5 max-w-2xl text-base md:text-lg text-primary-foreground/80 leading-relaxed">
-            {subtitle}
-          </p>
+          <Reveal delay={160}>
+            <p className="mt-5 max-w-2xl type-lead text-primary-foreground/80">{subtitle}</p>
+          </Reveal>
         )}
       </div>
     </section>
@@ -38,7 +86,7 @@ export function Section({
   className?: string;
 }) {
   return (
-    <section className={`container-page py-16 md:py-24 ${className}`}>{children}</section>
+    <section className={cn("container-page py-16 md:py-24", className)}>{children}</section>
   );
 }
 
@@ -54,18 +102,10 @@ export function SectionHeader({
   centered?: boolean;
 }) {
   return (
-    <div className={centered ? "mx-auto max-w-2xl text-center" : "max-w-2xl"}>
-      {eyebrow && (
-        <div className="mb-3 text-xs font-semibold uppercase tracking-[0.22em] text-gold">
-          {eyebrow}
-        </div>
-      )}
-      <h2 className="font-display text-3xl md:text-4xl font-bold text-primary leading-tight">
-        {title}
-      </h2>
-      {description && (
-        <p className="mt-4 text-base text-muted-foreground leading-relaxed">{description}</p>
-      )}
-    </div>
+    <Reveal className={centered ? "mx-auto max-w-2xl text-center" : "max-w-2xl"}>
+      {eyebrow && <div className="mb-3 type-eyebrow text-accent">{eyebrow}</div>}
+      <h2 className="type-h2 text-primary">{title}</h2>
+      {description && <p className="mt-4 type-lead text-muted-foreground">{description}</p>}
+    </Reveal>
   );
 }
