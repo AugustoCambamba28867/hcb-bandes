@@ -59,9 +59,11 @@ export function getSettings(): SiteSettings {
 }
 
 export function useSiteSettings(): SiteSettings {
-  const [settings, setSettings] = useState<SiteSettings>(getSettings);
+  // Arranca sempre com os defaults para que o HTML do servidor e do cliente coincidam.
+  const [settings, setSettings] = useState<SiteSettings>(DEFAULT_SETTINGS);
 
   useEffect(() => {
+    setSettings(getSettings());
     getSettingsAsync().then((s) => {
       if (s) setSettings(s);
     });
