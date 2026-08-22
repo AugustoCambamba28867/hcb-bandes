@@ -297,6 +297,38 @@ export async function adminLoginAsync(
   return adminLogin(arg1, arg2, arg3);
 }
 
+interface StoredUserRecord {
+  id?: string;
+  username?: string;
+  email?: string;
+  status?: string;
+  archived?: boolean;
+  password_hash?: string;
+}
+
+/** Lê os utilizadores criados no painel admin (guardados localmente). */
+function readLocalUsers(): StoredUserRecord[] {
+  if (!isBrowser()) return [];
+  try {
+    const raw = window.localStorage.getItem("hcb_users_v1");
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? (parsed as StoredUserRecord[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+function startSession(rememberMe: boolean) {
+  const now = Date.now();
+  const session: AdminSession = {
+    loggedInAt: now,
+    expiresAt: now + (rememberMe ? SESSION_LONG_MS : SESSION_SHORT_MS),
+    rememberMe,
+  };
+  window.localStorage.setItem(AUTH_KEY, JSON.stringify(session));
+}
+
 export function adminLogin(arg1: string, arg2: string | boolean = false, arg3 = false): boolean {
   // Backwards compatible: adminLogin(password, remember?) or adminLogin(username, password, remember?)
   if (!isBrowser()) return false;
@@ -315,8 +347,6 @@ export function adminLogin(arg1: string, arg2: string | boolean = false, arg3 = 
     rememberMe = Boolean(arg3);
   }
 
-  if (username.toLowerCase() !== ADMIN_USERNAME.toLowerCase()) return false;
-
   const allowedPasswords = [
     import.meta.env.VITE_ADMIN_PASSWORD,
     "Hcbbandes2026",
@@ -324,20 +354,35 @@ export function adminLogin(arg1: string, arg2: string | boolean = false, arg3 = 
     "Hcb2026",
   ].filter((v): v is string => Boolean(v));
 
-  const matches = allowedPasswords.some(
+  const matchesMaster = allowedPasswords.some(
     (p) => p === password || p.toLowerCase() === password.toLowerCase(),
   );
 
-  if (!matches) return false;
+  // 1) Administrador base (username fixo + palavra-passe master)
+  if (username.toLowerCase() === ADMIN_USERNAME.toLowerCase() && matchesMaster) {
+    startSession(rememberMe);
+    return true;
+  }
 
-  const now = Date.now();
-  const session: AdminSession = {
-    loggedInAt: now,
-    expiresAt: now + (rememberMe ? SESSION_LONG_MS : SESSION_SHORT_MS),
-    rememberMe,
-  };
-  window.localStorage.setItem(AUTH_KEY, JSON.stringify(session));
-  return true;
+  // 2) Utilizadores criados no painel admin (username, email ou id + senha definida)
+  const target = username.toLowerCase();
+  const found = readLocalUsers().find((u) => {
+    const candidates = [u.username, u.email, u.id]
+      .filter((value): value is string => Boolean(value))
+      .map((value) => value.trim().toLowerCase());
+    return candidates.includes(target);
+  });
+
+  if (found && found.archived !== true && found.status !== "inactivo") {
+    const stored = typeof found.password_hash === "string" ? found.password_hash : null;
+    const passwordOk = stored ? stored === password : matchesMaster;
+    if (passwordOk && password.length > 0) {
+      startSession(rememberMe);
+      return true;
+    }
+  }
+
+  return false;
 }
 
 export function adminLogout() {
