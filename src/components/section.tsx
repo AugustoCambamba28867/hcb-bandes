@@ -53,13 +53,26 @@ export function PageHero({
   eyebrow,
   title,
   subtitle,
+  imageSrc,
 }: {
   eyebrow?: string;
   title: string;
   subtitle?: string;
+  imageSrc?: string;
 }) {
   return (
     <section className="relative isolate overflow-hidden border-b border-border bg-gradient-to-br from-primary via-primary to-primary-dark text-primary-foreground">
+      {imageSrc && (
+        <>
+          <img
+            src={imageSrc}
+            alt=""
+            aria-hidden="true"
+            className="absolute inset-0 -z-20 h-full w-full object-cover"
+          />
+          <div className="absolute inset-0 -z-10 bg-gradient-to-br from-primary-dark/90 via-primary/80 to-primary/60" />
+        </>
+      )}
       <div className="absolute inset-0 -z-10 bg-grid-primary opacity-[0.12]" />
       <div className="container-page py-16 md:py-24 lg:py-28">
         {eyebrow && (
@@ -81,12 +94,16 @@ export function PageHero({
 export function Section({
   children,
   className = "",
+  id,
 }: {
   children: ReactNode;
   className?: string;
+  id?: string;
 }) {
   return (
-    <section className={cn("container-page py-16 md:py-24", className)}>{children}</section>
+    <section id={id} className={cn("container-page py-16 md:py-24", className)}>
+      {children}
+    </section>
   );
 }
 

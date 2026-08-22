@@ -65,6 +65,6 @@ export function SupabaseSchemaWarning() {
           Abrir Supabase
         </a>
       </div>
-    </div>
+    </aside>
   );
 }
