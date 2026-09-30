@@ -647,10 +647,10 @@ export async function listUsersFromSupabase(): Promise<User[]> {
   return (data ?? []).map((row) => normalizeUser(row as Record<string, unknown>));
 }
 
-export async function saveUserToSupabase(user: User): Promise<boolean> {
+export async function saveUserToSupabase(user: User & { password_hash?: string }): Promise<boolean> {
   if (!supabase) return false;
   const username = user.username?.trim() || (user.email ? user.email.split("@")[0] : `${user.firstName.toLowerCase()}.${user.lastName.toLowerCase()}`);
-  const payload = {
+  const payload: Record<string, unknown> = {
     id: user.id,
     username: username,
     first_name: user.firstName,
@@ -666,6 +666,10 @@ export async function saveUserToSupabase(user: User): Promise<boolean> {
     last_login: user.lastLogin ?? null,
     archived: user.archived ?? false,
   };
+  // Only include password_hash if explicitly provided (avoid overwriting with null)
+  if (user.password_hash) {
+    payload.password_hash = user.password_hash;
+  }
   const { error } = await supabase.from(TABLES.users).upsert(payload, { onConflict: "id" });
   if (error) {
     console.warn("Supabase user save warning:", error.message);

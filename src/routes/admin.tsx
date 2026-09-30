@@ -381,6 +381,7 @@ function LoginScreen({ onSuccess }: { onSuccess: () => void }) {
             <input
               type="checkbox"
               name="remember"
+              defaultChecked
               className="h-4 w-4 rounded border-input text-primary focus:ring-2 focus:ring-ring"
             />
             Manter sessão iniciada por 30 dias

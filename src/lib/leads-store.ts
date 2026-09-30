@@ -246,13 +246,42 @@ const ADMIN_PASSWORDS = [
   "hcb2026",
 ].filter((value, index, array): value is string => Boolean(value) && array.indexOf(value) === index);
 
-const SESSION_SHORT_MS = 24 * 60 * 60 * 1000; // 24 horas
-const SESSION_LONG_MS = 30 * 24 * 60 * 60 * 1000; // 30 dias (lembrar-me)
+const SESSION_SHORT_MS = 7 * 24 * 60 * 60 * 1000; // 7 dias padrão
+const SESSION_LONG_MS = 60 * 24 * 60 * 60 * 1000; // 60 dias (lembrar-me)
 
 interface AdminSession {
   expiresAt: number;
   rememberMe: boolean;
   loggedInAt: number;
+}
+
+function persistSession(session: AdminSession) {
+  if (!isBrowser()) return;
+  const serialized = JSON.stringify(session);
+  try {
+    window.localStorage.setItem(AUTH_KEY, serialized);
+  } catch {}
+  try {
+    window.sessionStorage.setItem(AUTH_KEY, serialized);
+  } catch {}
+  try {
+    const maxAge = Math.max(0, Math.floor((session.expiresAt - Date.now()) / 1000));
+    document.cookie = `${AUTH_KEY}=${encodeURIComponent(serialized)}; path=/; max-age=${maxAge}; SameSite=Lax`;
+  } catch {}
+}
+
+function clearSession() {
+  if (!isBrowser()) return;
+  try {
+    window.localStorage.removeItem(AUTH_KEY);
+    window.localStorage.removeItem("hcb_admin_auth_v1");
+  } catch {}
+  try {
+    window.sessionStorage.removeItem(AUTH_KEY);
+  } catch {}
+  try {
+    document.cookie = `${AUTH_KEY}=; path=/; max-age=0; SameSite=Lax`;
+  } catch {}
 }
 
 export async function adminLoginAsync(
@@ -279,13 +308,7 @@ export async function adminLoginAsync(
     try {
       const dbRes = await authenticateAdminFromSupabase(username || ADMIN_USERNAME, password);
       if (dbRes.success) {
-        const now = Date.now();
-        const session: AdminSession = {
-          loggedInAt: now,
-          expiresAt: now + (rememberMe ? SESSION_LONG_MS : SESSION_SHORT_MS),
-          rememberMe,
-        };
-        window.localStorage.setItem(AUTH_KEY, JSON.stringify(session));
+        startSession(rememberMe);
         return true;
       }
     } catch {
@@ -326,7 +349,7 @@ function startSession(rememberMe: boolean) {
     expiresAt: now + (rememberMe ? SESSION_LONG_MS : SESSION_SHORT_MS),
     rememberMe,
   };
-  window.localStorage.setItem(AUTH_KEY, JSON.stringify(session));
+  persistSession(session);
 }
 
 export function adminLogin(arg1: string, arg2: string | boolean = false, arg3 = false): boolean {
@@ -386,22 +409,47 @@ export function adminLogin(arg1: string, arg2: string | boolean = false, arg3 = 
 }
 
 export function adminLogout() {
-  if (!isBrowser()) return;
-  window.localStorage.removeItem(AUTH_KEY);
-  // Limpar chave antiga também.
-  window.localStorage.removeItem("hcb_admin_auth_v1");
+  clearSession();
 }
 
 export function getAdminSession(): AdminSession | null {
   if (!isBrowser()) return null;
+  let raw: string | null = null;
   try {
-    const raw = window.localStorage.getItem(AUTH_KEY);
-    if (!raw) return null;
+    raw = window.localStorage.getItem(AUTH_KEY);
+  } catch {}
+
+  if (!raw) {
+    try {
+      raw = window.sessionStorage.getItem(AUTH_KEY);
+    } catch {}
+  }
+
+  if (!raw && typeof document !== "undefined") {
+    try {
+      const match = document.cookie.match(new RegExp(`(?:^|; )${AUTH_KEY}=([^;]*)`));
+      if (match) {
+        raw = decodeURIComponent(match[1]);
+      }
+    } catch {}
+  }
+
+  if (!raw) return null;
+
+  try {
     const parsed = JSON.parse(raw) as AdminSession;
     if (!parsed?.expiresAt || Date.now() > parsed.expiresAt) {
-      window.localStorage.removeItem(AUTH_KEY);
+      clearSession();
       return null;
     }
+
+    // Sliding window: prolonga a validade automaticamente enquanto o admin estiver activo
+    const ttl = parsed.rememberMe ? SESSION_LONG_MS : SESSION_SHORT_MS;
+    if (parsed.expiresAt - Date.now() < ttl / 2) {
+      parsed.expiresAt = Date.now() + ttl;
+      persistSession(parsed);
+    }
+
     return parsed;
   } catch {
     return null;

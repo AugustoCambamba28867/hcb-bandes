@@ -190,10 +190,8 @@ export async function upsertUserAsync(user: User & { password?: string }): Promi
 
   if (await isSupabaseConfigured()) {
     try {
-      await saveUserToSupabase(saved);
-      if (password) {
-        await saveUserPasswordToSupabase(user.id, password);
-      }
+      // Save user profile + password_hash in one single upsert to avoid race
+      await saveUserToSupabase({ ...saved, ...(password ? ({ password_hash: password } as any) : {}) } as any);
     } catch (err) {
       console.warn("Failed to save user to Supabase", err);
     }

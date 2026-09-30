@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Outlet, Link, createRootRouteWithContext, HeadContent, Scripts, useRouter } from "@tanstack/react-router";
+import { Outlet, Link, createRootRouteWithContext, HeadContent, Scripts, useRouter, useRouterState } from "@tanstack/react-router";
 import { type ReactNode, useEffect } from "react";
 
 import appCss from "../styles.css?url";
@@ -128,16 +128,18 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isAdmin = pathname.startsWith("/admin");
 
   return (
     <QueryClientProvider client={queryClient}>
       <div className="flex min-h-screen flex-col">
-        <SiteHeader />
+        {!isAdmin && <SiteHeader />}
         <main className="flex-1">
           <Outlet />
         </main>
-        <SiteFooter />
-        <WhatsappFab />
+        {!isAdmin && <SiteFooter />}
+        {!isAdmin && <WhatsappFab />}
         <Toaster />
       </div>
     </QueryClientProvider>
