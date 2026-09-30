@@ -201,17 +201,18 @@ function AdminLayout() {
   return (
     <div className="min-h-screen bg-secondary/40">
       {/* topbar mobile */}
-      <div className="sticky top-0 z-30 flex items-center justify-between border-b border-border bg-card px-4 py-3 lg:hidden">
+      <div className="sticky top-0 z-30 flex items-center justify-between border-b border-border bg-card px-4 py-3 lg:hidden shadow-xs">
         <div className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground font-display text-sm font-bold">H</div>
-          <span className="font-display font-bold text-primary">Admin</span>
+          <span className="font-display font-bold text-primary">Painel Admin</span>
         </div>
         <button
           onClick={() => setOpen((o) => !o)}
-          aria-label="Menu"
-          className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-border"
+          aria-label="Abrir menu de navegação"
+          className="inline-flex h-10 px-3 items-center gap-1.5 rounded-md border border-border bg-secondary/80 font-medium text-xs text-foreground active:scale-95 transition"
         >
           {open ? <X size={16} /> : <Menu size={16} />}
+          <span>{open ? "Fechar" : "Menu"}</span>
         </button>
       </div>
 
@@ -315,7 +316,7 @@ function LoginScreen({ onSuccess }: { onSuccess: () => void }) {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
     const username = String(fd.get("username") ?? "").trim();
-    const password = String(fd.get("password") ?? "");
+    const password = String(fd.get("password") ?? "").trim();
     const remember = fd.get("remember") === "on";
     if (!password) {
       setError("Indique a palavra-passe.");
@@ -359,6 +360,10 @@ function LoginScreen({ onSuccess }: { onSuccess: () => void }) {
               id="username"
               name="username"
               type="text"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
+              inputMode="text"
               autoComplete="username"
               className="mt-1.5 w-full rounded-md border border-input bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
             />
@@ -372,6 +377,9 @@ function LoginScreen({ onSuccess }: { onSuccess: () => void }) {
               name="password"
               type="password"
               autoFocus
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
               autoComplete="current-password"
               className="mt-1.5 w-full rounded-md border border-input bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
             />
@@ -395,11 +403,6 @@ function LoginScreen({ onSuccess }: { onSuccess: () => void }) {
           </button>
         </form>
 
-        <div className="mt-6 rounded-md border border-dashed border-border bg-secondary/50 p-3 text-[11px] text-muted-foreground">
-          <strong className="text-foreground">Demo:</strong> palavra-passe{" "}
-          <code className="rounded bg-background px-1 py-0.5 font-mono">hcb2026</code>.
-          Será substituída por autenticação real quando a base de dados for ligada.
-        </div>
 
         <Link
           to="/"

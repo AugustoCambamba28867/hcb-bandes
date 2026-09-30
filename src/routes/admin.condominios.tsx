@@ -8,11 +8,13 @@ import {
   deleteProperty,
   fetchPropertiesRemote,
   forcePushLocalToSupabase,
+  syncPropertiesFromSupabase,
   type Property,
   PROPERTY_TYPES,
   PROPERTY_STATUSES,
   PROVINCES,
 } from "@/lib/properties-store";
+import { compressImage } from "@/lib/image-compression";
 import { isSupabaseConfigured } from "@/lib/supabase-client";
 import { Badge, ConfirmDialog, EmptyState } from "@/components/ui-kit";
 
@@ -49,7 +51,6 @@ function CondominiosAdminPage() {
       const local = listProperties();
       setProperties(local);
       if (await isSupabaseConfigured()) {
-        // Enviar os imóveis locais para o Supabase automaticamente se ainda não estiverem lá
         await forcePushLocalToSupabase().catch(() => {});
         const remote = await fetchPropertiesRemote();
         if (remote !== null && remote.length > 0) {
@@ -60,12 +61,33 @@ function CondominiosAdminPage() {
     }
 
     load();
+
     const sync = () => setProperties(listProperties());
+    const pullLatest = async () => {
+      if (await isSupabaseConfigured()) {
+        const remote = await fetchPropertiesRemote();
+        if (remote !== null && remote.length > 0) {
+          setProperties(remote);
+        }
+      }
+    };
+
+    const handleFocus = () => {
+      if (typeof document !== "undefined" && document.visibilityState === "visible") {
+        void pullLatest();
+      }
+    };
+
     window.addEventListener("hcb_properties_changed", sync);
     window.addEventListener("storage", sync);
+    window.addEventListener("focus", handleFocus);
+    document.addEventListener("visibilitychange", handleFocus);
+
     return () => {
       window.removeEventListener("hcb_properties_changed", sync);
       window.removeEventListener("storage", sync);
+      window.removeEventListener("focus", handleFocus);
+      document.removeEventListener("visibilitychange", handleFocus);
     };
   }, []);
 
@@ -115,16 +137,22 @@ function CondominiosAdminPage() {
   }
 
   async function save(property: Property) {
-    // cast to match the upsert signature which might use DbProperty internally
-    const saved = await upsertProperty(property as any);
+    const saved = await upsertProperty(property);
     setProperties((prev) => {
       const idx = prev.findIndex((p) => p.id === property.id);
-      if (idx === -1) return [saved as unknown as Property, ...prev];
+      if (idx === -1) return [saved, ...prev];
       const next = [...prev];
-      next[idx] = saved as unknown as Property;
+      next[idx] = saved;
       return next;
     });
-    toast.success("Condomínio/Residência salvo com sucesso");
+
+    if (saved._remoteSynced) {
+      toast.success("Condomínio salvo e sincronizado na nuvem com sucesso!");
+    } else if (saved._remoteError) {
+      toast.warning(`Salvo no navegador. Aviso da nuvem: ${saved._remoteError}. Pode clicar em "Sincronizar com Supabase" para tentar novamente.`);
+    } else {
+      toast.success("Condomínio guardado com sucesso!");
+    }
   }
 
   async function remove(id: string) {
@@ -382,44 +410,48 @@ function PropertyFormDrawer({ property, onClose, onSave }: { property: Property 
     return Object.keys(e).length === 0;
   }
 
-  function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
     setUploading(true);
-    const newImages: string[] = [];
-    let processed = 0;
     const fileList = Array.from(files);
+    const compressedImages: string[] = [];
 
-    fileList.forEach((file) => {
-      if (file.size > 5 * 1024 * 1024) {
-        toast.error(`O ficheiro ${file.name} é muito pesado (máx. 5MB).`);
-        processed++;
-        if (processed === fileList.length) setUploading(false);
-        return;
+    try {
+      for (const file of fileList) {
+        if (file.size > 20 * 1024 * 1024) {
+          toast.error(`O ficheiro ${file.name} ultrapassa 20MB.`);
+          continue;
+        }
+        try {
+          const compressed = await compressImage(file, {
+            maxWidth: 1200,
+            maxHeight: 1200,
+            quality: 0.78,
+          });
+          compressedImages.push(compressed);
+        } catch (err) {
+          console.warn("Falha ao comprimir imagem, usando leitura direta", err);
+          const raw = await new Promise<string>((resolve) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(String(reader.result));
+            reader.readAsDataURL(file);
+          });
+          compressedImages.push(raw);
+        }
       }
 
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const result = event.target?.result;
-        if (typeof result === "string") {
-          newImages.push(result);
-        }
-        processed++;
-        if (processed === fileList.length) {
-          setImages((prev) => [...prev, ...newImages]);
-          setUploading(false);
-          toast.success(`${newImages.length} imagem(ns) carregada(s) com sucesso`);
-        }
-      };
-      reader.onerror = () => {
-        processed++;
-        if (processed === fileList.length) setUploading(false);
-      };
-      reader.readAsDataURL(file);
-    });
-
-    e.target.value = "";
+      if (compressedImages.length > 0) {
+        setImages((prev) => [...prev, ...compressedImages]);
+        toast.success(`${compressedImages.length} imagem(ns) optimizada(s) e adicionada(s)`);
+      }
+    } catch {
+      toast.error("Erro ao carregar ficheiros.");
+    } finally {
+      setUploading(false);
+      e.target.value = "";
+    }
   }
 
   function removeImage(index: number) {

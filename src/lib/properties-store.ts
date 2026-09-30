@@ -5,6 +5,7 @@ import {
   ensureSupabaseSchema,
   listPropertiesFromSupabase,
   savePropertyToSupabase,
+  savePropertyToSupabaseDetailed,
   deletePropertyFromSupabase,
 } from "./supabase-data";
 
@@ -115,8 +116,8 @@ function mergeProperties(local: Property[], remote: Property[]): Property[] {
   return Array.from(map.values());
 }
 
-async function syncPropertiesFromSupabase(): Promise<void> {
-  if (!(await isSupabaseConfigured())) return;
+export async function syncPropertiesFromSupabase(): Promise<Property[]> {
+  if (!(await isSupabaseConfigured())) return listProperties();
   try {
     await ensureSupabaseSchema();
     const local = readStorage<Property[]>(PROPERTIES_KEY, []);
@@ -136,10 +137,12 @@ async function syncPropertiesFromSupabase(): Promise<void> {
     if (Array.isArray(updatedRemote) && updatedRemote.length > 0) {
       const merged = mergeProperties(local, updatedRemote);
       writeStorage(PROPERTIES_KEY, merged);
+      return merged;
     }
   } catch (error) {
     console.warn("Failed to sync properties from Supabase", error);
   }
+  return listProperties();
 }
 
 export async function forcePushLocalToSupabase(): Promise<number> {
@@ -172,16 +175,22 @@ export function listPropertiesPublic(): Property[] {
   return listProperties().filter((property) => property.is_active !== false && property.status !== "vendido");
 }
 
-export async function upsertProperty(property: Property): Promise<Property> {
+export interface SavedPropertyResult extends Property {
+  _remoteSynced?: boolean;
+  _remoteError?: string;
+}
+
+export async function upsertProperty(property: Property): Promise<SavedPropertyResult> {
   const current = listProperties();
   const next = [...current];
   const index = next.findIndex((entry) => entry.id === property.id);
   const now = new Date().toISOString();
-  const saved: Property = {
+  const saved: SavedPropertyResult = {
     ...property,
     is_active: property.is_active !== false,
     updated_at: property.updated_at || now,
     created_at: property.created_at || now,
+    _remoteSynced: false,
   };
 
   if (index < 0) {
@@ -195,11 +204,18 @@ export async function upsertProperty(property: Property): Promise<Property> {
   if (await isSupabaseConfigured()) {
     try {
       await ensureSupabaseSchema();
-      const remoteSaved = await savePropertyToSupabase(saved);
-      if (remoteSaved) {
-        return remoteSaved;
+      const res = await savePropertyToSupabaseDetailed(saved);
+      if (res.data) {
+        saved._remoteSynced = true;
+        // Atualiza a cache com o retorno confirmado do Supabase
+        const updatedLocal = listProperties().map((item) => (item.id === saved.id ? res.data! : item));
+        writeStorage(PROPERTIES_KEY, updatedLocal);
+      } else if (res.error) {
+        saved._remoteError = res.error;
       }
     } catch (err) {
+      const errMsg = err instanceof Error ? err.message : String(err);
+      saved._remoteError = errMsg;
       console.warn("Failed to save property to Supabase", err);
     }
   }
@@ -284,15 +300,15 @@ export function useProperties() {
     let mounted = true;
     setLoading(true);
 
-    fetchPropertiesRemote().then((data) => {
-      if (mounted) {
-        if (data !== null && data.length > 0) {
-          setProperties(data);
-        } else {
-          setProperties(listProperties());
-        }
-        setLoading(false);
+    const pullRemote = async () => {
+      const data = await fetchPropertiesRemote();
+      if (mounted && data !== null && data.length > 0) {
+        setProperties(data);
       }
+    };
+
+    pullRemote().finally(() => {
+      if (mounted) setLoading(false);
     });
 
     function handleChange() {
@@ -301,12 +317,23 @@ export function useProperties() {
       }
     }
 
+    const handleFocus = () => {
+      if (typeof document !== "undefined" && document.visibilityState === "visible") {
+        void pullRemote();
+      }
+    };
+
     window.addEventListener(PROPERTIES_EVENT, handleChange);
     window.addEventListener("storage", handleChange);
+    window.addEventListener("focus", handleFocus);
+    document.addEventListener("visibilitychange", handleFocus);
+
     return () => {
       mounted = false;
       window.removeEventListener(PROPERTIES_EVENT, handleChange);
       window.removeEventListener("storage", handleChange);
+      window.removeEventListener("focus", handleFocus);
+      document.removeEventListener("visibilitychange", handleFocus);
     };
   }, []);
 
@@ -321,15 +348,15 @@ export function usePublicProperties() {
     let mounted = true;
     setLoading(true);
 
-    listPropertiesPublicDynamic().then((data) => {
-      if (mounted) {
-        if (Array.isArray(data) && data.length > 0) {
-          setProperties(data);
-        } else {
-          setProperties(listPropertiesPublic());
-        }
-        setLoading(false);
+    const pullRemote = async () => {
+      const data = await listPropertiesPublicDynamic();
+      if (mounted && Array.isArray(data) && data.length > 0) {
+        setProperties(data);
       }
+    };
+
+    pullRemote().finally(() => {
+      if (mounted) setLoading(false);
     });
 
     function handleChange() {
@@ -338,12 +365,23 @@ export function usePublicProperties() {
       }
     }
 
+    const handleFocus = () => {
+      if (typeof document !== "undefined" && document.visibilityState === "visible") {
+        void pullRemote();
+      }
+    };
+
     window.addEventListener(PROPERTIES_EVENT, handleChange);
     window.addEventListener("storage", handleChange);
+    window.addEventListener("focus", handleFocus);
+    document.addEventListener("visibilitychange", handleFocus);
+
     return () => {
       mounted = false;
       window.removeEventListener(PROPERTIES_EVENT, handleChange);
       window.removeEventListener("storage", handleChange);
+      window.removeEventListener("focus", handleFocus);
+      document.removeEventListener("visibilitychange", handleFocus);
     };
   }, []);
 

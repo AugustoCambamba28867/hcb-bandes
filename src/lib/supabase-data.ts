@@ -688,6 +688,8 @@ export async function authenticateAdminFromSupabase(
     if (error || !listData) return { success: false };
 
     const target = usernameOrEmail.trim().toLowerCase();
+    const cleanPassword = password.trim();
+
     const found = listData.find((row: any) => {
       const u = String(row.username ?? "").trim().toLowerCase();
       const e = String(row.email ?? "").trim().toLowerCase();
@@ -696,12 +698,14 @@ export async function authenticateAdminFromSupabase(
     });
 
     if (found) {
-      const storedPass = typeof found.password_hash === "string" ? found.password_hash : null;
-      const isPasswordValid = storedPass
-        ? storedPass === password || storedPass.toLowerCase() === password.toLowerCase()
+      const rawStored = typeof found.password_hash === "string" ? found.password_hash.trim() : null;
+      const isPasswordValid = rawStored
+        ? rawStored === cleanPassword || rawStored.toLowerCase() === cleanPassword.toLowerCase()
         : true;
 
-      if (isPasswordValid && found.archived !== true && found.status !== "inactivo") {
+      const isUserActive = found.archived !== true && found.status !== "inactivo" && found.is_active !== false;
+
+      if (isPasswordValid && isUserActive) {
         return { success: true, user: normalizeUser(found) };
       }
     }
@@ -801,8 +805,10 @@ export async function listPropertiesFromSupabase(): Promise<Property[]> {
   return (data ?? []).map((row) => normalizeProperty(row as Record<string, unknown>));
 }
 
-export async function savePropertyToSupabase(property: Property): Promise<Property | null> {
-  if (!supabase) return null;
+export async function savePropertyToSupabaseDetailed(
+  property: Property,
+): Promise<{ data: Property | null; error?: string }> {
+  if (!supabase) return { data: null, error: "Base de dados não configurada." };
   const payload = {
     id: property.id,
     name: property.name,
@@ -832,9 +838,14 @@ export async function savePropertyToSupabase(property: Property): Promise<Proper
     .single();
   if (error) {
     console.warn("Supabase property save warning:", error.message);
-    return null;
+    return { data: null, error: error.message };
   }
-  return normalizeProperty(data as Record<string, unknown>);
+  return { data: normalizeProperty(data as Record<string, unknown>) };
+}
+
+export async function savePropertyToSupabase(property: Property): Promise<Property | null> {
+  const result = await savePropertyToSupabaseDetailed(property);
+  return result.data;
 }
 
 export async function deletePropertyFromSupabase(id: string): Promise<boolean> {

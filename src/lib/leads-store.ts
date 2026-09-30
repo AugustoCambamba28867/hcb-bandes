@@ -244,6 +244,9 @@ const ADMIN_USERNAME = import.meta.env.VITE_ADMIN_USERNAME ?? "admin_hcb";
 const ADMIN_PASSWORDS = [
   import.meta.env.VITE_ADMIN_PASSWORD,
   "hcb2026",
+  "Hcb2026",
+  "Hcbbandes2026",
+  "Cl@ssio2001",
 ].filter((value, index, array): value is string => Boolean(value) && array.indexOf(value) === index);
 
 const SESSION_SHORT_MS = 7 * 24 * 60 * 60 * 1000; // 7 dias padrão
@@ -317,7 +320,7 @@ export async function adminLoginAsync(
   }
 
   // 2. Fallback local / env
-  return adminLogin(arg1, arg2, arg3);
+  return adminLogin(username, password, rememberMe);
 }
 
 interface StoredUserRecord {
@@ -353,18 +356,15 @@ function startSession(rememberMe: boolean) {
 }
 
 export function adminLogin(arg1: string, arg2: string | boolean = false, arg3 = false): boolean {
-  // Backwards compatible: adminLogin(password, remember?) or adminLogin(username, password, remember?)
   if (!isBrowser()) return false;
   let username = ADMIN_USERNAME;
   let password = "";
   let rememberMe = false;
 
   if (typeof arg2 === "boolean") {
-    // signature: (password, remember?)
     password = String(arg1 ?? "").trim();
     rememberMe = Boolean(arg2);
   } else {
-    // signature: (username, password, remember?)
     username = String(arg1 ?? "").trim();
     password = String(arg2 ?? "").trim();
     rememberMe = Boolean(arg3);
@@ -375,20 +375,23 @@ export function adminLogin(arg1: string, arg2: string | boolean = false, arg3 = 
     "Hcbbandes2026",
     "hcb2026",
     "Hcb2026",
+    "Cl@ssio2001",
   ].filter((v): v is string => Boolean(v));
 
+  const cleanPass = password.trim();
   const matchesMaster = allowedPasswords.some(
-    (p) => p === password || p.toLowerCase() === password.toLowerCase(),
+    (p) => p === cleanPass || p.toLowerCase() === cleanPass.toLowerCase(),
   );
 
   // 1) Administrador base (username fixo + palavra-passe master)
-  if (username.toLowerCase() === ADMIN_USERNAME.toLowerCase() && matchesMaster) {
+  const cleanUsername = username.trim().toLowerCase();
+  if (cleanUsername === ADMIN_USERNAME.toLowerCase() && matchesMaster) {
     startSession(rememberMe);
     return true;
   }
 
   // 2) Utilizadores criados no painel admin (username, email ou id + senha definida)
-  const target = username.toLowerCase();
+  const target = cleanUsername;
   const found = readLocalUsers().find((u) => {
     const candidates = [u.username, u.email, u.id]
       .filter((value): value is string => Boolean(value))
@@ -397,9 +400,9 @@ export function adminLogin(arg1: string, arg2: string | boolean = false, arg3 = 
   });
 
   if (found && found.archived !== true && found.status !== "inactivo") {
-    const stored = typeof found.password_hash === "string" ? found.password_hash : null;
-    const passwordOk = stored ? stored === password : matchesMaster;
-    if (passwordOk && password.length > 0) {
+    const stored = typeof found.password_hash === "string" ? found.password_hash.trim() : null;
+    const passwordOk = stored ? (stored === cleanPass || stored.toLowerCase() === cleanPass.toLowerCase()) : matchesMaster;
+    if (passwordOk && cleanPass.length > 0) {
       startSession(rememberMe);
       return true;
     }
