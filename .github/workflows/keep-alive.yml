@@ -1,0 +1,27 @@
+name: Supabase & Site Keep-Alive
+
+on:
+  schedule:
+    # Dispara duas vezes por semana: Segunda-feira e Quinta-feira às 09:00 UTC
+    - cron: '0 9 * * 1,4'
+  workflow_dispatch: # Permite disparo manual na aba Actions do GitHub
+
+jobs:
+  ping:
+    name: Ping Supabase & Website
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Executar Keep-Alive
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL || 'https://kxmkysvwyboddkrstfwk.supabase.co' }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY || 'sb_publishable_2YUzrH6y7C3Z9QLSM9Fdjw_jKA3SOqh' }}
+          SITE_URL: 'https://hcb-bandes.co'
+        run: node scripts/keep-alive.js
