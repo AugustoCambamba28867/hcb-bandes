@@ -687,14 +687,22 @@ export async function authenticateAdminFromSupabase(
     const { data: listData, error } = await supabase.from(TABLES.users).select("*");
     if (error || !listData) return { success: false };
 
-    const target = usernameOrEmail.trim().toLowerCase();
+    const rawTarget = usernameOrEmail.trim().toLowerCase();
+    const cleanTarget = rawTarget.replace(/^@/, "");
     const cleanPassword = password.trim();
 
     const found = listData.find((row: any) => {
       const u = String(row.username ?? "").trim().toLowerCase();
+      const uClean = u.replace(/^@/, "");
       const e = String(row.email ?? "").trim().toLowerCase();
       const id = String(row.id ?? "").trim().toLowerCase();
-      return u === target || e === target || id === target;
+      return (
+        uClean === cleanTarget ||
+        u === rawTarget ||
+        e === cleanTarget ||
+        e === rawTarget ||
+        id === cleanTarget
+      );
     });
 
     if (found) {

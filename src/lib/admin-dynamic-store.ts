@@ -86,9 +86,35 @@ async function syncUsersFromSupabase() {
   if (!(await isSupabaseConfigured())) return;
   try {
     await ensureSupabaseSchema();
+    const local = readStorage<User[]>(USERS_KEY, []);
     const remote = await listUsersFromSupabase();
-    if (remote.length > 0) {
-      writeStorage(USERS_KEY, remote);
+
+    // Sincronizar utilizadores locais criados no navegador que ainda não estão no Supabase
+    if (local.length > 0) {
+      const remoteIds = new Set(remote.map((r) => r.id));
+      for (const u of local) {
+        if (!remoteIds.has(u.id)) {
+          await saveUserToSupabase(u).catch(() => undefined);
+        }
+      }
+    }
+
+    const updatedRemote = await listUsersFromSupabase();
+    if (updatedRemote.length > 0) {
+      const mergedMap = new Map<string, User>();
+      for (const item of local) {
+        if (item && item.id) mergedMap.set(item.id, item);
+      }
+      for (const item of updatedRemote) {
+        if (item && item.id) {
+          const existing = mergedMap.get(item.id) as any;
+          mergedMap.set(item.id, {
+            ...item,
+            ...(existing?.password_hash ? { password_hash: existing.password_hash } : {}),
+          });
+        }
+      }
+      writeStorage(USERS_KEY, Array.from(mergedMap.values()));
     }
   } catch (error) {
     console.warn("Failed to sync users from Supabase", error);

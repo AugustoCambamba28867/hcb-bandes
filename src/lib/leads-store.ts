@@ -384,19 +384,26 @@ export function adminLogin(arg1: string, arg2: string | boolean = false, arg3 = 
   );
 
   // 1) Administrador base (username fixo + palavra-passe master)
-  const cleanUsername = username.trim().toLowerCase();
-  if (cleanUsername === ADMIN_USERNAME.toLowerCase() && matchesMaster) {
+  const rawUsername = username.trim().toLowerCase();
+  const cleanUsername = rawUsername.replace(/^@/, "");
+  if ((cleanUsername === ADMIN_USERNAME.toLowerCase() || rawUsername === ADMIN_USERNAME.toLowerCase()) && matchesMaster) {
     startSession(rememberMe);
     return true;
   }
 
   // 2) Utilizadores criados no painel admin (username, email ou id + senha definida)
-  const target = cleanUsername;
+  const targetClean = cleanUsername;
+  const targetRaw = rawUsername;
   const found = readLocalUsers().find((u) => {
     const candidates = [u.username, u.email, u.id]
       .filter((value): value is string => Boolean(value))
       .map((value) => value.trim().toLowerCase());
-    return candidates.includes(target);
+    const candidatesClean = candidates.map((c) => c.replace(/^@/, ""));
+    return (
+      candidates.includes(targetRaw) ||
+      candidates.includes(targetClean) ||
+      candidatesClean.includes(targetClean)
+    );
   });
 
   if (found && found.archived !== true && found.status !== "inactivo") {
